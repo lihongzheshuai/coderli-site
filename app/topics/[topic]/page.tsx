@@ -99,20 +99,20 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
 
         <aside className="sticky top-20 space-y-6">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+            <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
               其他核心专题
             </h4>
-            <div className="space-y-1 text-xs">
+            <div className="space-y-1.5 text-[15px]">
               {Object.entries(topicMetaMap).map(([key, item]) => {
                 if (key === params.topic) return null;
                 return (
                   <Link
                     key={key}
                     href={`/topics/${key}/`}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
                   >
                     <span>{item.icon} {item.name}</span>
-                    <span className="font-mono text-teal-600 dark:text-teal-400">
+                    <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">
                       {allPosts.filter(p => p.topic === key).length} 篇
                     </span>
                   </Link>

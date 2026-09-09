@@ -165,32 +165,32 @@ export default function HomePage() {
               <img
                 src="/images/onecoder/avatar.png"
                 alt="OneCoder"
-                className="w-14 h-14 rounded-full border-2 border-teal-500 object-cover"
+                className="w-16 h-16 rounded-full border-2 border-teal-500 object-cover"
               />
               <div>
-                <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">OneCoder</h3>
-                <span className="text-xs text-slate-400 font-mono">wushikezuohehe</span>
+                <h3 className="font-extrabold text-xl text-slate-900 dark:text-slate-100">OneCoder</h3>
+                <span className="text-sm text-slate-400 font-mono">wushikezuohehe</span>
               </div>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            <p className="text-[15px] text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
               一个中年人的自留地，记录学习 Java、Python、C++ 以及算法架构的心得体会。本站唯一网址：coderli.com
             </p>
-            <div className="flex flex-wrap gap-2 text-xs">
+            <div className="flex flex-wrap gap-2 text-sm font-medium">
               <Link
                 href="https://github.com/lihongzheshuai"
                 target="_blank"
-                className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-teal-500 transition"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-teal-500 transition"
               >
                 🐙 GitHub
               </Link>
               <Link
                 href="https://twitter.com/wushikezuohehe"
                 target="_blank"
-                className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-teal-500 transition"
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-teal-500 transition"
               >
                 🐦 Twitter/X
               </Link>
-              <span className="px-2.5 py-1 rounded-md bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500/20">
+              <span className="px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500/20">
                 👥 QQ群: 688906745
               </span>
             </div>
@@ -198,37 +198,37 @@ export default function HomePage() {
 
           {/* Topics Navigation */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <div className="font-bold text-sm text-slate-900 dark:text-slate-100 mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-              📚 专题快速导航
+            <div className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <span>📚 专题快速导航</span>
             </div>
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-1.5 text-[15px]">
               <Link
                 href="/topics/gesp/"
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
               >
                 <span>🏆 GESP 编程与算法</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-semibold">{topicStats.gesp} 篇</span>
+                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.gesp} 篇</span>
               </Link>
               <Link
                 href="/topics/java/"
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
               >
                 <span>☕ Java 架构演进与实战</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-semibold">{topicStats.java} 篇</span>
+                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.java} 篇</span>
               </Link>
               <Link
                 href="/topics/csp/"
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
               >
                 <span>⌘ CSP / NOIP 信奥竞赛</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-semibold">{topicStats.csp} 篇</span>
+                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.csp} 篇</span>
               </Link>
               <Link
                 href="/topics/algo/"
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
               >
                 <span>🧮 算法专题与 LeetCode</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-semibold">{topicStats.algo} 篇</span>
+                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.algo} 篇</span>
               </Link>
             </div>
           </div>

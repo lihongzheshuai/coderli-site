@@ -35,7 +35,7 @@ export default function Comments({ slug }: { slug: string }) {
       if (res.ok && result.comment) {
         mutate({ comments: [result.comment, ...comments] }, false);
         setContent('');
-        setMessage('🎉 留言成功！数据已持久化存储至自建数据库。');
+        setMessage('🎉 留言成功！感谢你的交流与支持。');
         setTimeout(() => setMessage(''), 4000);
       } else {
         setMessage(result.error || '提交失败，请稍后重试');
@@ -54,9 +54,6 @@ export default function Comments({ slug }: { slug: string }) {
           <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <span>💬 读者留言与交流</span>
           </h3>
-          <span className="text-xs font-mono bg-teal-500/10 text-teal-600 dark:text-teal-400 px-2 py-0.5 rounded font-semibold border border-teal-500/20">
-            自建 DB 驱动
-          </span>
         </div>
         <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
           共 {comments.length} 条讨论

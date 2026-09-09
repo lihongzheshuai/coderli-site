@@ -6,12 +6,15 @@ import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const pathname = usePathname();
-  const [isDark, setIsDark] = useState(true);
+  // Default to Light Theme as requested
+  const [isDark, setIsDark] = useState(false);
   const [isWide, setIsWide] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Initial theme setup
-    const isDarkStored = localStorage.getItem('theme') !== 'light';
+    // Initial theme setup: default to light unless explicitly saved as 'dark'
+    const storedTheme = localStorage.getItem('theme');
+    const isDarkStored = storedTheme === 'dark';
     setIsDark(isDarkStored);
     if (isDarkStored) {
       document.documentElement.classList.add('dark');
@@ -25,6 +28,11 @@ export default function Header() {
       document.body.classList.add('ultra-wide');
     }
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   function toggleTheme() {
     const nextDark = !isDark;
@@ -54,8 +62,16 @@ export default function Header() {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
   }
 
+  function handleHomeClick(e: React.MouseEvent) {
+    if (pathname === '/' || pathname === '') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    setMobileMenuOpen(false);
+  }
+
   const navs = [
-    { label: '首页', href: '/' },
+    { label: '首页', href: '/', onClick: handleHomeClick },
     { label: '🏆 GESP 考级', href: '/topics/gesp/' },
     { label: '☕ Java 架构', href: '/topics/java/' },
     { label: '⌘ CSP / NOIP', href: '/topics/csp/' },
@@ -63,10 +79,15 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-white/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-40 backdrop-blur-md bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
       <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link
+          href="/"
+          onClick={handleHomeClick}
+          className="flex items-center gap-3 group"
+          title="点击返回首页或回到顶部"
+        >
           <img
             src="/images/onecoder/avatar.png"
             alt="OneCoder Avatar"
@@ -76,7 +97,7 @@ export default function Header() {
             }}
           />
           <div className="flex flex-col">
-            <span className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-tight">
+            <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-tight">
               OneCoder
             </span>
             <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 leading-tight">
@@ -85,17 +106,18 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden lg:flex items-center gap-1.5">
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-2">
           {navs.map(n => {
             const isActive = pathname === n.href;
             return (
               <Link
                 key={n.href}
                 href={n.href}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                onClick={n.onClick}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition ${
                   isActive
-                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 font-semibold'
+                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 font-semibold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 }`}
               >
@@ -106,10 +128,11 @@ export default function Header() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 md:gap-2.5">
           <button
+            type="button"
             onClick={openSearch}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/60 text-xs text-slate-500 hover:border-teal-500 transition"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-xs text-slate-600 dark:text-slate-400 hover:border-teal-500 transition cursor-pointer"
             title="快捷搜索 (按 / 或 Ctrl+K)"
           >
             <span>🔍 搜索博文...</span>
@@ -119,8 +142,9 @@ export default function Header() {
           </button>
 
           <button
+            type="button"
             onClick={toggleWide}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm flex items-center gap-1"
+            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm flex items-center gap-1 cursor-pointer"
             title="切换超宽屏 / 标准宽度"
           >
             <span>{isWide ? '⤡' : '⤢'}</span>
@@ -128,14 +152,51 @@ export default function Header() {
           </button>
 
           <button
+            type="button"
             onClick={toggleTheme}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm"
+            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm cursor-pointer"
             title="切换浅色 / 深色模式"
           >
             {isDark ? '🌙' : '☀️'}
           </button>
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 hover:text-teal-600 text-base flex items-center justify-center cursor-pointer"
+            aria-label="打开网站导航菜单"
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Navigation Dropdown */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 shadow-lg space-y-1">
+          {navs.map(n => {
+            const isActive = pathname === n.href;
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                onClick={e => {
+                  if (n.onClick) n.onClick(e);
+                  setMobileMenuOpen(false);
+                }}
+                className={`block px-4 py-2.5 rounded-xl text-base font-medium transition ${
+                  isActive
+                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 font-bold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }

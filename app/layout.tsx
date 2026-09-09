@@ -28,8 +28,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className="dark scroll-smooth">
+    <html lang="zh-CN" className="scroll-smooth">
       <head>
+        {/* Dark mode restoration script: default to Light theme unless 'dark' is saved */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
         {/* Google AdSense Global Client Script */}
         <script
           async
