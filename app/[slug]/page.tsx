@@ -7,6 +7,7 @@ import TOC from '@/components/TOC';
 import GoogleAd from '@/components/GoogleAd';
 import ViewCounter from '@/components/ViewCounter';
 import Comments from '@/components/Comments';
+import LatexText from '@/components/LatexText';
 
 interface PageProps {
   params: { slug: string };
@@ -105,7 +106,7 @@ export default async function PostPage({ params }: PageProps) {
 
           {/* Article Title */}
           <h1 className="text-2xl md:text-3xl lg:text-[38px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug mb-6">
-            {post.title}
+            <LatexText text={post.title} />
           </h1>
 
           {/* Metadata line */}

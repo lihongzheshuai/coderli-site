@@ -31,7 +31,25 @@ function cleanExcerpt(content) {
   text = text.replace(/#{1,6}\s+/g, '');
   text = text.replace(/[*_~`>]/g, '');
   text = text.replace(/\s+/g, ' ').trim();
-  return text.slice(0, 160);
+
+  if (text.length <= 160) return text;
+
+  let truncated = text.slice(0, 160);
+  const dollarCount = (truncated.match(/(?<!\\)\$/g) || []).length;
+  if (dollarCount % 2 !== 0) {
+    const remainder = text.slice(160);
+    const closingIndex = remainder.indexOf('$');
+    if (closingIndex !== -1 && closingIndex < 40) {
+      truncated += remainder.slice(0, closingIndex + 1);
+    } else {
+      const lastDollar = truncated.lastIndexOf('$');
+      if (lastDollar !== -1) {
+        truncated = truncated.slice(0, lastDollar).trim();
+      }
+    }
+  }
+
+  return truncated.trim() + (text.length > truncated.length ? '...' : '');
 }
 
 function extractFirstImage(content) {

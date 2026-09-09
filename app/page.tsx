@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getAllPosts, getFeaturedPost } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
+import LatexText from '@/components/LatexText';
 
 export const revalidate = false; // ISR static caching
 
@@ -83,10 +84,12 @@ export default function HomePage() {
                     {featured.pinned ? '📌 核心置顶' : '🔥 最新推荐'} · {featured.topicName}
                   </span>
                   <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition mb-3 leading-snug">
-                    <Link href={`/${featured.slug}/`}>{featured.title}</Link>
+                    <Link href={`/${featured.slug}/`}>
+                      <LatexText text={featured.title} />
+                    </Link>
                   </h2>
                   <p className="text-[15px] md:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4 line-clamp-3">
-                    {featured.excerpt}
+                    <LatexText text={featured.excerpt} />
                   </p>
                 </div>
                 <div className="text-xs text-slate-400 flex items-center gap-3">

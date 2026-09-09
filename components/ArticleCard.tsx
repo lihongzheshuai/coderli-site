@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { PostMeta } from '@/types/post';
+import LatexText from '@/components/LatexText';
 
 export default function ArticleCard({ post }: { post: PostMeta }) {
   return (
@@ -20,12 +21,12 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
 
         <h3 className="text-xl md:text-[22px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-snug mb-2.5">
           <Link href={`/${post.slug}/`} className="block">
-            {post.title}
+            <LatexText text={post.title} />
           </Link>
         </h3>
 
         <p className="text-[15px] md:text-base text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2 mb-3.5">
-          {post.excerpt}
+          <LatexText text={post.excerpt} />
         </p>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
