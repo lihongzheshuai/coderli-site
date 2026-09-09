@@ -1,0 +1,178 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-body: #F4F6F9;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F1F5F9;
+  --border-main: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --primary: #0D9488;
+  --primary-light: rgba(13, 148, 136, 0.1);
+  --container-max-width: 1560px;
+}
+
+html.dark {
+  --bg-body: #090D16;
+  --bg-surface: #101623;
+  --bg-surface-elevated: #161F33;
+  --bg-subtle: #192233;
+  --border-main: #1D263B;
+  --border-subtle: #192233;
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --primary: #14B8A6;
+  --primary-light: rgba(20, 184, 166, 0.15);
+}
+
+html {
+  font-size: 17px;
+}
+
+body.ultra-wide {
+  --container-max-width: 98%;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Typography styles */
+.prose {
+  color: var(--text-main);
+  font-size: 1.15rem;
+  line-height: 1.95;
+}
+.prose p {
+  margin-bottom: 1.6rem;
+}
+.prose h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 2.85rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  scroll-margin-top: 5.5rem;
+}
+.prose h2::before {
+  content: "#";
+  color: var(--primary);
+  font-weight: 800;
+  font-family: monospace;
+  font-size: 1.4rem;
+}
+.prose h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-top: 2.15rem;
+  margin-bottom: 0.95rem;
+  scroll-margin-top: 5.5rem;
+}
+.prose h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose ul, .prose ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.75rem;
+}
+.prose ul {
+  list-style-type: disc;
+}
+.prose ol {
+  list-style-type: decimal;
+}
+.prose li {
+  margin-bottom: 0.45rem;
+}
+.prose blockquote {
+  border-left: 4px solid var(--primary);
+  background: var(--bg-subtle);
+  padding: 1rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+}
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.75rem 0;
+  font-size: 0.95rem;
+}
+.prose th, .prose td {
+  border: 1px solid var(--border-main);
+  padding: 0.6rem 1rem;
+  text-align: left;
+}
+.prose th {
+  background: var(--bg-subtle);
+  font-weight: 600;
+}
+.prose strong {
+  font-weight: 700;
+  color: var(--text-main);
+}
+.prose code:not(pre code) {
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-size: 0.88em;
+  background: var(--bg-subtle);
+  color: var(--primary);
+  padding: 0.2em 0.45em;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+}
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem auto;
+  display: block;
+  border: 1px solid var(--border-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Shiki Code styling */
+.shiki {
+  padding: 1.35rem 1.35rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-size: 0.96rem;
+  line-height: 1.75;
+}

@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B3930 [GESP202312 五级] 烹饪问题 - 高位贪心动态可视化模拟器</title>
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-secondary: #111827;
+      --bg-card: #1e293b;
+      --bg-card-hover: #26354a;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-emerald-bg: rgba(16, 185, 129, 0.15);
+      --accent-amber: #f59e0b;
+      --accent-amber-bg: rgba(245, 158, 11, 0.18);
+      --accent-rose: #ef4444;
+      --accent-rose-bg: rgba(239, 68, 68, 0.15);
+      --accent-indigo: #6366f1;
+      --accent-indigo-bg: rgba(99, 102, 241, 0.18);
+      --bit-active-glow: 0 0 12px rgba(245, 158, 11, 0.65);
+      --bit-success-glow: 0 0 12px rgba(16, 185, 129, 0.65);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .title-group h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-group h1 .badge {
+      font-size: 0.82rem;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 5px;
+    }
+
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .doc-link:hover {
+      background: var(--border-color);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Common Card Panel */
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #e2e8f0;
+    }
+
+    .presets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .presets-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-cyan);
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: var(--border-color) !important;
+    }
+    .btn-primary {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+    .btn-emerald {
+      background: #059669;
+      border-color: #34d399;
+      color: #fff;
+    }
+    .btn-emerald:hover {
+      background: #047857;
+    }
+    .btn-rose {
+      background: #dc2626;
+      border-color: #f87171;
+      color: #fff;
+    }
+    .btn-preset.active {
+      background: var(--accent-indigo);
+      border-color: #a5b4fc;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 9px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Stepper Controls */
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-top: 14px;
+      margin-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .speed-control select {
+      padding: 6px 10px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    /* Main Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1080px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Matrix Card */
+    .matrix-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    /* Step Status Banner */
+    .step-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: #334155;
+      color: #94a3b8;
+    }
+
+    .step-badge.probing {
+      background: var(--accent-amber-bg);
+      border: 1px solid var(--accent-amber);
+      color: #fde047;
+    }
+
+    .step-badge.success {
+      background: var(--accent-emerald-bg);
+      border: 1px solid var(--accent-emerald);
+      color: #6ee7b7;
+    }
+
+    .step-badge.fail {
+      background: var(--accent-rose-bg);
+      border: 1px solid var(--accent-rose);
+      color: #fca5a5;
+    }
+
+    .step-badge.finish {
+      background: var(--accent-indigo-bg);
+      border: 1px solid var(--accent-indigo);
+      color: #c7d2fe;
+    }
+
+    .banner-text {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      flex: 1;
+    }
+
+    /* Binary Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+    }
+
+    .matrix-table th {
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 8px 6px;
+      text-align: center;
+      border-bottom: 2px solid var(--border-color);
+      font-size: 0.78rem;
+    }
+
+    .matrix-table th.bit-header {
+      min-width: 38px;
+      transition: all 0.2s;
+    }
+
+    .matrix-table th.bit-header.current-bit {
+      color: var(--accent-amber);
+      font-weight: 700;
+      background: var(--accent-amber-bg);
+      border-radius: 6px 6px 0 0;
+      border-bottom: 2px solid var(--accent-amber);
+    }
+
+    .matrix-table tr.ingredient-row {
+      background: var(--bg-card);
+      transition: all 0.2s;
+    }
+    .matrix-table tr.ingredient-row:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .matrix-table tr.ingredient-row.eliminated {
+      opacity: 0.28;
+      filter: grayscale(80%);
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .matrix-table tr.ingredient-row.matched {
+      background: rgba(16, 185, 129, 0.12);
+      box-shadow: inset 2px 0 0 var(--accent-emerald);
+    }
+
+    .matrix-table tr.ingredient-row.optimal-pair {
+      background: rgba(99, 102, 241, 0.25);
+      box-shadow: inset 4px 0 0 var(--accent-indigo), 0 0 16px rgba(99, 102, 241, 0.25);
+    }
+
+    .matrix-table td {
+      padding: 9px 6px;
+      text-align: center;
+      vertical-align: middle;
+      border-top: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+    }
+
+    .matrix-table td:first-child {
+      border-left: 1px solid transparent;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+      text-align: left;
+      padding-left: 14px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .matrix-table td:last-child {
+      border-right: 1px solid transparent;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+      padding-right: 14px;
+    }
+
+    .num-val {
+      color: #38bdf8;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* Bit Cell Styling */
+    .bit-cell {
+      display: inline-block;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      border-radius: 5px;
+      font-weight: 600;
+      color: #475569;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .bit-cell.val-1 {
+      color: #f1f5f9;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bit-cell.confirmed-1 {
+      color: #10b981;
+      background: var(--accent-emerald-bg);
+      font-weight: 700;
+    }
+
+    .bit-cell.probing-1 {
+      color: #f59e0b;
+      background: var(--accent-amber-bg);
+      box-shadow: var(--bit-active-glow);
+      font-weight: 700;
+    }
+
+    .bit-cell.probing-0 {
+      color: #ef4444;
+      background: var(--accent-rose-bg);
+    }
+
+    .status-pill {
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .status-pill.pass {
+      background: var(--accent-emerald-bg);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pill.fail {
+      background: var(--accent-rose-bg);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-pill.elim {
+      background: rgba(100, 116, 139, 0.2);
+      color: #64748b;
+    }
+
+    /* Candidate Target Mask Row */
+    tr.mask-row {
+      background: #0c1322;
+      border: 1px dashed var(--border-color);
+      font-weight: 600;
+    }
+    tr.mask-row td {
+      padding: 11px 6px;
+      border-top: 1px dashed var(--border-color);
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ans-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .ans-val {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--accent-emerald);
+      font-family: var(--font-mono);
+      line-height: 1.1;
+    }
+
+    .ans-bin {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--accent-cyan);
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    .decision-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+    }
+
+    .decision-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .decision-row:last-child {
+      margin-bottom: 0;
+    }
+    .decision-label {
+      color: var(--text-muted);
+    }
+    .decision-value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Algorithm PK Arena */
+    .pk-arena {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 22px;
+    }
+
+    .pk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .pk-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      transition: all 0.2s;
+    }
+    .pk-card:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .pk-card h4 {
+      font-size: 0.98rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .pk-stat {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .pk-stat span {
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .pk-result-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 100%;
+      text-align: center;
+    }
+
+    .pk-result-badge.correct {
+      background: var(--accent-emerald-bg);
+      border: 1px solid var(--accent-emerald);
+      color: #34d399;
+    }
+
+    .pk-result-badge.wrong {
+      background: var(--accent-rose-bg);
+      border: 1px solid var(--accent-rose);
+      color: #f87171;
+    }
+
+    /* Educational Section */
+    .edu-section {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .edu-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .edu-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 22px;
+    }
+
+    .edu-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edu-card p, .edu-card li {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 9px;
+      line-height: 1.65;
+    }
+
+    .edu-card ul {
+      padding-left: 20px;
+    }
+
+    .code-block {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .highlight-kw { color: #f43f5e; }
+    .highlight-fn { color: #38bdf8; }
+    .highlight-num { color: #a78bfa; }
+    .highlight-com { color: #64748b; font-style: italic; }
+
+    .compare-result {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+    .compare-result.danger {
+      background: var(--accent-rose-bg);
+      border: 1px solid var(--accent-rose);
+      color: #fca5a5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Header -->
+  <header>
+    <div class="title-group">
+      <h1>
+        <span>🍲 B3930 烹饪问题 · 算法动态全景模拟器</span>
+        <span class="badge">GESP 5级 权威题解</span>
+      </h1>
+      <p class="subtitle">最大两两按位与 (Maximum Pairwise Bitwise AND) · 高位逐位贪心与剪枝交互系统</p>
+    </div>
+    <div>
+      <span style="font-size:0.85rem; color:#94a3b8; margin-right:12px;">题型：位运算 / 贪心 / 剪枝</span>
+      <a href="#tutorial" class="doc-link">📚 查看图文解题思路</a>
+    </div>
+  </header>
+
+  <!-- Input & Presets Panel -->
+  <section class="panel">
+    <div class="panel-header">
+      <span>1. 测试用例与数据输入</span>
+      <span style="font-size:0.82rem; color:#94a3b8; font-weight:normal;">输入任意一组食材美味度即可启动步进分析</span>
+    </div>
+
+    <!-- Presets -->
+    <div class="presets-row">
+      <span class="presets-label">预设场景：</span>
+      <button class="btn btn-preset" onclick="loadPreset('sample1', this)">样例 1: [1, 2, 3]</button>
+      <button class="btn btn-preset active" onclick="loadPreset('sample2', this)">样例 2: [5, 6, 2, 10, 13]</button>
+      <button class="btn btn-preset" onclick="loadPreset('hack', this)">🚨 验真打脸(Hack Top-K): [1024, 512, 256, 128, 63, 63]</button>
+      <button class="btn btn-preset" onclick="loadPreset('powers', this)">高位冲突: [25, 27, 28, 14, 15]</button>
+      <button class="btn btn-preset" onclick="loadRandom(this)">🎲 随机生成一组</button>
+    </div>
+
+    <!-- Custom Input -->
+    <div class="input-row">
+      <div class="input-group">
+        <label for="customInput" style="font-size:0.85rem; color:#94a3b8; white-space:nowrap;">自定义食材美味度数值：</label>
+        <input type="text" id="customInput" value="5 6 2 10 13" placeholder="例如: 5 6 2 10 13">
+      </div>
+      <button class="btn btn-primary" onclick="applyCustomInput()">应用并重新分析</button>
+    </div>
+
+    <!-- Stepper Controls -->
+    <div class="controls-row">
+      <div class="button-group">
+        <button class="btn" id="btnPrev" onclick="stepBackward()">⏮ 上一步</button>
+        <button class="btn btn-emerald" id="btnNext" onclick="stepForward()">⏭ 下一步 (探查当前位)</button>
+        <button class="btn" id="btnPlay" onclick="togglePlay()">▶ 自动播放</button>
+        <button class="btn" id="btnReset" onclick="resetVisualizer()">🔄 重置</button>
+      </div>
+
+      <div class="speed-control">
+        <label for="speedSelect">演进速率：</label>
+        <select id="speedSelect" onchange="updateSpeed()">
+          <option value="1500">慢速 (1.5s)</option>
+          <option value="900" selected>标准 (0.9s)</option>
+          <option value="400">极速 (0.4s)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visualization Area -->
+  <div class="dashboard-grid">
+    <!-- Main Matrix -->
+    <div class="matrix-card">
+      <!-- Step status banner -->
+      <div class="step-banner">
+        <div id="stepBadge" class="step-badge probing">准备就绪</div>
+        <div id="bannerText" class="banner-text">点击「下一步」开始从最高有效位（MSB）向低位逐位试探。</div>
+      </div>
+
+      <!-- Table of Bits -->
+      <table class="matrix-table" id="matrixTable">
+        <thead id="matrixHead">
+          <!-- Will be rendered dynamically -->
+        </thead>
+        <tbody id="matrixBody">
+          <!-- Will be rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Sidebar: Results & State -->
+    <div class="sidebar">
+      <!-- Answer Card -->
+      <div class="info-card">
+        <div class="info-title">
+          <span>当前确定最高契合度 (Ans)</span>
+          <span style="color:var(--accent-emerald);" id="ansHex">0x0</span>
+        </div>
+        <div class="ans-box">
+          <div class="ans-val" id="ansDec">0</div>
+          <div class="ans-bin" id="ansBin">二进制: 0000₂</div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-row">
+            <span class="decision-label">当前试探位 (Bit)：</span>
+            <span class="decision-value" id="currentBitInfo">第 3 位 (权值 8)</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-label">试探掩码 (Candidate)：</span>
+            <span class="decision-value" id="candidateInfo">8 (1000₂)</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-label">符合掩码食材数：</span>
+            <span class="decision-value" id="matchCountInfo">2 种 (≥ 2)</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-label">贪心决策：</span>
+            <span class="decision-value" id="decisionResult" style="color:var(--accent-emerald);">保留该位 (置 1)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Best Pairs Identified -->
+      <div class="info-card">
+        <div class="info-title">
+          <span>达成最优契合度的食材组合</span>
+        </div>
+        <div id="optimalPairsList" style="font-size:0.875rem; color:#cbd5e1;">
+          计算完成后将自动高亮并列出所有能够产生该最大契合度的食材对。
+        </div>
+      </div>
+
+      <!-- Algorithm Speed Comparison -->
+      <div class="info-card">
+        <div class="info-title">
+          <span>理论计算步数与规模对比</span>
+        </div>
+        <div style="font-size:0.82rem; color:#94a3b8; line-height: 1.75;">
+          <div>• <strong>当前输入食材数 N：</strong> <span id="statN" style="color:#fff;">5</span></div>
+          <div>• <strong>暴力两两比较次数：</strong> <span id="statBrute" style="color:#f87171;">10 次</span></div>
+          <div>• <strong>高位贪心扫描次数：</strong> <span id="statGreedy" style="color:#34d399;">4 位 × 5 = 20 次操作</span></div>
+          <div style="margin-top:6px; font-size:0.76rem; color:#64748b;">
+            当 $N=10^6$ 时：暴力比较需 $\approx 5\times 10^{11}$ 次（严重超时TLE）；而高位贪心仅需 $31\times 10^6$ 次，0.05秒即可AC！
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Algorithm PK Arena -->
+  <section class="pk-arena">
+    <div class="panel-header" style="margin-bottom:8px;">
+      <span>⚔️ 算法竞技场：三大解法针对当前输入的实测对比</span>
+      <span style="font-size:0.82rem; color:#94a3b8;">亲眼见证考场伪解法与高位贪心正解的区别</span>
+    </div>
+    <div class="pk-grid">
+      <!-- 1. Brute Force -->
+      <div class="pk-card">
+        <h4>
+          <span>1. 暴力枚举两两与</span>
+          <span style="font-size:0.75rem; color:#94a3b8;">O(N²)</span>
+        </h4>
+        <div class="pk-stat">运行逻辑：枚举所有 $1 \le i < j \le N$ 计算 $a_i \ \& \ a_j$</div>
+        <div class="pk-stat">当前执行步数：<span id="pkBruteSteps">10</span> 次与运算</div>
+        <div class="pk-stat">计算结果：<span id="pkBruteRes">8</span></div>
+        <div class="pk-result-badge correct" id="pkBruteBadge">✔ 结果正确 (N≤1000可过，N=10⁶超时)</div>
+      </div>
+
+      <!-- 2. Greedy -->
+      <div class="pk-card">
+        <h4>
+          <span>2. 高位逐位贪心 (正解)</span>
+          <span style="font-size:0.75rem; color:#34d399;">O(31·N) 推荐</span>
+        </h4>
+        <div class="pk-stat">运行逻辑：从第 30 位到 0 位逐位试探掩码合法性</div>
+        <div class="pk-stat">当前执行步数：<span id="pkGreedySteps">20</span> 次位判断</div>
+        <div class="pk-stat">计算结果：<span id="pkGreedyRes">8</span></div>
+        <div class="pk-result-badge correct" id="pkGreedyBadge">🏆 满分 AC (严格最优，极限数据 0.05s)</div>
+      </div>
+
+      <!-- 3. Top-K Sorting Fake Algorithm -->
+      <div class="pk-card">
+        <h4>
+          <span>3. 排序取前 K 大伪算法</span>
+          <span style="font-size:0.75rem; color:#f87171;">O(N log N + K²) 伪算法</span>
+        </h4>
+        <div class="pk-stat">运行逻辑：降序排序后，仅对最大的前 $K=4$ 个数暴力两两与</div>
+        <div class="pk-stat">当前执行步数：<span id="pkFakeSteps">6</span> 次与运算</div>
+        <div class="pk-stat">计算结果：<span id="pkFakeRes">8</span></div>
+        <div class="pk-result-badge correct" id="pkFakeBadge">✔ 当前用例碰巧通过</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Educational & Deep Dive Section -->
+  <div class="edu-section" id="tutorial">
+    <!-- Core idea -->
+    <div class="edu-card">
+      <h3>💡 核心算法剖析：为什么“高位逐位贪心”是严格正确的？</h3>
+      <p>
+        按位与（<code>&</code>）的核心特性是：<strong>只有两个数在第 $k$ 位同为 1 时，按位与的结果在第 $k$ 位才为 1</strong>。
+      </p>
+      <p>
+        在二进制进制系统中，高位权值具有<strong>压倒性优势</strong>：
+        <br>
+        $$2^k > \sum_{j=0}^{k-1} 2^j = 2^k - 1$$
+        这意味着：<strong>第 $k$ 位为 1，其数值权重严格大于低位所有位全为 1 的总和！</strong>
+      </p>
+      <ul>
+        <li><strong>优先保证高位为 1：</strong>我们要尽可能让更高位为 1。如果食材集合中存在至少 2 个食材在第 $k$ 位都是 1，那么最终答案的第 $k$ 位<strong>一定可以也是必须设为 1</strong>！</li>
+        <li><strong>锁定前缀，继续往下贪心：</strong>一旦第 $k$ 位成功置 1，那么后续寻找更低位的 1 时，<strong>只能在那些第 $k$ 位（以及之前所有确认保留的高位）都为 1 的食材中继续挑选</strong>！因为绝不能为了换取低位的 1 而牺牲已经确立的高位 1。</li>
+        <li><strong>逐位试探掩码 (Bit Candidate)：</strong>从最高位（30 位）循环到第 0 位，每位试探 <code>candidate = ans | (1 &lt;&lt; bit)</code>，统计数组中有多少个数满足 <code>(x & candidate) == candidate</code>。若计数 $\ge 2$ 则该位成功保留，否则舍弃。</li>
+      </ul>
+    </div>
+
+    <!-- Common Traps & Fake Algos -->
+    <div class="edu-card">
+      <h3>⚠️ 考场致命陷阱：警惕“从大到小排序取前100”伪解法！</h3>
+      <p>
+        很多初学者在考场上会直觉推测：“最大的按位与肯定产生在最大的那批数里”，于是写出：
+        <code>sort(a, a+n); 仅取最大的 100 个数暴力两两与</code>。
+      </p>
+      <div class="compare-result danger">
+        <strong>❌ 致命漏洞反例 (点击上方“验真打脸”预设可一键重现)：</strong><br>
+        假设食材美味度为 <code>[1024, 512, 256, 128, 63, 63]</code>。<br>
+        排在前面的 4 个大数都是 $2^k$（二进制只有一位 1 且互不重合），它们两两按位与全为 0！<br>
+        而排在后面的两个较小数 <code>63 (111111₂)</code> 和 <code>63</code>，按位与结果高达 <strong>63</strong>！<br>
+        如果只检查前 4 大的数，程序会输出 0，导致严重丢分。
+      </div>
+      <p style="margin-top:10px;">
+        <strong>正解的优越性：</strong>高位贪心在数学逻辑上无懈可击，时间复杂度仅为 $O(31 \times N)$，在洛谷评测机上 $10^6$ 数据可在 0.05s 左右完美 AC！
+      </p>
+    </div>
+  </div>
+
+  <!-- Standard C++ Code Templates -->
+  <div class="panel" style="margin-top: 22px;">
+    <div class="panel-header">
+      <span>💻 满分 AC 代码 (C++ 标准实现)</span>
+      <span style="font-size:0.8rem; color:#94a3b8; font-weight:normal;">时间复杂度：O(31 · N) · 空间复杂度：O(N)</span>
+    </div>
+    <div class="code-block">
+<span class="highlight-kw">#include</span> <span class="highlight-fn">&lt;iostream&gt;</span>
+<span class="highlight-kw">#include</span> <span class="highlight-fn">&lt;vector&gt;</span>
+<span class="highlight-kw">using namespace</span> std;
+
+<span class="highlight-com">// 针对 N=10^6 的快速输入输出优化</span>
+<span class="highlight-kw">int</span> <span class="highlight-fn">main</span>() {
+    ios::sync_with_stdio(<span class="highlight-num">false</span>);
+    cin.tie(<span class="highlight-num">nullptr</span>);
+
+    <span class="highlight-kw">int</span> n;
+    <span class="highlight-kw">if</span> (!(cin &gt;&gt; n)) <span class="highlight-kw">return</span> <span class="highlight-num">0</span>;
+
+    vector&lt;<span class="highlight-kw">int</span>&gt; a(n);
+    <span class="highlight-kw">for</span> (<span class="highlight-kw">int</span> i = <span class="highlight-num">0</span>; i &lt; n; ++i) {
+        cin &gt;&gt; a[i];
+    }
+
+    <span class="highlight-kw">int</span> ans = <span class="highlight-num">0</span>; <span class="highlight-com">// 累积确认的最高按位与值</span>
+
+    <span class="highlight-com">// a_i &lt;= 2,147,483,647 = 2^31 - 1，二进制位下标为 30 到 0</span>
+    <span class="highlight-kw">for</span> (<span class="highlight-kw">int</span> bit = <span class="highlight-num">30</span>; bit &gt;= <span class="highlight-num">0</span>; --bit) {
+        <span class="highlight-kw">int</span> candidate = ans | (<span class="highlight-num">1</span> &lt;&lt; bit); <span class="highlight-com">// 试探当前位是否可以置 1</span>
+        <span class="highlight-kw">int</span> cnt = <span class="highlight-num">0</span>;
+
+        <span class="highlight-com">// 遍历检查有多少个数能包含 candidate 中的所有 1</span>
+        <span class="highlight-kw">for</span> (<span class="highlight-kw">int</span> x : a) {
+            <span class="highlight-kw">if</span> ((x &amp; candidate) == candidate) {
+                <span class="highlight-kw">if</span> (++cnt &gt;= <span class="highlight-num">2</span>) <span class="highlight-kw">break</span>; <span class="highlight-com">// 剪枝：只要凑齐 2 个就足够支撑该位</span>
+            }
+        }
+
+        <span class="highlight-com">// 若至少有 2 个食材支持，则该位确认保留</span>
+        <span class="highlight-kw">if</span> (cnt &gt;= <span class="highlight-num">2</span>) {
+            ans = candidate;
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; <span class="highlight-fn">"\n"</span>;
+    <span class="highlight-kw">return</span> <span class="highlight-num">0</span>;
+}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Presets
+  const PRESETS = {
+    sample1: [1, 2, 3],
+    sample2: [5, 6, 2, 10, 13],
+    hack: [1024, 512, 256, 128, 63, 63],
+    powers: [25, 27, 28, 14, 15]
+  };
+
+  // State
+  let items = [5, 6, 2, 10, 13];
+  let maxBit = 3;
+  let currentBit = 3;
+  let ans = 0;
+  let history = []; // for step backward
+  let isPlaying = false;
+  let timer = null;
+  let stepSpeed = 900;
+  let currentPhase = 'probe'; // 'probe', 'finished'
+
+  function calculateMaxBit(arr) {
+    let maxVal = 0;
+    for (let v of arr) {
+      if (v > maxVal) maxVal = v;
+    }
+    if (maxVal <= 0) return 0;
+    return Math.floor(Math.log2(maxVal));
+  }
+
+  function initVisualizer(arr) {
+    items = [...arr];
+    maxBit = calculateMaxBit(items);
+    currentBit = maxBit;
+    ans = 0;
+    history = [];
+    currentPhase = 'probe';
+    if (isPlaying) togglePlay();
+
+    updateStats();
+    renderMatrix();
+    updateUI();
+    runPKArena();
+  }
+
+  function updateStats() {
+    const n = items.length;
+    document.getElementById('statN').innerText = n;
+    const bruteOps = (n * (n - 1)) / 2;
+    document.getElementById('statBrute').innerText = `${bruteOps} 次两两比较`;
+    const greedyOps = (maxBit + 1) * n;
+    document.getElementById('statGreedy').innerText = `${maxBit + 1} 位 × ${n} = ${greedyOps} 次基础扫描`;
+  }
+
+  function renderMatrix() {
+    const head = document.getElementById('matrixHead');
+    const body = document.getElementById('matrixBody');
+
+    // Header row
+    let headHtml = `<tr>
+      <th style="text-align:left; min-width:85px;">食材 / 编号</th>
+      <th style="min-width:68px;">十进制</th>`;
+    
+    for (let b = maxBit; b >= 0; b--) {
+      const isCur = (b === currentBit && currentPhase !== 'finished');
+      headHtml += `<th class="bit-header ${isCur ? 'current-bit' : ''}" title="第 ${b} 位，权值 ${1 << b}">
+        Bit ${b}<br><span style="font-size:0.68rem; font-weight:normal; opacity:0.8;">2^${b}=${1 << b}</span>
+      </th>`;
+    }
+    headHtml += `<th style="min-width:96px;">匹配状态</th></tr>`;
+    head.innerHTML = headHtml;
+
+    // Body rows
+    const candidate = ans | (1 << currentBit);
+    let bodyHtml = '';
+
+    items.forEach((val, idx) => {
+      const isCandidateMatch = (val & candidate) === candidate;
+      const isAnsMatch = (val & ans) === ans;
+      const isEliminated = !isAnsMatch;
+
+      let rowClass = 'ingredient-row';
+      if (isEliminated) {
+        rowClass += ' eliminated';
+      } else if (currentPhase !== 'finished' && isCandidateMatch) {
+        rowClass += ' matched';
+      }
+
+      // If finished, highlight pairs that produce ans
+      if (currentPhase === 'finished' && (val & ans) === ans) {
+        rowClass += ' optimal-pair';
+      }
+
+      bodyHtml += `<tr class="${rowClass}" id="row-${idx}">
+        <td>食材 #${idx + 1}</td>
+        <td class="num-val">${val}</td>`;
+
+      for (let b = maxBit; b >= 0; b--) {
+        const bitVal = (val >> b) & 1;
+        let cellClass = 'bit-cell';
+        if (bitVal === 1) cellClass += ' val-1';
+
+        // Highlight confirmed vs probing bits
+        if ((ans >> b) & 1) {
+          cellClass += ' confirmed-1';
+        } else if (b === currentBit && currentPhase !== 'finished') {
+          if (bitVal === 1) {
+            cellClass += ' probing-1';
+          } else {
+            cellClass += ' probing-0';
+          }
+        }
+
+        bodyHtml += `<td><span class="${cellClass}">${bitVal}</span></td>`;
+      }
+
+      // Status pill
+      let statusHtml = '';
+      if (isEliminated) {
+        statusHtml = `<span class="status-pill elim">已提前淘汰</span>`;
+      } else if (currentPhase === 'finished') {
+        statusHtml = `<span class="status-pill pass">构成最优对</span>`;
+      } else if (isCandidateMatch) {
+        statusHtml = `<span class="status-pill pass">包含试探掩码</span>`;
+      } else {
+        statusHtml = `<span class="status-pill fail">缺少关键 1</span>`;
+      }
+
+      bodyHtml += `<td>${statusHtml}</td></tr>`;
+    });
+
+    // Add candidate mask row
+    if (currentPhase !== 'finished') {
+      let maskRow = `<tr class="mask-row">
+        <td style="color:#f59e0b;">🔍 试探目标</td>
+        <td style="color:#f59e0b; font-weight:700;">${candidate}</td>`;
+      for (let b = maxBit; b >= 0; b--) {
+        const maskBit = (candidate >> b) & 1;
+        let cClass = 'bit-cell';
+        if (maskBit === 1) {
+          cClass += b === currentBit ? ' probing-1' : ' confirmed-1';
+        }
+        maskRow += `<td><span class="${cClass}">${maskBit}</span></td>`;
+      }
+      maskRow += `<td><span style="color:#f59e0b; font-size:0.75rem;">当前试探掩码</span></td></tr>`;
+      bodyHtml += maskRow;
+    }
+
+    body.innerHTML = bodyHtml;
+  }
+
+  function updateUI() {
+    const candidate = ans | (1 << currentBit);
+    const badge = document.getElementById('stepBadge');
+    const banner = document.getElementById('bannerText');
+
+    document.getElementById('ansDec').innerText = ans;
+    document.getElementById('ansHex').innerText = `0x${ans.toString(16).toUpperCase()}`;
+    document.getElementById('ansBin').innerText = `二进制: ${ans.toString(2).padStart(maxBit + 1, '0')}₂`;
+
+    if (currentPhase === 'finished') {
+      badge.className = 'step-badge finish';
+      badge.innerText = '✅ 搜索完成';
+      banner.innerHTML = `已完成所有有效位的贪心试探！全局最高食材契合度为 <strong>${ans}</strong>。`;
+
+      document.getElementById('currentBitInfo').innerText = '已全部考察完毕';
+      document.getElementById('candidateInfo').innerText = `${ans} (${ans.toString(2)}₂)`;
+      document.getElementById('decisionResult').innerHTML = `<span style="color:var(--accent-indigo);">全局最优解确定为 ${ans}</span>`;
+
+      // Find matching pairs
+      const matchingIndices = [];
+      items.forEach((v, idx) => {
+        if ((v & ans) === ans) matchingIndices.push(idx);
+      });
+
+      let pairsHtml = '';
+      if (matchingIndices.length >= 2) {
+        pairsHtml = `<p style="color:#34d399; margin-bottom:6px;">共有 <strong>${matchingIndices.length}</strong> 种食材能支撑最大契合度：</p><ul style="padding-left:18px;">`;
+        for (let i = 0; i < matchingIndices.length; i++) {
+          for (let j = i + 1; j < matchingIndices.length; j++) {
+            const u = items[matchingIndices[i]];
+            const v = items[matchingIndices[j]];
+            if ((u & v) === ans) {
+              pairsHtml += `<li>食材 #${matchingIndices[i]+1} (${u}) & 食材 #${matchingIndices[j]+1} (${v}) = <strong>${ans}</strong></li>`;
+            }
+          }
+        }
+        pairsHtml += `</ul>`;
+      } else {
+        pairsHtml = '未找到有效配对';
+      }
+      document.getElementById('optimalPairsList').innerHTML = pairsHtml;
+
+      document.getElementById('btnNext').disabled = true;
+      if (isPlaying) togglePlay();
+      return;
+    }
+
+    document.getElementById('btnNext').disabled = false;
+
+    // Probing info
+    document.getElementById('currentBitInfo').innerText = `第 ${currentBit} 位 (权值 2^${currentBit} = ${1 << currentBit})`;
+    document.getElementById('candidateInfo').innerText = `${candidate} (${candidate.toString(2).padStart(maxBit + 1, '0')}₂)`;
+
+    // Count matches
+    let cnt = 0;
+    const matchingIds = [];
+    items.forEach((x, idx) => {
+      if ((x & candidate) === candidate) {
+        cnt++;
+        matchingIds.push(`#${idx + 1}`);
+      }
+    });
+
+    document.getElementById('matchCountInfo').innerText = `${cnt} 种 (${matchingIds.join(', ') || '无'})`;
+
+    if (cnt >= 2) {
+      badge.className = 'step-badge success';
+      badge.innerText = `第 ${currentBit} 位保留 (置 1)`;
+      banner.innerHTML = `第 <strong>${currentBit}</strong> 位探查：共有 <strong>${cnt}</strong> 种食材满足条件（≥ 2 种），所以最终答案在第 ${currentBit} 位<strong>能够且必须置 1</strong>！`;
+      document.getElementById('decisionResult').innerHTML = `<span style="color:var(--accent-emerald);">保留该位 (+${1 << currentBit})</span>`;
+    } else {
+      badge.className = 'step-badge fail';
+      badge.innerText = `第 ${currentBit} 位舍弃 (置 0)`;
+      banner.innerHTML = `第 <strong>${currentBit}</strong> 位探查：仅有 <strong>${cnt}</strong> 种食材满足条件（不足 2 种），无法两两配对，该位<strong>必须舍弃（置 0）</strong>。`;
+      document.getElementById('decisionResult').innerHTML = `<span style="color:var(--accent-rose);">舍弃该位 (保持 0)</span>`;
+    }
+
+    document.getElementById('optimalPairsList').innerHTML = `
+      <div style="font-size:0.85rem; color:#94a3b8;">
+        正在逐位锁定高位财富...<br>
+        当前已确定的高位掩码：<code style="color:#38bdf8;">${ans.toString(2).padStart(maxBit + 1, '0')}</code><br>
+        当前候选匹配食材：<strong>${cnt}</strong> 种
+      </div>
+    `;
+  }
+
+  function stepForward() {
+    if (currentPhase === 'finished') return;
+
+    // Push into history
+    history.push({
+      currentBit: currentBit,
+      ans: ans,
+      currentPhase: currentPhase
+    });
+
+    const candidate = ans | (1 << currentBit);
+    let cnt = 0;
+    for (let x of items) {
+      if ((x & candidate) === candidate) {
+        cnt++;
+        if (cnt >= 2) break;
+      }
+    }
+
+    if (cnt >= 2) {
+      ans = candidate;
+    }
+
+    if (currentBit > 0) {
+      currentBit--;
+    } else {
+      currentPhase = 'finished';
+    }
+
+    renderMatrix();
+    updateUI();
+  }
+
+  function stepBackward() {
+    if (history.length === 0) return;
+    const prev = history.pop();
+    currentBit = prev.currentBit;
+    ans = prev.ans;
+    currentPhase = prev.currentPhase;
+
+    renderMatrix();
+    updateUI();
+  }
+
+  function togglePlay() {
+    const playBtn = document.getElementById('btnPlay');
+    if (isPlaying) {
+      clearInterval(timer);
+      isPlaying = false;
+      playBtn.innerText = '▶ 自动播放';
+      playBtn.classList.remove('btn-rose');
+    } else {
+      if (currentPhase === 'finished') {
+        resetVisualizer();
+      }
+      isPlaying = true;
+      playBtn.innerText = '⏸ 暂停';
+      playBtn.classList.add('btn-rose');
+      timer = setInterval(() => {
+        if (currentPhase === 'finished') {
+          togglePlay();
+        } else {
+          stepForward();
+        }
+      }, stepSpeed);
+    }
+  }
+
+  function updateSpeed() {
+    stepSpeed = parseInt(document.getElementById('speedSelect').value, 10);
+    if (isPlaying) {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (currentPhase === 'finished') {
+          togglePlay();
+        } else {
+          stepForward();
+        }
+      }, stepSpeed);
+    }
+  }
+
+  function resetVisualizer() {
+    if (isPlaying) togglePlay();
+    currentBit = maxBit;
+    ans = 0;
+    history = [];
+    currentPhase = 'probe';
+    renderMatrix();
+    updateUI();
+  }
+
+  function loadPreset(key, btn) {
+    document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const arr = PRESETS[key];
+    document.getElementById('customInput').value = arr.join(' ');
+    initVisualizer(arr);
+  }
+
+  function loadRandom(btn) {
+    document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const count = 5 + Math.floor(Math.random() * 4);
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(Math.floor(Math.random() * 31) + 1);
+    }
+    document.getElementById('customInput').value = arr.join(' ');
+    initVisualizer(arr);
+  }
+
+  function applyCustomInput() {
+    const raw = document.getElementById('customInput').value.trim();
+    if (!raw) return;
+    const parts = raw.split(/[\s,]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x) && x >= 0);
+    if (parts.length < 2) {
+      alert('请至少输入 2 种食材的美味度数值！');
+      return;
+    }
+    if (parts.length > 16) {
+      alert('为了获得最佳的动画与视觉展示，建议食材数量控制在 16 个以内。');
+    }
+    document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+    initVisualizer(parts);
+  }
+
+  // Algorithm PK Engine
+  function runPKArena() {
+    const n = items.length;
+
+    // 1. Brute Force
+    let bruteAns = 0;
+    let bruteOps = 0;
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        bruteOps++;
+        bruteAns = Math.max(bruteAns, items[i] & items[j]);
+      }
+    }
+    document.getElementById('pkBruteSteps').innerText = bruteOps;
+    document.getElementById('pkBruteRes').innerText = bruteAns;
+
+    // 2. High-Bit Greedy
+    let greedyAns = 0;
+    let greedyOps = 0;
+    for (let b = maxBit; b >= 0; b--) {
+      let cand = greedyAns | (1 << b);
+      let cnt = 0;
+      for (let x of items) {
+        greedyOps++;
+        if ((x & cand) === cand) {
+          if (++cnt >= 2) break;
+        }
+      }
+      if (cnt >= 2) greedyAns = cand;
+    }
+    document.getElementById('pkGreedySteps').innerText = greedyOps;
+    document.getElementById('pkGreedyRes').innerText = greedyAns;
+
+    // 3. Top-K Sorting Fake Algorithm (take top 4 or top K)
+    const sorted = [...items].sort((a, b) => b - a);
+    const k = Math.min(n, 4);
+    let fakeAns = 0;
+    let fakeOps = 0;
+    for (let i = 0; i < k; i++) {
+      for (let j = i + 1; j < k; j++) {
+        fakeOps++;
+        fakeAns = Math.max(fakeAns, sorted[i] & sorted[j]);
+      }
+    }
+    document.getElementById('pkFakeSteps').innerText = fakeOps;
+    document.getElementById('pkFakeRes').innerText = fakeAns;
+
+    const fakeBadge = document.getElementById('pkFakeBadge');
+    if (fakeAns === bruteAns) {
+      fakeBadge.className = 'pk-result-badge correct';
+      fakeBadge.innerText = '✔ 当前用例碰巧猜中';
+    } else {
+      fakeBadge.className = 'pk-result-badge wrong';
+      fakeBadge.innerText = `❌ 伪算法翻车！输出 ${fakeAns}，实际应为 ${bruteAns}`;
+    }
+  }
+
+  // Initialize on load
+  window.addEventListener('DOMContentLoaded', () => {
+    initVisualizer(PRESETS.sample2);
+  });
+</script>
+
+</body>
+</html>

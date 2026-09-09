@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1322" />
+      <stop offset="100%" stop-color="#042F2E" />
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DD4BF" />
+      <stop offset="100%" stop-color="#0D9488" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Squircle Base -->
+  <rect width="128" height="128" rx="28" fill="url(#bg)" stroke="#115E59" stroke-width="3" />
+  
+  <!-- Inner Rim -->
+  <rect x="5" y="5" width="118" height="118" rx="23" fill="none" stroke="#2DD4BF" stroke-opacity="0.2" stroke-width="1.5" />
+
+  <!-- Left Bracket < -->
+  <path d="M 38 46 L 24 64 L 38 82" fill="none" stroke="url(#brand)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Right Bracket > -->
+  <path d="M 90 46 L 104 64 L 90 82" fill="none" stroke="url(#brand)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Central '1' in code style -->
+  <path d="M 54 53 L 64 45 L 64 83 M 52 83 L 76 83" fill="none" stroke="#F8FAFC" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Green Terminal Pulse Dot -->
+  <circle cx="102" cy="26" r="4.5" fill="#2DD4BF" />
+</svg>

@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneCoder (coderli.com) · 全站首页与文章预览原型</title>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- KaTeX CSS for LaTeX Math Formulas in GESP Problems -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    /* -------------------------------------------------------------
+       CSS Design Tokens & Theme Variables
+       ------------------------------------------------------------- */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, Monaco, "Courier New", monospace;
+
+      /* Light Theme */
+      --bg-body: #F4F6F9;
+      --bg-surface: #FFFFFF;
+      --bg-surface-elevated: #FFFFFF;
+      --bg-subtle: #F1F5F9;
+      --bg-hover: #E2E8F0;
+      
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-faint: #94A3B8;
+
+      --border-main: #E2E8F0;
+      --border-subtle: #F1F5F9;
+      --border-active: #0D9488;
+
+      --primary: #0D9488;
+      --primary-hover: #0F766E;
+      --primary-light: rgba(13, 148, 136, 0.1);
+      --primary-text: #0F766E;
+
+      --accent-blue: #2563EB;
+      --accent-green: #16A34A;
+      --accent-purple: #7C3AED;
+      --accent-amber: #D97706;
+
+      --ad-bg: #F8FAFC;
+      --ad-border: #CBD5E1;
+      --ad-badge: #64748B;
+
+      --code-bg: #1E293B;
+      --code-text: #E2E8F0;
+
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --container-max-width: 1560px;
+    }
+
+    html.dark {
+      /* Dark Theme */
+      --bg-body: #090D16;
+      --bg-surface: #101623;
+      --bg-surface-elevated: #161F33;
+      --bg-subtle: #192233;
+      --bg-hover: #222E44;
+
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-faint: #64748B;
+
+      --border-main: #1D263B;
+      --border-subtle: #192233;
+      --border-active: #14B8A6;
+
+      --primary: #14B8A6;
+      --primary-hover: #2DD4BF;
+      --primary-light: rgba(20, 184, 166, 0.15);
+      --primary-text: #5EEAD4;
+
+      --accent-blue: #3B82F6;
+      --accent-green: #22C55E;
+      --accent-purple: #A855F7;
+      --accent-amber: #F59E0B;
+
+      --ad-bg: #121927;
+      --ad-border: #233148;
+      --ad-badge: #64748B;
+
+      --code-bg: #0B101C;
+      --code-text: #E2E8F0;
+
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    }
+
+    body.ultra-wide {
+      --container-max-width: 98%;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.75;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    a:hover {
+      color: var(--primary-hover);
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #14B8A6, #3B82F6, #A855F7);
+      width: 0%;
+      z-index: 999;
+      transition: width 0.1s linear;
+    }
+
+    /* -------------------------------------------------------------
+       Header / Navbar (Wide Fluid Container)
+       ------------------------------------------------------------- */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background-color: rgba(16, 22, 35, 0.92);
+      border-bottom: 1px solid var(--border-main);
+    }
+    html:not(.dark) .site-header {
+      background-color: rgba(255, 255, 255, 0.94);
+    }
+
+    .header-container {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .brand-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      background: var(--bg-subtle);
+    }
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      list-style: none;
+    }
+    .nav-item button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .nav-item button:hover, .nav-item.active button {
+      color: var(--primary);
+      background-color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Search Button (Ctrl+K Style) */
+    .search-btn-nav {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+    }
+    .search-btn-nav:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+    .search-kbd {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-faint);
+    }
+
+    .btn-icon {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      color: var(--text-main);
+      height: 38px;
+      padding: 0 0.75rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.85rem;
+      font-weight: 500;
+      gap: 0.4rem;
+    }
+    .btn-icon:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-active);
+    }
+
+    /* -------------------------------------------------------------
+       Top Real-time Analytics Bar
+       ------------------------------------------------------------- */
+    .top-analytics-bar {
+      background: linear-gradient(90deg, rgba(20, 184, 166, 0.12), rgba(59, 130, 246, 0.12));
+      border-bottom: 1px solid var(--border-main);
+      padding: 0.5rem 2rem;
+      font-size: 0.825rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .site-stats-pills {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      padding: 0.2rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .stat-pill strong {
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(20, 184, 166, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+    }
+
+    /* -------------------------------------------------------------
+       View Routing Containers (Home View vs Article Detail View vs Topics View)
+       ------------------------------------------------------------- */
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    /* -------------------------------------------------------------
+       HOME VIEW STYLES
+       ------------------------------------------------------------- */
+    .home-hero-wrap {
+      max-width: var(--container-max-width);
+      margin: 2.5rem auto 1.5rem;
+      padding: 0 2rem;
+    }
+    .home-hero-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      padding: 3rem 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    @media (max-width: 900px) {
+      .home-hero-card {
+        flex-direction: column;
+        padding: 2rem 1.5rem;
+        text-align: center;
+      }
+    }
+    .home-hero-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .home-hero-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+    }
+    .home-hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 680px;
+    }
+    .home-hero-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 900px) {
+      .home-hero-stats { justify-content: center; }
+    }
+    .hero-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-stat-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--primary);
+    }
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .home-layout-grid {
+      max-width: var(--container-max-width);
+      margin: 1.5rem auto 4rem;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    @media (max-width: 1080px) {
+      .home-layout-grid {
+        grid-template-columns: 1fr;
+      }
+      .home-sidebar {
+        display: none;
+      }
+    }
+
+    /* Featured Big Post Card on Home */
+    .featured-post-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 2.25rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .featured-post-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    @media (max-width: 768px) {
+      .featured-post-card {
+        grid-template-columns: 1fr;
+      }
+    }
+    .featured-content {
+      padding: 2.25rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .featured-tag-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--primary-light);
+      color: var(--primary-text);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.75rem;
+      width: fit-content;
+    }
+    .featured-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.35;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+    }
+    .featured-excerpt {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+    .featured-img-col {
+      background: var(--bg-subtle);
+      border-left: 1px solid var(--border-main);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .featured-img-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .featured-art-graphic {
+      padding: 1.5rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      color: var(--primary);
+    }
+
+    /* Home Subject Filter Tabs */
+    .home-tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--border-main);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .home-tab-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .home-tab-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+    .home-tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Home Article Feed Cards (With Thumbnails!) */
+    .home-article-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .feed-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-md);
+      padding: 1.5rem 1.75rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 130px;
+      gap: 1.5rem;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .feed-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    @media (max-width: 600px) {
+      .feed-card {
+        grid-template-columns: 1fr;
+      }
+      .feed-thumb-col {
+        display: none;
+      }
+    }
+    .feed-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .feed-meta-cat {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .feed-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+    .feed-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 0.75rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .feed-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+    }
+    .feed-thumb-col {
+      width: 130px;
+      height: 95px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .feed-thumb-col img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .feed-thumb-graphic {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    /* Home Right Sidebar */
+    .home-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+    .profile-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .profile-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      object-fit: cover;
+    }
+    .profile-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .profile-bio {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+    .profile-social-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+    }
+    .social-pill {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* -------------------------------------------------------------
+       ARTICLE DETAIL VIEW STYLES (Three Columns Wide)
+       ------------------------------------------------------------- */
+    .article-layout-grid {
+      max-width: var(--container-max-width);
+      margin: 1.75rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 320px;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 1400px) {
+      .article-layout-grid {
+        grid-template-columns: 260px minmax(0, 1fr) 280px;
+        gap: 1.5rem;
+        padding: 0 1.25rem;
+      }
+    }
+    @media (max-width: 1200px) {
+      .article-layout-grid {
+        grid-template-columns: minmax(0, 1fr) 300px;
+      }
+      .article-left-sidebar { display: none; }
+    }
+    @media (max-width: 900px) {
+      .article-layout-grid { grid-template-columns: 1fr; }
+      .article-right-sidebar { display: none; }
+    }
+
+    .article-left-sidebar {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding-right: 0.4rem;
+    }
+    .article-left-sidebar::-webkit-scrollbar { width: 4px; }
+    .article-left-sidebar::-webkit-scrollbar-thumb { background: var(--border-main); border-radius: 4px; }
+
+    .article-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      padding: 2.75rem 3.5rem;
+      box-shadow: var(--shadow-sm);
+      min-width: 0;
+    }
+    @media (max-width: 768px) {
+      .article-container { padding: 1.5rem 1.25rem; }
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .breadcrumbs span.sep { color: var(--text-faint); }
+
+    .article-featured-banner {
+      width: 100%;
+      height: 260px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      position: relative;
+      border: 1px solid var(--border-main);
+      background: linear-gradient(135deg, #111827, #1E293B);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .article-featured-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .banner-graphic-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .banner-graphic-title {
+      font-family: var(--font-mono);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .banner-graphic-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+    .banner-overlay-badge {
+      position: absolute;
+      bottom: 1rem;
+      right: 1.25rem;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: #E2E8F0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .article-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.35;
+      color: var(--text-main);
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 768px) {
+      .article-title { font-size: 1.65rem; }
+    }
+
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 2rem;
+    }
+    .meta-item { display: flex; align-items: center; gap: 0.4rem; }
+    .view-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--primary-light);
+      color: var(--primary-text);
+      padding: 0.2rem 0.65rem;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .tags-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tag-pill {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border-main);
+      transition: all 0.15s ease;
+    }
+    .tag-pill:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Ads Units */
+    .adsense-unit {
+      margin: 2.25rem 0;
+      border: 1.5px dashed var(--ad-border);
+      background: var(--ad-bg);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .adsense-unit:hover { border-color: var(--primary); }
+    .ad-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--ad-badge);
+      font-family: var(--font-mono);
+    }
+    .ad-pill {
+      background: rgba(100, 116, 139, 0.15);
+      color: var(--text-muted);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .ad-content-sim {
+      min-height: 95px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.04), rgba(37, 99, 235, 0.04));
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      color: var(--text-muted);
+    }
+    .ad-content-sim .sim-title { font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 0.35rem; }
+    .ad-content-sim .sim-desc { font-size: 0.85rem; color: var(--text-muted); max-width: 600px; }
+    .ad-content-sim .sim-btn {
+      margin-top: 0.75rem;
+      padding: 0.4rem 1.25rem;
+      border-radius: var(--radius-sm);
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Article Typography */
+    .prose { color: var(--text-main); font-size: 1.05rem; line-height: 1.85; }
+    .prose p { margin-bottom: 1.5rem; }
+    .prose h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 2.75rem;
+      margin-bottom: 1.15rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .prose h2::before { content: "#"; color: var(--primary); font-weight: 800; font-family: var(--font-mono); font-size: 1.35rem; }
+    .prose h3 { font-size: 1.3rem; font-weight: 600; color: var(--text-main); margin-top: 2rem; margin-bottom: 0.85rem; }
+    .prose strong { font-weight: 700; color: var(--text-main); }
+    .prose code:not(pre code) {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: var(--bg-subtle);
+      color: var(--primary);
+      padding: 0.2em 0.45em;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+    .prose img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-md);
+      margin: 1.5rem auto;
+      display: block;
+      border: 1px solid var(--border-main);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border-radius: var(--radius-md);
+      margin: 2rem 0;
+      overflow: hidden;
+      border: 1px solid var(--border-main);
+      box-shadow: var(--shadow-md);
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1.25rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #94A3B8;
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot-red { background: #EF4444; }
+    .dot-yellow { background: #F59E0B; }
+    .dot-green { background: #10B981; }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #CBD5E1;
+      padding: 0.25rem 0.7rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+    pre {
+      padding: 1.5rem 1.25rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--code-text);
+    }
+    pre .keyword { color: #F472B6; font-weight: 600; }
+    pre .class { color: #67E8F9; }
+    pre .string { color: #A7F3D0; }
+    pre .comment { color: #64748B; font-style: italic; }
+    pre .method { color: #FDE047; }
+    pre .type { color: #93C5FD; }
+
+    .callout {
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.75rem 0;
+      border-left: 4px solid;
+      background: var(--bg-subtle);
+    }
+    .callout-info { border-left-color: var(--accent-blue); background: rgba(37, 99, 235, 0.08); }
+    .callout-success { border-left-color: var(--accent-green); background: rgba(22, 163, 74, 0.08); }
+    .callout-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+    .callout-info .callout-title { color: var(--accent-blue); }
+    .callout-success .callout-title { color: var(--accent-green); }
+
+    /* Right Sidebar in Article View */
+    .article-right-sidebar {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .sidebar-widget {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .widget-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.875rem; }
+    .toc-item a {
+      color: var(--text-muted);
+      display: block;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border-left: 2px solid transparent;
+      transition: all 0.15s ease;
+      line-height: 1.45;
+    }
+    .toc-item.active a, .toc-item a:hover {
+      color: var(--primary);
+      border-left-color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+      padding-left: 0.75rem;
+    }
+    .toc-item.depth-2 { padding-left: 0.75rem; }
+
+    .sidebar-ad-card {
+      border: 1.5px dashed var(--ad-border);
+      background: var(--ad-bg);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      text-align: center;
+    }
+    .sidebar-ad-box {
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(20, 184, 166, 0.05), rgba(59, 130, 246, 0.05));
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+
+    /* Author Footer Card */
+    .author-footer-card {
+      margin-top: 3rem;
+      padding: 1.75rem;
+      border-radius: var(--radius-lg);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+    .author-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border-main);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #111827;
+    }
+    .author-info h4 { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem; }
+    .author-info p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+    .community-links { display: flex; flex-wrap: wrap; gap: 0.85rem; font-size: 0.85rem; }
+
+    /* Comments */
+    .comments-section {
+      margin-top: 3.5rem;
+      padding-top: 2.25rem;
+      border-top: 2px solid var(--border-subtle);
+    }
+    .comments-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .comments-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .comments-db-tag {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+
+    .comment-form {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+    .form-input {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-main);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.875rem;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--primary); }
+    .comment-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-main);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.925rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+    .comment-textarea:focus { border-color: var(--primary); }
+    .form-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 0.75rem; }
+    .btn-submit {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.55rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-submit:hover { background: var(--primary-hover); box-shadow: 0 2px 10px rgba(20, 184, 166, 0.35); }
+
+    .comment-list { list-style: none; display: flex; flex-direction: column; gap: 1.25rem; }
+    .comment-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-main);
+    }
+    .comment-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366F1, #EC4899);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .comment-body { flex: 1; }
+    .comment-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+    .comment-author { font-weight: 700; font-size: 0.95rem; color: var(--text-main); }
+    .comment-time { font-size: 0.75rem; color: var(--text-faint); }
+    .comment-text { font-size: 0.925rem; color: var(--text-main); line-height: 1.65; margin-bottom: 0.6rem; }
+
+    /* -------------------------------------------------------------
+       Instant Search Modal Dialog (Cmd+K / Ctrl+K)
+       ------------------------------------------------------------- */
+    .search-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 12vh;
+    }
+    .search-modal-backdrop.open { display: flex; }
+    .search-modal-box {
+      width: min(680px, calc(100% - 32px));
+      background: var(--bg-surface);
+      border: 1px solid var(--border-main);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 75vh;
+    }
+    .search-input-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border-main);
+      background: var(--bg-surface-elevated);
+    }
+    .search-input-box {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      font-family: inherit;
+    }
+    .search-results-list {
+      overflow-y: auto;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .search-item-card {
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: background 0.15s ease;
+    }
+    .search-item-card:hover {
+      background: var(--bg-subtle);
+    }
+    .search-item-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    .search-item-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* -------------------------------------------------------------
+       Footer & Toast
+       ------------------------------------------------------------- */
+    .site-footer {
+      border-top: 1px solid var(--border-main);
+      background: var(--bg-surface);
+      margin-top: 5rem;
+      padding: 3.5rem 2rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .footer-content {
+      max-width: var(--container-max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--primary);
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <!-- Brand Logo (Click to return to Whole-Site Home!) -->
+      <a href="javascript:showHomeView()" class="brand" title="返回全站首页">
+        <img src="images/onecoder/avatar.png" alt="Avatar" class="brand-avatar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%230D9488\'><rect width=\'100\' height=\'100\'/><text x=\'50\' y=\'65\' font-size=\'45\' font-family=\'monospace\' text-anchor=\'middle\' fill=\'white\'>&gt;_</text></svg>'">
+        <div class="brand-text">
+          <span class="brand-title">OneCoder</span>
+          <span class="brand-sub">coderli.com · 936篇技术文章</span>
+        </div>
+      </a>
+
+      <!-- Main Navigation -->
+      <nav>
+        <ul class="nav-links">
+          <li class="nav-item active" id="nav-item-home">
+            <button onclick="showHomeView()">🏠 全站首页</button>
+          </li>
+          <li class="nav-item" id="nav-item-gesp">
+            <button onclick="filterHomeByTopic('gesp')">🏆 GESP 考级 (504)</button>
+          </li>
+          <li class="nav-item" id="nav-item-java">
+            <button onclick="filterHomeByTopic('java')">☕ Java 架构 (146)</button>
+          </li>
+          <li class="nav-item" id="nav-item-csp">
+            <button onclick="filterHomeByTopic('csp')">⌘ CSP / NOIP (37)</button>
+          </li>
+          <li class="nav-item" id="nav-item-algo">
+            <button onclick="filterHomeByTopic('algo')">🧮 算法刷题 (81)</button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Search Button -->
+        <button class="search-btn-nav" onclick="openSearchModal()" title="快速搜索文章 (快捷键: Ctrl+K 或 /)">
+          <span>🔍 搜索 936 篇博文...</span>
+          <kbd class="search-kbd">/</kbd>
+        </button>
+
+        <!-- Wide Screen Mode Toggle -->
+        <button class="btn-icon" id="wide-toggle" title="切换超宽屏/标准宽屏">
+          <span id="wide-icon">⤢</span>
+          <span id="wide-text">超宽屏</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button class="btn-icon" id="theme-toggle" title="深浅主题切换">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Top Realtime Analytics Bar -->
+  <div class="top-analytics-bar">
+    <div class="site-stats-pills">
+      <span class="stat-pill" title="全站自建数据库真实汇总 PV">
+        📈 站点总访问量：<strong id="site-total-pv">1,286,432</strong>
+      </span>
+      <span class="stat-pill" title="根据客户端指纹去重的独立访客">
+        👤 全站访客 (UV)：<strong>462,185</strong>
+      </span>
+      <span class="stat-pill" title="今日自建数据库累加">
+        ⚡ 今日访问：<strong>3,842</strong>
+      </span>
+      <span class="stat-pill" title="当前活跃会话">
+        <span class="live-dot"></span> 实时在线：<strong>18</strong> 人
+      </span>
+    </div>
+
+    <div>
+      <span style="color: var(--text-muted); font-size: 0.8rem;">
+        ⚡ 当前已展示：<strong>全站首页视角</strong> · 点击文章卡片可直接进入单篇阅读
+      </span>
+    </div>
+  </div>
+
+  <!-- =============================================================
+       VIEW 1: WHOLE-SITE HOMEPAGE (全站首页)
+       ============================================================= -->
+  <section id="view-home" class="view-section active">
+    <!-- Home Hero -->
+    <div class="home-hero-wrap">
+      <div class="home-hero-card">
+        <div>
+          <div class="home-hero-badge">ONECODER · DEVELOPER'S KNOWLEDGE BASE</div>
+          <h1 class="home-hero-title">
+            慢慢学，认真写。<br>
+            <span style="color: var(--primary);">把每一次想明白的技术，留在这里。</span>
+          </h1>
+          <p class="home-hero-desc">
+            一个中年人的技术自留地。记录学习 C++、GESP/NOI 信奥、Java 架构演进与 Python 的心得体会。
+            始于 2012，现已积累 936 篇独立文章。
+          </p>
+          <div class="home-hero-stats">
+            <div class="hero-stat-item">
+              <span class="hero-stat-num">936</span>
+              <span class="hero-stat-label">已写下博文</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-num">504</span>
+              <span class="hero-stat-label">GESP/信奥题解</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-num">14 年</span>
+              <span class="hero-stat-label">持续思考记录</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="hero-stat-num">128 万+</span>
+              <span class="hero-stat-label">全站累计阅读</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero QR & Quick Link -->
+        <div style="text-align: center; flex-shrink: 0;">
+          <img src="images/wechat_qrcode.jpg" alt="WeChat QR" style="width: 140px; height: 140px; border-radius: var(--radius-md); border: 2px solid var(--border-main);" onerror="this.style.display='none'">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 600;">
+            GESP/CSP 学习公众号
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Main Feed & Sidebar Grid -->
+    <div class="home-layout-grid">
+      <!-- Left: Article Stream -->
+      <div class="home-feed-col">
+        <!-- Featured Big Post (Top Pick) -->
+        <div class="featured-post-card" onclick="loadArticle('gesp4')">
+          <div class="featured-content">
+            <div>
+              <span class="featured-tag-pill">🔥 核心置顶 · GESP 四级真题</span>
+              <h2 class="featured-title">【GESP】C++四级真题 luogu-B4501 [GESP202603] 山之谷</h2>
+              <p class="featured-excerpt">
+                2026年3月最新真题。面对八方向网格探测，如何摆脱 8 个冗长 if 的臃肿写法？详解方向数组常量定义与边界拦截技巧。
+              </p>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              <span>📅 2026-03-16 · ⏱️ 6 分钟 · 🔥 3,180 次阅读</span>
+            </div>
+          </div>
+          <div class="featured-img-col">
+            <img src="https://cdn.luogu.com.cn/upload/image_hosting/1xp2gfel.png" alt="山之谷真题插图">
+          </div>
+        </div>
+
+        <!-- Subject Filter Tabs -->
+        <div class="home-tabs-bar">
+          <button class="home-tab-btn active" id="tab-all" onclick="filterHomeByTopic('all')">全部博文 (936)</button>
+          <button class="home-tab-btn" id="tab-gesp" onclick="filterHomeByTopic('gesp')">🏆 GESP 考级 (504)</button>
+          <button class="home-tab-btn" id="tab-java" onclick="filterHomeByTopic('java')">☕ Java 架构 (146)</button>
+          <button class="home-tab-btn" id="tab-csp" onclick="filterHomeByTopic('csp')">⌘ CSP / NOIP (37)</button>
+          <button class="home-tab-btn" id="tab-algo" onclick="filterHomeByTopic('algo')">🧮 算法专题 (81)</button>
+          <button class="home-tab-btn" id="tab-python" onclick="filterHomeByTopic('python')">🐍 Python与数据 (60)</button>
+        </div>
+
+        <!-- Article List (With Real Thumbnails & Graphic Cards) -->
+        <div class="home-article-feed" id="home-feed-container">
+          <!-- Dynamically populated by renderHomeFeed() -->
+        </div>
+
+        <!-- Google AdSense In-Feed Ad (Slot: 9656071817) -->
+        <div class="adsense-unit" style="margin: 1.5rem 0;">
+          <div class="ad-header">
+            <span class="ad-pill">Google AdSense</span>
+            <span>广告位 5 · 首页信息流原生穿插 (Slot: 9656071817 · in-feed)</span>
+          </div>
+          <div class="ad-content-sim" style="min-height: 80px; flex-direction: row; justify-content: space-between; text-align: left; padding: 1rem 1.5rem;">
+            <div>
+              <div class="sim-title" style="margin-bottom: 2px;">⚡ JetBrains 开发者效率插件与全家桶套件</div>
+              <div class="sim-desc">提升 30% 编码效率的 AI 辅助补全与代码重构利器，支持 C++ / Java / Python</div>
+            </div>
+            <button class="sim-btn" style="margin: 0; white-space: nowrap;" onclick="showToast('模拟点击了信息流推广')">免费试用 →</button>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn-submit" onclick="showToast('Next.js 下支持平滑无限滚动加载更多或标准数字分页')">加载更多历史博文 (共936篇) ↓</button>
+        </div>
+      </div>
+
+      <!-- Right: Home Sidebar -->
+      <aside class="home-sidebar">
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <div class="profile-header">
+            <img src="images/onecoder/avatar.png" alt="OneCoder" class="profile-avatar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\' fill=\'%230D9488\'><rect width=\'100\' height=\'100\'/><text x=\'50\' y=\'65\' font-size=\'45\' font-family=\'monospace\' text-anchor=\'middle\' fill=\'white\'>&gt;_</text></svg>'">
+            <div>
+              <div class="profile-name">OneCoder</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono);">wushikezuohehe</div>
+            </div>
+          </div>
+          <p class="profile-bio">
+            一个中年人的自留地，记录学习 Java、Python、C++ 以及算法架构的心得体会。本站唯一网址：coderli.com
+          </p>
+          <div class="profile-social-row">
+            <a href="https://github.com/lihongzheshuai" target="_blank" class="social-pill">🐙 GitHub</a>
+            <a href="https://twitter.com/wushikezuohehe" target="_blank" class="social-pill">🐦 Twitter/X</a>
+            <a href="mailto:wushikezuo@gmail.com" class="social-pill">📫 邮箱联系</a>
+            <span class="social-pill" style="color: var(--primary);">👥 QQ群: 688906745</span>
+          </div>
+        </div>
+
+        <!-- Topic Shortcut Card -->
+        <div class="profile-card">
+          <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);">
+            📚 专题分类快速通道
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <button class="topic-nav-btn" onclick="filterHomeByTopic('gesp')" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-subtle); border: 1px solid var(--border-main); border-radius: 6px; cursor: pointer; color: var(--text-main); font-family: inherit;">
+              <span>🏆 GESP 编程与算法</span>
+              <strong style="color: var(--primary); font-family: var(--font-mono);">504 篇</strong>
+            </button>
+            <button class="topic-nav-btn" onclick="filterHomeByTopic('java')" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-subtle); border: 1px solid var(--border-main); border-radius: 6px; cursor: pointer; color: var(--text-main); font-family: inherit;">
+              <span>☕ Java 从入门到架构实战</span>
+              <strong style="color: var(--primary); font-family: var(--font-mono);">146 篇</strong>
+            </button>
+            <button class="topic-nav-btn" onclick="filterHomeByTopic('csp')" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-subtle); border: 1px solid var(--border-main); border-radius: 6px; cursor: pointer; color: var(--text-main); font-family: inherit;">
+              <span>⌘ CSP / NOIP 真题解析</span>
+              <strong style="color: var(--primary); font-family: var(--font-mono);">37 篇</strong>
+            </button>
+            <button class="topic-nav-btn" onclick="filterHomeByTopic('algo')" style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-subtle); border: 1px solid var(--border-main); border-radius: 6px; cursor: pointer; color: var(--text-main); font-family: inherit;">
+              <span>🧮 算法专题与 LeetCode</span>
+              <strong style="color: var(--primary); font-family: var(--font-mono);">81 篇</strong>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sticky Ad on Home Sidebar -->
+        <div class="sidebar-ad-card">
+          <div class="ad-header">
+            <span class="ad-pill">Google AdSense</span>
+            <span>广告位 4 · 侧边栏吸顶</span>
+          </div>
+          <div class="sidebar-ad-box">
+            <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">💻</div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.25rem;">
+              信奥真题与算法精讲
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              动态规划、树论与回溯实战
+            </div>
+            <button class="sim-btn" style="background: var(--primary);" onclick="showToast('模拟点击了侧栏广告')">
+              免费试听 →
+            </button>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-faint); margin-top: 0.5rem; font-family: var(--font-mono);">
+            slot="6734143049" · 300x250
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       VIEW 2: ARTICLE DETAIL VIEW (文章详情阅读页)
+       ============================================================= -->
+  <section id="view-article" class="view-section">
+    <div style="max-width: var(--container-max-width); margin: 1rem auto 0; padding: 0 2rem;">
+      <button class="btn-icon" onclick="showHomeView()" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.85rem;">
+        <span>← 返回全站首页</span>
+      </button>
+    </div>
+
+    <div class="article-layout-grid">
+      <!-- Left: Series Quick Switcher -->
+      <aside class="article-left-sidebar">
+        <div class="profile-card" style="padding: 1.25rem;">
+          <div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">
+            📑 当前专栏文章导航
+          </div>
+          <div id="article-sidebar-links" style="display: flex; flex-direction: column; gap: 0.4rem;">
+            <!-- Injected by loadArticle() -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: Article Body -->
+      <article class="article-container" id="article-main-body">
+        <!-- Dynamically injected by loadArticle() -->
+      </article>
+
+      <!-- Right: TOC & Sticky Ad -->
+      <aside class="article-right-sidebar">
+        <div class="sidebar-widget">
+          <div class="widget-title">
+            <span>📑 本文目录导航</span>
+            <span style="font-size: 0.75rem; color: var(--text-faint);">TOC</span>
+          </div>
+          <ul class="toc-list" id="toc-container"></ul>
+        </div>
+
+        <div class="sidebar-ad-card">
+          <div class="ad-header">
+            <span class="ad-pill">Google AdSense</span>
+            <span>广告位 4 · 侧边栏吸顶</span>
+          </div>
+          <div class="sidebar-ad-box">
+            <div style="font-size: 1.8rem; margin-bottom: 0.5rem;">🏆</div>
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.25rem;">
+              CSP-J / GESP 算法集训
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              名师拆解八向探测、DFS、二分真题
+            </div>
+            <button class="sim-btn" style="background: var(--primary);" onclick="showToast('模拟点击了 AdSense 侧栏广告')">
+              立即学习 →
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------------
+       Instant Search Dialog (Ctrl+K / / shortcut)
+       ------------------------------------------------------------- -->
+  <div class="search-modal-backdrop" id="search-modal" onclick="closeSearchModal(event)">
+    <div class="search-modal-box" onclick="event.stopPropagation()">
+      <div class="search-input-header">
+        <span style="font-size: 1.2rem; color: var(--primary);">🔍</span>
+        <input type="text" id="search-input" class="search-input-box" placeholder="快速检索 936 篇博文（支持标题、标签、题目如 GESP、B4501、SLF4J、烤鸡）..." oninput="doSearch(this.value)">
+        <span class="search-kbd" onclick="closeSearchModal()">ESC</span>
+      </div>
+      <div class="search-results-list" id="search-results-box">
+        <!-- Search Results injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-copy">
+        © 2012 - 2026 <strong>OneCoder</strong> (coderli.com) · 保留所有权利
+        <div style="font-size: 0.8rem; color: var(--text-faint); margin-top: 0.35rem;">
+          基于 Next.js 边缘计算构建 · 936 篇博文支持即时检索与按需增量静态渲染 (ISR)
+        </div>
+      </div>
+      <div>
+        <a href="#progress-bar" style="font-size: 0.85rem; color: var(--text-muted);">回到顶部 ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast"><span id="toast-text"></span></div>
+
+  <!-- -------------------------------------------------------------
+       Client Scripts
+       ------------------------------------------------------------- -->
+  <script>
+    // -------------------------------------------------------------
+    // 1. Articles Database with Real Thumbnails & Visual Graphics
+    // -------------------------------------------------------------
+    const articlesData = {
+      gesp4: {
+        id: "gesp4",
+        title: "【GESP】C++四级真题 luogu-B4501, [GESP202603 四级] 山之谷",
+        date: "2026-03-16",
+        author: "OneCoder",
+        views: 3180,
+        commentsCount: 6,
+        readTime: "6 分钟",
+        topic: "gesp",
+        topicName: "GESP 编程与算法",
+        categories: ["GESP", "四级"],
+        tags: ["GESP", "C++", "二维数组", "矩阵遍历", "八方向数组"],
+        previewImg: "https://cdn.luogu.com.cn/upload/image_hosting/1xp2gfel.png",
+        previewGraphic: { symbol: "8向", title: "八方向矩阵探测", desc: "dx/dy 偏移数组与地图边界拦截" },
+        excerpt: "2026年3月最新真题。面对八方向网格探测，如何摆脱 8 个冗长 if 的臃肿写法？详解方向数组常量定义与边界拦截技巧。",
+        toc: [
+          { id: "desc", title: "题目要求与描述", depth: 1 },
+          { id: "sample", title: "输入输出样例与说明", depth: 2 },
+          { id: "analysis", title: "题目深度分析与技巧", depth: 1 },
+          { id: "dir-array", title: "技巧点拨：八方向数组", depth: 2 },
+          { id: "code", title: "AC 示例代码与解析", depth: 1 },
+          { id: "comments", title: "💬 读者留言与讨论", depth: 1 }
+        ],
+        contentHtml: `
+          <p>
+            2026年3月，GESP四级真题，考察二维数组与八方向矩阵周围元素的探测验证，难度★★☆☆☆。洛谷难度级别：<code>普及-</code>。
+          </p>
+
+          <div class="adsense-unit">
+            <div class="ad-header">
+              <span class="ad-pill">Google AdSense</span>
+              <span>广告位 1 · 文首流式 (Slot: 1669039692 · in-article)</span>
+            </div>
+            <div class="ad-content-sim">
+              <div class="sim-title">🏆 信奥赛 (GESP / CSP) C++ 题库精准评测与名师答疑</div>
+              <div class="sim-desc">涵盖历年 1~8 级全套真题，配备在线 OJ 自动评判，掌握方向数组与动态规划核心考点</div>
+              <button class="sim-btn" onclick="showToast('模拟点击了 AdSense 推广')">了解集训详情 →</button>
+            </div>
+          </div>
+
+          <h2 id="desc">题目要求与描述</h2>
+          <p>
+            现有一片山地，可以视为一个 <code>N</code> 行 <code>M</code> 列的网格图，第 <code>i</code> 行 <code>j</code> 列的海拔为 <code>h[i][j]</code>。
+          </p>
+          <p>
+            如果一个单元格的海拔<strong>不高于其所有相邻单元格</strong>（<strong>相邻包括上、下、左、右、左上、右上、左下、右下，最多 8 个方向</strong>）的海拔，则称该单元格为山谷。请你数一数该片山地中有多少山谷。
+          </p>
+
+          <h3 id="sample">输入输出样例</h3>
+          <p><strong>样例解释：</strong>绿色单元格代表探测出来的山谷（周围8个方向不存在严格比它矮的邻居）：</p>
+          <p style="text-align: center;">
+            <img src="https://cdn.luogu.com.cn/upload/image_hosting/1xp2gfel.png" alt="山之谷样例解释" style="max-height: 240px;">
+          </p>
+
+          <h2 id="analysis">题目深度分析与技巧</h2>
+          <p>
+            本题是 GESP 四级非常经典的“二维数组（矩阵）遍历与周围探伤”问题。核心考察点在于：<strong>如何优雅地遍历一个坐标周围的 8 个邻居</strong>，并在过程中处理矩阵边界越界的问题。
+          </p>
+
+          <h3 id="dir-array">技巧点拨：八方向数组</h3>
+          <p>
+            标准的四级做法是定义两个分别代表行偏移量和列偏移量的常量数组：
+          </p>
+          <div class="code-block">
+            <pre><code><span class="keyword">const int</span> dx[8] = {-1, -1, -1,  0, 0,  1, 1, 1};
+<span class="keyword">const int</span> dy[8] = {-1,  0,  1, -1, 1, -1, 0, 1};</code></pre>
+          </div>
+
+          <h2 id="code">AC 示例代码与解析</h2>
+          <div class="code-block">
+            <div class="code-header">
+              <div class="code-dots">
+                <span class="code-dot dot-red"></span>
+                <span class="code-dot dot-yellow"></span>
+                <span class="code-dot dot-green"></span>
+              </div>
+              <span>solution.cpp (C++ AC 核心代码)</span>
+              <button class="copy-btn" onclick="copyCode(this)"><span>📋 复制代码</span></button>
+            </div>
+            <pre><code><span class="keyword">#include</span> <span class="string">&lt;iostream&gt;</span>
+<span class="keyword">#include</span> <span class="string">&lt;vector&gt;</span>
+
+<span class="keyword">using namespace</span> std;
+
+<span class="type">int</span> <span class="method">main</span>() {
+    <span class="type">int</span> N, M;
+    cin &gt;&gt; N &gt;&gt; M;
+
+    vector&lt;vector&lt;<span class="type">int</span>&gt;&gt; h(N + 2, vector&lt;<span class="type">int</span>&gt;(M + 2, 0));
+    <span class="keyword">for</span> (<span class="type">int</span> i = 1; i &lt;= N; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = 1; j &lt;= M; j++) {
+            cin &gt;&gt; h[i][j];
+        }
+    }
+
+    <span class="keyword">const int</span> dx[8] = {-1, -1, -1,  0, 0,  1, 1, 1};
+    <span class="keyword">const int</span> dy[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
+
+    <span class="type">int</span> valleyCount = 0;
+    <span class="keyword">for</span> (<span class="type">int</span> i = 1; i &lt;= N; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = 1; j &lt;= M; j++) {
+            <span class="type">bool</span> isValley = <span class="keyword">true</span>;
+            <span class="keyword">for</span> (<span class="type">int</span> k = 0; k &lt; 8; k++) {
+                <span class="type">int</span> nx = i + dx[k];
+                <span class="type">int</span> ny = j + dy[k];
+                <span class="keyword">if</span> (nx &gt;= 1 &amp;&amp; nx &lt;= N &amp;&amp; ny &gt;= 1 &amp;&amp; ny &lt;= M) {
+                    <span class="keyword">if</span> (h[nx][ny] &lt; h[i][j]) {
+                        isValley = <span class="keyword">false</span>;
+                        <span class="keyword">break</span>;
+                    }
+                }
+            }
+            <span class="keyword">if</span> (isValley) valleyCount++;
+        }
+    }
+
+    cout &lt;&lt; valleyCount &lt;&lt; endl;
+    <span class="keyword">return</span> 0;
+}</code></pre>
+          </div>
+        `
+      },
+
+      gesp1: {
+        id: "gesp1",
+        title: "【GESP】C++一级练习BCQM3032，浮点计算，国庆七天乐",
+        date: "2024-10-02",
+        author: "OneCoder",
+        views: 2680,
+        commentsCount: 3,
+        readTime: "3 分钟",
+        topic: "gesp",
+        topicName: "GESP 编程与算法",
+        categories: ["GESP", "一级"],
+        tags: ["GESP", "C++", "基础语句", "浮点计算"],
+        previewImg: "images/post/gesp/3032.png",
+        previewGraphic: { symbol: "S=h(a+b)/2", title: "几何梯形面积", desc: "C++ fixed 两位小数输出" },
+        excerpt: "浮点数计算。看图列算式，小学奥数思维，通过已知阴影求高，再求出梯形总面积并保留两位小数。",
+        toc: [
+          { id: "desc", title: "题目要求与描述", depth: 1 },
+          { id: "analysis", title: "题目分析与数学转换", depth: 1 },
+          { id: "code", title: "C++ 格式化输出代码", depth: 1 },
+          { id: "comments", title: "💬 读者留言与讨论", depth: 1 }
+        ],
+        contentHtml: `
+          <p>
+            浮点数计算。看图列算式，小学思维，甚至没有输入的一道题。考察 C++ 中 <code>fixed</code> 与 <code>setprecision</code> 的使用。
+          </p>
+
+          <h2 id="desc">题目要求与描述</h2>
+          <p>在梯形中阴影部分面积是 150 平方厘米，求梯形面积。</p>
+          <p style="text-align: center;">
+            <img src="images/post/gesp/3032.png" alt="GESP3032 梯形与阴影部分示意图" style="max-height: 280px;">
+          </p>
+
+          <h2 id="analysis">题目分析与数学转换</h2>
+          <p>
+            看图计算。用已知阴影三角形的面积求出三角形也是梯形的高，然后根据梯形面积公式求出梯形面积即可：
+          </p>
+          <ul>
+            <li>阴影三角形底边为 15，面积为 150，故高为：<code>150 * 2 / 15 = 20</code>。</li>
+            <li>梯形上底为 15，下底为 25，梯形面积为：<code>(15 + 25) * 20 / 2 = 400.00</code>。</li>
+          </ul>
+
+          <h2 id="code">C++ 格式化输出代码</h2>
+          <div class="code-block">
+            <pre><code><span class="keyword">#include</span> <span class="string">&lt;iostream&gt;</span>
+<span class="keyword">#include</span> <span class="string">&lt;iomanip&gt;</span>
+
+<span class="keyword">using namespace</span> std;
+
+<span class="type">int</span> <span class="method">main</span>() {
+    <span class="type">double</span> s_triangle = 150.0;
+    <span class="type">double</span> top = 15.0;
+    <span class="type">double</span> bottom = 25.0;
+
+    <span class="type">double</span> h = s_triangle * 2.0 / top;
+    <span class="type">double</span> s_trapezoid = (top + bottom) * h / 2.0;
+
+    cout &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; s_trapezoid &lt;&lt; endl;
+    <span class="keyword">return</span> 0;
+}</code></pre>
+          </div>
+        `
+      },
+
+      chicken: {
+        id: "chicken",
+        title: "从枚举到回溯：一道「烤鸡」题的解题之旅 (luogu-P2089)",
+        date: "2026-09-04",
+        author: "OneCoder",
+        views: 1890,
+        commentsCount: 5,
+        readTime: "5 分钟",
+        topic: "gesp",
+        topicName: "GESP 编程与算法",
+        categories: ["GESP", "三级"],
+        tags: ["C++", "递归", "深度优先搜索", "回溯", "剪枝"],
+        previewImg: null,
+        previewGraphic: { symbol: "DFS", title: "回溯搜索树", desc: "10 种配料，从十层循环到递归剪枝" },
+        excerpt: "10 种配料，每种 1~3 克。从最直观的穷举开始，理解递归回溯搜索（DFS）以及剪枝优化思考方式。",
+        toc: [
+          { id: "problem", title: "题目与问题理解", depth: 1 },
+          { id: "dfs", title: "十层循环变递归", depth: 1 },
+          { id: "prune", title: "提前剪枝优化", depth: 1 },
+          { id: "comments", title: "💬 读者留言与讨论", depth: 1 }
+        ],
+        contentHtml: `
+          <p>
+            10 种配料，每种 1~3 克。从最直观的穷举开始，理解递归回溯搜索（DFS）以及剪枝优化。
+          </p>
+
+          <h2 id="problem">题目与问题理解</h2>
+          <p>
+            烤鸡需要 10 种配料，每种配料可以放 1、2 或 3 克。给定总美味度 <code>n</code>，找出所有满足配料总和为 n 的方案，并按字典序输出。
+          </p>
+
+          <h2 id="dfs">十层循环变递归</h2>
+          <p>
+            给当前配料选择克数，再把剩下的选择交给下一层。用 <code>dfs(pos, sum)</code> 表示当前决策进度。
+          </p>
+
+          <h2 id="prune">提前剪枝优化</h2>
+          <p>
+            假设还剩 <code>r</code> 种配料，它们至少贡献 <code>r</code> 克，最多贡献 <code>3r</code> 克。
+            若 <code>sum + r &gt; n</code> 或 <code>sum + 3*r &lt; n</code>，即可提前停止搜索分支！
+          </p>
+        `
+      },
+
+      java: {
+        id: "java",
+        title: "一起学Java(9)-[日志篇] 教你掌握Java日志框架的演进和设计逻辑",
+        date: "2024-08-05",
+        author: "OneCoder",
+        views: 4520,
+        commentsCount: 8,
+        readTime: "7 分钟",
+        topic: "java",
+        topicName: "Java 架构演进",
+        categories: ["一起学Java系列", "日志篇"],
+        tags: ["Java", "Log", "架构设计", "SLF4J", "Logback"],
+        previewImg: null,
+        previewGraphic: { symbol: "{ } Log", title: "Java 日志演进图谱", desc: "从 Log4j 到 SLF4J 统一门面设计" },
+        excerpt: "在项目开发中，日志记录扮演着至关重要的角色。梳理从 Log4j、JUL、JCL 到 SLF4J 门面模式的架构演变与优雅选型。",
+        toc: [
+          { id: "intro", title: "日志引入与选型背景", depth: 1 },
+          { id: "history", title: "Java 主要日志框架演进", depth: 1 },
+          { id: "slf4j", title: "SLF4J 门面与桥接设计", depth: 2 },
+          { id: "code", title: "SLF4J 代码规范示例", depth: 1 },
+          { id: "comments", title: "💬 读者留言与讨论", depth: 1 }
+        ],
+        contentHtml: `
+          <p>
+            在项目开发中，日志记录（Logging）扮演着至关重要的角色。生产环境中通常无法直接调试代码，日志提供了一个详细的执行轨迹。
+          </p>
+
+          <h2 id="intro">日志引入与选型背景</h2>
+          <p>
+            要完成 Log 框架的引入，首先要弄清楚有哪些框架可选以及框架之间的关系逻辑，进而完成框架对比和选型。这也是本文研究的重点。
+          </p>
+
+          <h2 id="history">Java 主要日志框架演进</h2>
+          <p>
+            从 1999 年的 Log4j 到 2002 年 JDK 的 JUL、Apache Commons Logging (JCL)，再到 2005 年 Ceki 大佬推出的 <strong>SLF4J</strong>，Java 日志经历了一场从混乱到统一门面的规范化浪潮。
+          </p>
+
+          <h2 id="code">SLF4J 代码规范示例</h2>
+          <div class="code-block">
+            <pre><code><span class="keyword">import</span> <span class="class">org.slf4j.Logger</span>;
+<span class="keyword">import</span> <span class="class">org.slf4j.LoggerFactory</span>;
+
+<span class="keyword">public class</span> <span class="class">OrderService</span> {
+    <span class="keyword">private static final</span> <span class="class">Logger</span> log = <span class="class">LoggerFactory</span>.<span class="method">getLogger</span>(<span class="class">OrderService</span>.<span class="keyword">class</span>);
+
+    <span class="keyword">public void</span> <span class="method">processOrder</span>(<span class="class">String</span> orderId) {
+        log.<span class="method">info</span>(<span class="string">"正在处理订单ID: {}"</span>, orderId);
+    }
+}</code></pre>
+          </div>
+        `
+      }
+    };
+
+    // -------------------------------------------------------------
+    // 2. View Switcher (Show Home View vs Show Article Detail View)
+    // -------------------------------------------------------------
+    function showHomeView() {
+      document.getElementById('view-home').classList.add('active');
+      document.getElementById('view-article').classList.remove('active');
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('nav-item-home').classList.add('active');
+
+      renderHomeFeed('all');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderHomeFeed(filterTopic = 'all') {
+      const container = document.getElementById('home-feed-container');
+      const list = Object.values(articlesData).filter(item => {
+        if (filterTopic === 'all') return true;
+        return item.topic === filterTopic;
+      });
+
+      if (list.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 3rem; color: var(--text-muted);">暂无此专题文章预览</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        let thumbHtml = '';
+        if (item.previewImg) {
+          thumbHtml = `<img src="${item.previewImg}" alt="${item.title}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 130 95\\' fill=\\'%231E293B\\'><text x=\\'65\\' y=\\'50\\' fill=\\'white\\' font-size=\\'12\\' text-anchor=\\'middle\\'>插图预览</text></svg>'">`;
+        } else {
+          thumbHtml = `<div class="feed-thumb-graphic">${item.previewGraphic.symbol}</div>`;
+        }
+
+        return `
+          <div class="feed-card" onclick="loadArticle('${item.id}')">
+            <div>
+              <div class="feed-meta">
+                <span class="feed-meta-cat">🏷️ ${item.categories.join(' · ')}</span>
+                <span>·</span>
+                <span>📅 ${item.date}</span>
+                <span>·</span>
+                <span>⏱️ ${item.readTime}</span>
+              </div>
+              <div class="feed-title">${item.title}</div>
+              <div class="feed-desc">${item.excerpt}</div>
+              <div class="feed-footer">
+                <div class="tags-group">
+                  ${item.tags.slice(0, 3).map(t => `<span class="tag-pill">#${t}</span>`).join('')}
+                </div>
+                <span>🔥 ${item.views.toLocaleString()} 阅读 · 💬 ${item.commentsCount} 讨论</span>
+              </div>
+            </div>
+            <div class="feed-thumb-col">
+              ${thumbHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterHomeByTopic(topicKey) {
+      showHomeView();
+
+      document.querySelectorAll('.home-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeTab = document.getElementById('tab-' + topicKey);
+      if (activeTab) activeTab.classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.getElementById('nav-item-' + topicKey);
+      if (activeNav) activeNav.classList.add('active');
+
+      renderHomeFeed(topicKey);
+    }
+
+    // -------------------------------------------------------------
+    // 3. Load and Display Article Detail View
+    // -------------------------------------------------------------
+    let currentKey = 'gesp4';
+
+    function loadArticle(key) {
+      currentKey = key;
+      const data = articlesData[key];
+      if (!data) return;
+
+      // Switch to Article View
+      document.getElementById('view-home').classList.remove('active');
+      document.getElementById('view-article').classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      // Build Featured Banner
+      let bannerHtml = '';
+      if (data.previewImg) {
+        bannerHtml = `
+          <div class="article-featured-banner">
+            <img src="${data.previewImg}" alt="${data.title}">
+            <span class="banner-overlay-badge">📷 文章题解插图</span>
+          </div>
+        `;
+      } else {
+        bannerHtml = `
+          <div class="article-featured-banner">
+            <div class="banner-graphic-card">
+              <div class="banner-graphic-title">${data.previewGraphic.symbol}</div>
+              <h3 style="color: var(--text-main); font-size: 1.25rem; font-weight: 700; margin-bottom: 0.35rem;">${data.previewGraphic.title}</h3>
+              <p class="banner-graphic-desc">${data.previewGraphic.desc}</p>
+            </div>
+            <span class="banner-overlay-badge">🎨 算法主题自动视觉封面</span>
+          </div>
+        `;
+      }
+
+      const tagsHtml = data.tags.map(t => `<a href="javascript:doSearch('${t}')" class="tag-pill">#${t}</a>`).join('');
+
+      const container = document.getElementById('article-main-body');
+      container.innerHTML = `
+        <nav class="breadcrumbs">
+          <a href="javascript:showHomeView()">首页</a>
+          <span class="sep">/</span>
+          <a href="javascript:filterHomeByTopic('${data.topic}')">${data.topicName}</a>
+          <span class="sep">/</span>
+          <span>${data.categories.join(' · ')}</span>
+        </nav>
+
+        ${bannerHtml}
+
+        <h1 class="article-title">${data.title}</h1>
+
+        <div class="article-meta">
+          <div class="meta-item"><span>📅 ${data.date}</span></div>
+          <div class="meta-item"><span>✍️ ${data.author}</span></div>
+          <div class="meta-item">
+            <span class="view-badge" onclick="incrementPostView()" title="点击模拟自建数据库浏览量累加">
+              <span class="live-dot"></span>
+              <span id="post-view-count-text">${data.views.toLocaleString()} 次阅读</span>
+            </span>
+          </div>
+          <div class="meta-item"><span>⏱️ ${data.readTime}</span></div>
+          <div class="tags-group">${tagsHtml}</div>
+        </div>
+
+        <div class="prose">
+          ${data.contentHtml}
+
+          <div class="callout callout-info">
+            <div class="callout-title">💡 OneCoder 资源索引</div>
+            <p style="margin: 0; font-size: 0.95rem;">
+              本站代码已开源上传至 GitHub：<a href="https://github.com/lihongzheshuai/yummy-code" target="_blank"><strong>yummy-code 仓库</strong></a><br>
+              GESP 专题站：<a href="https://wiki.coderli.com/" target="_blank"><strong>GESP WIKI</strong></a>
+            </p>
+          </div>
+        </div>
+
+        <!-- Author Footer Card -->
+        <div class="author-footer-card">
+          <img src="images/onecoder/avatar.png" alt="OneCoder Avatar" class="author-avatar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\' fill=\\'%230D9488\\'><rect width=\\'100\\' height=\\'100\\'/><text x=\\'50\\' y=\\'65\\' font-size=\\'45\\' font-family=\\'monospace\\' text-anchor=\\'middle\\' fill=\\'white\\'>&gt;_</text></svg>'">
+          <div class="author-info">
+            <h4>OneCoder (lihongzheshuai)</h4>
+            <p>一个中年人的自留地，记录学习 C++、GESP/NOI、Java、Python 与算法架构的心得体会。本站唯一网址：coderli.com</p>
+            <div class="community-links">
+              <span>📫 <a href="mailto:wushikezuo@gmail.com">wushikezuo@gmail.com</a></span>
+              <span>🐙 <a href="https://github.com/lihongzheshuai" target="_blank">GitHub</a></span>
+              <span>🐦 <a href="https://twitter.com/wushikezuohehe" target="_blank">Twitter/X</a></span>
+              <span>👥 QQ群：688906745</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Self-hosted DB Comments Section -->
+        <section class="comments-section" id="comments">
+          <div class="comments-header">
+            <div class="comments-title">
+              <span>💬 读者留言交流</span>
+              <span class="comments-db-tag">自建 MySQL/PG 存储驱动</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">共 ${data.commentsCount} 条讨论</span>
+          </div>
+
+          <form class="comment-form" onsubmit="handleCommentSubmit(event)">
+            <div class="form-row">
+              <input type="text" id="author-name" class="form-input" placeholder="昵称 *" required>
+              <input type="email" id="author-email" class="form-input" placeholder="邮箱 (用于 Gravatar) *" required>
+              <input type="url" id="author-site" class="form-input" placeholder="个人主页 (选填)">
+            </div>
+            <textarea id="comment-content" class="comment-textarea" placeholder="写下你的技术见解... (支持 Markdown 语法与代码，数据将写入你的自建数据库)" required></textarea>
+            <div class="form-actions">
+              <span style="font-size: 0.78rem; color: var(--text-faint);">✨ 留言将直接存入自建数据库</span>
+              <button type="submit" class="btn-submit">发表评论</button>
+            </div>
+          </form>
+
+          <ul class="comment-list" id="comment-list">
+            <li class="comment-item">
+              <div class="comment-avatar">王</div>
+              <div class="comment-body">
+                <div class="comment-meta">
+                  <span class="comment-author">王同学 (GESP 学员)</span>
+                  <span class="comment-time">2 小时前</span>
+                </div>
+                <div class="comment-text">
+                  代码写得很清楚，结合题解图和八方向数组，非常清晰！
+                </div>
+              </div>
+            </li>
+          </ul>
+        </section>
+      `;
+
+      // Render TOC
+      const tocContainer = document.getElementById('toc-container');
+      tocContainer.innerHTML = data.toc.map(item => `
+        <li class="toc-item ${item.depth === 2 ? 'depth-2' : ''}">
+          <a href="#${item.id}">${item.title}</a>
+        </li>
+      `).join('');
+
+      // Render Left Sidebar in Article View
+      const linkBox = document.getElementById('article-sidebar-links');
+      linkBox.innerHTML = Object.values(articlesData).map(a => `
+        <button class="topic-nav-btn" onclick="loadArticle('${a.id}')" style="display: flex; gap: 0.5rem; text-align: left; padding: 0.45rem 0.6rem; background: ${a.id === key ? 'var(--primary-light)' : 'var(--bg-subtle)'}; border: 1px solid ${a.id === key ? 'var(--primary)' : 'var(--border-main)'}; border-radius: 6px; cursor: pointer; color: ${a.id === key ? 'var(--primary)' : 'var(--text-main)'}; font-family: inherit; font-size: 0.85rem;">
+          <span>•</span>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.title}</span>
+        </button>
+      `).join('');
+
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ]
+        });
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // -------------------------------------------------------------
+    // 4. Instant Search Engine (Client-side Fuzzy Matcher)
+    // -------------------------------------------------------------
+    const searchModal = document.getElementById('search-modal');
+    const searchInput = document.getElementById('search-input');
+    const searchResultsBox = document.getElementById('search-results-box');
+
+    function openSearchModal() {
+      searchModal.classList.add('open');
+      searchInput.value = '';
+      doSearch('');
+      setTimeout(() => searchInput.focus(), 50);
+    }
+
+    function closeSearchModal(event) {
+      if (!event || event.target === searchModal) {
+        searchModal.classList.remove('open');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearchModal();
+      } else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        openSearchModal();
+      } else if (e.key === 'Escape' && searchModal.classList.contains('open')) {
+        searchModal.classList.remove('open');
+      }
+    });
+
+    function doSearch(query) {
+      const q = query.trim().toLowerCase();
+      const list = Object.values(articlesData);
+
+      let filtered = list;
+      if (q) {
+        filtered = list.filter(item => {
+          const hay = (item.title + ' ' + item.categories.join(' ') + ' ' + item.tags.join(' ') + ' ' + item.excerpt).toLowerCase();
+          return hay.includes(q);
+        });
+      }
+
+      if (filtered.length === 0) {
+        searchResultsBox.innerHTML = `
+          <div style="text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.9rem;">
+            🔍 未找到匹配文章，可尝试搜索 <code>GESP</code>、<code>四级</code>、<code>B4501</code>、<code>Java</code>、<code>SLF4J</code>、<code>烤鸡</code>
+          </div>
+        `;
+        return;
+      }
+
+      searchResultsBox.innerHTML = filtered.map(item => `
+        <div class="search-item-card" onclick="selectSearchResult('${item.id}')">
+          <div>
+            <div class="search-item-title">${highlightQuery(item.title, q)}</div>
+            <div class="search-item-desc">📅 ${item.date} · 🏷️ ${item.categories.join(' / ')} · ${item.tags.join(', ')}</div>
+          </div>
+          <span style="color: var(--primary); font-size: 1.1rem;">→</span>
+        </div>
+      `).join('');
+    }
+
+    function highlightQuery(text, q) {
+      if (!q) return text;
+      const regex = new RegExp(`(${q})`, 'gi');
+      return text.replace(regex, '<mark style="background: rgba(20, 184, 166, 0.3); color: var(--primary); padding: 0 2px; border-radius: 2px;">$1</mark>');
+    }
+
+    function selectSearchResult(key) {
+      searchModal.classList.remove('open');
+      loadArticle(key);
+      showToast('已跳转到搜索结果');
+    }
+
+    // -------------------------------------------------------------
+    // 5. Interactive Utilities
+    // -------------------------------------------------------------
+    function incrementPostView() {
+      const cur = articlesData[currentKey];
+      cur.views++;
+      document.getElementById('post-view-count-text').textContent = cur.views.toLocaleString() + ' 次阅读';
+      
+      const siteTotalEl = document.getElementById('site-total-pv');
+      let total = parseInt(siteTotalEl.innerText.replace(/,/g, ''), 10) || 1286432;
+      total++;
+      siteTotalEl.innerText = total.toLocaleString();
+
+      showToast('⚡ 触发 /api/views 上报，自建数据库浏览量 +1');
+    }
+
+    function handleCommentSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('author-name').value.trim();
+      const content = document.getElementById('comment-content').value.trim();
+      if (!name || !content) return;
+
+      const commentList = document.getElementById('comment-list');
+      const newLi = document.createElement('li');
+      newLi.className = 'comment-item';
+      newLi.innerHTML = `
+        <div class="comment-avatar">${name.charAt(0).toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-author">${name}</span>
+            <span class="comment-time">刚刚 (已存入自建数据库)</span>
+          </div>
+          <div class="comment-text">${content}</div>
+        </div>
+      `;
+      commentList.prepend(newLi);
+      document.getElementById('comment-content').value = '';
+      showToast('🎉 留言成功！数据已持久化至自建数据库');
+      incrementPostView();
+    }
+
+    function copyCode(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      navigator.clipboard.writeText(pre.innerText).then(() => showToast('代码已复制到剪贴板！'));
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // Wide Screen Toggle
+    document.getElementById('wide-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('ultra-wide');
+      const isWide = document.body.classList.contains('ultra-wide');
+      document.getElementById('wide-icon').textContent = isWide ? '⤡' : '⤢';
+      document.getElementById('wide-text').textContent = isWide ? '收缩宽屏' : '超宽屏';
+      showToast(isWide ? '已开启超宽屏阅读模式' : '已恢复标准黄金阅读宽度');
+    });
+
+    // Dark/Light Theme Toggle
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+      showToast(isDark ? '已切换为深色模式' : '已切换为浅色模式');
+    });
+
+    // Reading Progress
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (height > 0) {
+        document.getElementById('progress-bar').style.width = (winScroll / height * 100) + '%';
+      }
+    });
+
+    // Default to show Whole-Site Homepage on load!
+    document.addEventListener('DOMContentLoaded', () => {
+      showHomeView();
+    });
+  </script>
+</body>
+</html>

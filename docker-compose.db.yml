@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: onecoder-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: onecoder
+      POSTGRES_PASSWORD: onecoder_secure_password
+      POSTGRES_DB: coderli_blog
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/schema-postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+volumes:
+  pgdata:
