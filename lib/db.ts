@@ -9,16 +9,57 @@ const globalForDb = globalThis as unknown as {
   mysqlPool?: MySqlPool;
 };
 
+let pgInitAttempted = false;
+
 function getPgPool(): PgPool | null {
-  const url = process.env.DATABASE_URL;
+  const url =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING;
+
   if (!url || (!url.startsWith('postgres://') && !url.startsWith('postgresql://'))) return null;
   if (!globalForDb.pgPool) {
-    const isCloud = url.includes('supabase') || url.includes('neon.tech') || url.includes('pooler') || url.includes('sslmode=require');
+    const isCloud =
+      url.includes('supabase') ||
+      url.includes('neon.tech') ||
+      url.includes('pooler') ||
+      url.includes('sslmode=require') ||
+      process.env.NODE_ENV === 'production';
     globalForDb.pgPool = new PgPool({
       connectionString: url,
       ssl: isCloud ? { rejectUnauthorized: false } : undefined,
     });
   }
+
+  // Automatic background table schema initialization if not exists
+  if (!pgInitAttempted && globalForDb.pgPool) {
+    pgInitAttempted = true;
+    globalForDb.pgPool
+      .query(`
+        CREATE TABLE IF NOT EXISTS post_views (
+          slug VARCHAR(191) PRIMARY KEY,
+          views INTEGER NOT NULL DEFAULT 0,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS post_comments (
+          id VARCHAR(64) PRIMARY KEY,
+          slug VARCHAR(191) NOT NULL,
+          author VARCHAR(100) NOT NULL,
+          email VARCHAR(150) NOT NULL,
+          site VARCHAR(255) DEFAULT '',
+          content TEXT NOT NULL,
+          likes INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_post_comments_slug ON post_comments(slug);
+        CREATE INDEX IF NOT EXISTS idx_post_comments_created_at ON post_comments(created_at DESC);
+      `)
+      .catch(err => {
+        console.warn('[DB] Auto-migration error:', err.message);
+      });
+  }
+
   return globalForDb.pgPool;
 }
 
@@ -300,4 +341,57 @@ export async function addPostComment(
   writeLocalComments(all);
 
   return newItem;
+}
+
+export async function checkDbStatus(): Promise<{
+  connected: boolean;
+  type: string;
+  viewsCount?: number;
+  commentsCount?: number;
+  error?: string;
+}> {
+  const pg = getPgPool();
+  if (pg) {
+    try {
+      const vRes = await pg.query('SELECT COUNT(*) as count FROM post_views');
+      const cRes = await pg.query('SELECT COUNT(*) as count FROM post_comments');
+      return {
+        connected: true,
+        type: 'PostgreSQL (Supabase/Cloud)',
+        viewsCount: Number(vRes.rows[0]?.count || 0),
+        commentsCount: Number(cRes.rows[0]?.count || 0),
+      };
+    } catch (e) {
+      return {
+        connected: false,
+        type: 'PostgreSQL (Failed)',
+        error: (e as Error).message,
+      };
+    }
+  }
+
+  const my = getMySqlPool();
+  if (my) {
+    try {
+      const [vRows] = await my.query<any[]>('SELECT COUNT(*) as count FROM post_views');
+      const [cRows] = await my.query<any[]>('SELECT COUNT(*) as count FROM post_comments');
+      return {
+        connected: true,
+        type: 'MySQL',
+        viewsCount: Number(vRows[0]?.count || 0),
+        commentsCount: Number(cRows[0]?.count || 0),
+      };
+    } catch (e) {
+      return {
+        connected: false,
+        type: 'MySQL (Failed)',
+        error: (e as Error).message,
+      };
+    }
+  }
+
+  return {
+    connected: true,
+    type: 'Local File Fallback (.db_data/)',
+  };
 }
