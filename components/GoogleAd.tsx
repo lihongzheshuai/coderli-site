@@ -36,17 +36,25 @@ export default function GoogleAd({
     }
   }, [pathname, slot]);
 
+  const isDev = process.env.NODE_ENV === 'development';
+
   return (
     <div
-      className={`my-6 text-center overflow-hidden border border-dashed border-slate-700/60 dark:border-slate-800 rounded-lg p-3 bg-slate-100/50 dark:bg-slate-900/40 transition-colors ${className}`}
+      className={`my-6 text-center overflow-hidden transition-colors ${
+        isDev
+          ? 'border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30'
+          : ''
+      } ${className}`}
       style={{ minHeight: `${minHeight}px` }}
     >
-      <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 mb-2 px-1">
-        <span className="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold">
-          {label}
-        </span>
-        <span className="opacity-70">Slot: {slot}</span>
-      </div>
+      {isDev && (
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2 px-1">
+          <span className="bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold">
+            {label}
+          </span>
+          <span className="opacity-70">Slot: {slot}</span>
+        </div>
+      )}
 
       <ins
         key={`${pathname}-${slot}`}
