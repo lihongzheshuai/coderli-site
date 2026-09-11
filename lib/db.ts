@@ -12,22 +12,25 @@ const globalForDb = globalThis as unknown as {
 let pgInitAttempted = false;
 
 function getPgPool(): PgPool | null {
-  const url =
+  const rawUrl =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
     process.env.POSTGRES_PRISMA_URL ||
     process.env.POSTGRES_URL_NON_POOLING;
 
-  if (!url || (!url.startsWith('postgres://') && !url.startsWith('postgresql://'))) return null;
+  if (!rawUrl || (!rawUrl.startsWith('postgres://') && !rawUrl.startsWith('postgresql://'))) return null;
   if (!globalForDb.pgPool) {
+    // Strip ?sslmode=... because pg-connection-string forces strict cert verification when present in URL
+    const cleanUrl = rawUrl.replace(/[?&]sslmode=[^&]+/g, '');
     const isCloud =
-      url.includes('supabase') ||
-      url.includes('neon.tech') ||
-      url.includes('pooler') ||
-      url.includes('sslmode=require') ||
+      rawUrl.includes('supabase') ||
+      rawUrl.includes('neon.tech') ||
+      rawUrl.includes('pooler') ||
+      rawUrl.includes('sslmode=') ||
       process.env.NODE_ENV === 'production';
+
     globalForDb.pgPool = new PgPool({
-      connectionString: url,
+      connectionString: cleanUrl,
       ssl: isCloud ? { rejectUnauthorized: false } : undefined,
     });
   }
