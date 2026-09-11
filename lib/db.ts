@@ -405,3 +405,44 @@ export async function checkDbStatus(): Promise<{
     type: 'Local File Fallback (.db_data/)',
   };
 }
+
+export async function seedPostViews(
+  items: { slug: string; views: number }[]
+): Promise<{ count: number; totalViews: number }> {
+  const pg = getPgPool();
+  if (pg) {
+    const chunkSize = 100;
+    let seeded = 0;
+    let total = 0;
+    for (let i = 0; i < items.length; i += chunkSize) {
+      const chunk = items.slice(i, i + chunkSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      chunk.forEach((item, idx) => {
+        const offset = idx * 2;
+        placeholders.push(`($${offset + 1}, $${offset + 2}, NOW())`);
+        values.push(item.slug, item.views);
+        total += item.views;
+      });
+      const query = `
+        INSERT INTO post_views (slug, views, updated_at)
+        VALUES ${placeholders.join(', ')}
+        ON CONFLICT (slug) DO UPDATE SET views = GREATEST(post_views.views, EXCLUDED.views)
+      `;
+      await pg.query(query, values);
+      seeded += chunk.length;
+    }
+    return { count: seeded, totalViews: total };
+  }
+
+  const local = readLocalViews();
+  let total = 0;
+  items.forEach(item => {
+    if (!local[item.slug] || local[item.slug] < item.views) {
+      local[item.slug] = item.views;
+    }
+    total += local[item.slug];
+  });
+  writeLocalViews(local);
+  return { count: items.length, totalViews: total };
+}
