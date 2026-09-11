@@ -1,23 +1,18 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const incrementFetcher = (url: string) =>
+  fetch(url, { method: 'POST' }).then(r => r.json());
 
 export default function ViewCounter({ slug }: { slug: string }) {
-  const { data, mutate } = useSWR(`/api/views/${slug}/`, fetcher);
-
-  useEffect(() => {
-    fetch(`/api/views/${slug}/`, { method: 'POST' })
-      .then(r => r.json())
-      .then(res => {
-        if (res?.views) {
-          mutate(res, false);
-        }
-      })
-      .catch(() => {});
-  }, [slug, mutate]);
+  // Opening the page automatically triggers POST to increment view count by 1 in DB
+  const { data } = useSWR(`/api/views/${slug}/`, incrementFetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 10000,
+  });
 
   const count = data?.views;
 
