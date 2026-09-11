@@ -30,4 +30,7 @@ export interface PostDetail extends PostMeta {
     title: string;
     depth: number;
   }[];
+  prevPost?: PostMeta | null;
+  nextPost?: PostMeta | null;
+  relatedPosts?: PostMeta[];
 }

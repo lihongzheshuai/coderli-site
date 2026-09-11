@@ -325,11 +325,53 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   // Apply Shiki Code Highlighting to <pre><code class="language-xyz"> blocks
   html = await highlightCodeBlocks(html);
 
+  // Calculate Previous and Next Posts chronologically
+  const currentIndex = allPosts.findIndex(p => p.slug === slug);
+  const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+  const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+
+  // Calculate intelligent Related Posts based on topic, subtopic and tags
+  const relatedPosts = getRelatedPosts(meta, allPosts, 3);
+
   return {
     ...meta,
     contentHtml: html,
     toc,
+    prevPost,
+    nextPost,
+    relatedPosts,
   };
+}
+
+function getRelatedPosts(current: PostMeta, allPosts: PostMeta[], limit = 3): PostMeta[] {
+  const candidates = allPosts.filter(p => p.slug !== current.slug);
+
+  const scored = candidates.map(p => {
+    let score = 0;
+    // Same subtopic gets top priority (e.g. both are GESP 三级 or Java 日志篇)
+    if (p.subtopic && current.subtopic && p.subtopic === current.subtopic) {
+      score += 6;
+    }
+    // Same topic
+    if (p.topic === current.topic) {
+      score += 3;
+    }
+    // Shared tags
+    const sharedTags = p.tags.filter(t => current.tags.includes(t));
+    score += sharedTags.length * 2;
+    // Shared categories
+    const sharedCategories = p.categories.filter(c => current.categories.includes(c));
+    score += sharedCategories.length * 1.5;
+
+    return { post: p, score };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.post.date < a.post.date ? 1 : -1;
+  });
+
+  return scored.slice(0, limit).map(s => s.post);
 }
 
 async function highlightCodeBlocks(html: string): Promise<string> {

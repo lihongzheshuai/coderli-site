@@ -8,6 +8,8 @@ import GoogleAd from '@/components/GoogleAd';
 import ViewCounter from '@/components/ViewCounter';
 import Comments from '@/components/Comments';
 import LatexText from '@/components/LatexText';
+import PostNavigation from '@/components/PostNavigation';
+import RelatedPosts from '@/components/RelatedPosts';
 
 interface PageProps {
   params: { slug: string };
@@ -172,6 +174,17 @@ export default async function PostPage({ params }: PageProps) {
             minHeight={120}
             label="广告位 3 · 文末推荐横幅"
           />
+
+          {/* Previous & Next Post Navigation */}
+          <PostNavigation
+            prevPost={post.prevPost || null}
+            nextPost={post.nextPost || null}
+          />
+
+          {/* Related Recommended Posts */}
+          {post.relatedPosts && post.relatedPosts.length > 0 && (
+            <RelatedPosts posts={post.relatedPosts} />
+          )}
 
           {/* Author Card Footer */}
           <div className="mt-12 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center gap-5">
