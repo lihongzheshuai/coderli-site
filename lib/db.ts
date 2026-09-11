@@ -20,8 +20,15 @@ function getPgPool(): PgPool | null {
 
   if (!rawUrl || (!rawUrl.startsWith('postgres://') && !rawUrl.startsWith('postgresql://'))) return null;
   if (!globalForDb.pgPool) {
-    // Strip ?sslmode=... because pg-connection-string forces strict cert verification when present in URL
-    const cleanUrl = rawUrl.replace(/[?&]sslmode=[^&]+/g, '');
+    let cleanUrl = rawUrl;
+    try {
+      const u = new URL(rawUrl);
+      u.searchParams.delete('sslmode');
+      cleanUrl = u.toString();
+    } catch {
+      cleanUrl = rawUrl.replace(/[?&]sslmode=[^&]+/g, '');
+    }
+
     const isCloud =
       rawUrl.includes('supabase') ||
       rawUrl.includes('neon.tech') ||
