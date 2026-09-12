@@ -306,6 +306,64 @@ export function getPostsByTag(tag: string): PostMeta[] {
   );
 }
 
+export interface CategoryChild {
+  name: string;
+  count: number;
+}
+
+export interface CategoryNode {
+  name: string;
+  count: number;
+  children: CategoryChild[];
+}
+
+export function getCategoryTree(): CategoryNode[] {
+  const posts = getAllPosts();
+  const treeMap: Record<string, { count: number; children: Record<string, number> }> = {};
+
+  for (const post of posts) {
+    const cats = post.categories && post.categories.length > 0 ? post.categories : ['未分类'];
+    const parent = cats[0].trim();
+    const child = cats[1] ? cats[1].trim() : null;
+
+    if (!treeMap[parent]) {
+      treeMap[parent] = { count: 0, children: {} };
+    }
+    treeMap[parent].count++;
+
+    if (child) {
+      treeMap[parent].children[child] = (treeMap[parent].children[child] || 0) + 1;
+    }
+  }
+
+  return Object.entries(treeMap)
+    .map(([name, info]) => ({
+      name,
+      count: info.count,
+      children: Object.entries(info.children)
+        .map(([cName, cCount]) => ({ name: cName, count: cCount }))
+        .sort((a, b) => b.count - a.count),
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export function getPostsByCategory(parentCategory: string, subCategory?: string): PostMeta[] {
+  const posts = getAllPosts();
+  const targetParent = parentCategory.trim().toLowerCase();
+  const targetSub = subCategory ? subCategory.trim().toLowerCase() : null;
+
+  return posts.filter(post => {
+    const cats = post.categories && post.categories.length > 0 ? post.categories : ['未分类'];
+    const parent = cats[0]?.trim()?.toLowerCase();
+    const child = cats[1]?.trim()?.toLowerCase();
+
+    if (targetSub) {
+      return parent === targetParent && child === targetSub;
+    }
+    return parent === targetParent;
+  });
+}
+
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   const allPosts = getAllPosts();
   const meta = allPosts.find(p => p.slug === slug);

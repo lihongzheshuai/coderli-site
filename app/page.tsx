@@ -1,10 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import { getAllPosts, getFeaturedPost } from '@/lib/posts';
+import { getAllPosts, getFeaturedPost, getCategoryTree } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
 import LatexText from '@/components/LatexText';
 import PopularTagsCard from '@/components/PopularTagsCard';
+import CategoryNavTree from '@/components/CategoryNavTree';
 
 export const revalidate = false; // ISR static caching
 
@@ -12,6 +13,7 @@ export default function HomePage() {
   const posts = getAllPosts();
   const featured = getFeaturedPost();
   const streamPosts = featured ? posts.filter(p => p.slug !== featured.slug) : posts;
+  const categoryTree = getCategoryTree();
 
   const topicStats = {
     gesp: posts.filter(p => p.topic === 'gesp').length,
@@ -206,42 +208,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Topics Navigation */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <div className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span>📚 专题快速导航</span>
-            </div>
-            <div className="space-y-1.5 text-[15px]">
-              <Link
-                href="/topics/gesp/"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
-              >
-                <span>🏆 GESP 编程与算法</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.gesp} 篇</span>
-              </Link>
-              <Link
-                href="/topics/java/"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
-              >
-                <span>☕ Java 架构演进与实战</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.java} 篇</span>
-              </Link>
-              <Link
-                href="/topics/csp/"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
-              >
-                <span>⌘ CSP / NOIP 信奥竞赛</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.csp} 篇</span>
-              </Link>
-              <Link
-                href="/topics/algo/"
-                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
-              >
-                <span>🧮 算法专题与 LeetCode</span>
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-sm bg-teal-50 dark:bg-teal-950/60 px-2.5 py-0.5 rounded-md border border-teal-500/20">{topicStats.algo} 篇</span>
-              </Link>
-            </div>
-          </div>
+          {/* Categories Hierarchical Navigation Tree */}
+          <CategoryNavTree categories={categoryTree} limit={10} />
 
           {/* Sticky Sidebar Google Ad & Popular Tags */}
           <div className="sticky top-20 space-y-6">
