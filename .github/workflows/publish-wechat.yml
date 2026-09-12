@@ -1,0 +1,73 @@
+name: Publish to WeChat Official Account
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '_posts/**'
+  workflow_dispatch:
+    inputs:
+      post_path:
+        description: 'Target markdown file to publish (e.g. _posts/2026-09-12-luogu-p1873-eko.md)'
+        required: false
+        default: ''
+
+jobs:
+  wechat-sync:
+    name: Auto Typeset & Push to WeChat Drafts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format & Push Article to WeChat
+        env:
+          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+          WECHAT_PROXY_URL: ${{ secrets.WECHAT_PROXY_URL }}
+          WECHAT_PROXY_TOKEN: ${{ secrets.WECHAT_PROXY_TOKEN }}
+          SITE_URL: 'https://www.coderli.com'
+        run: |
+          # 1. If manually triggered with input, use that file
+          if [ -n "${{ github.event.inputs.post_path }}" ]; then
+            TARGET_FILE="${{ github.event.inputs.post_path }}"
+          else
+            # 2. Automatically detect new or modified article from git diff
+            echo "Detecting changed article in _posts/..."
+            TARGET_FILE=$(git diff --name-only HEAD^ HEAD | grep '^_posts/.*\.md$' | head -n 1 || true)
+          fi
+
+          if [ -z "$TARGET_FILE" ]; then
+            echo "No article found to publish. Skipping WeChat sync."
+            exit 0
+          fi
+
+          if [ ! -f "$TARGET_FILE" ]; then
+            echo "File $TARGET_FILE does not exist. Skipping."
+            exit 0
+          fi
+
+          # Skip if WeChat credentials are not yet configured
+          if [ -z "$WECHAT_APP_ID" ] || [ -z "$WECHAT_APP_SECRET" ]; then
+            echo "⚠️ WECHAT_APP_ID or WECHAT_APP_SECRET is not configured in GitHub Secrets. Skipping sync."
+            exit 0
+          fi
+
+          echo "🚀 Publishing article: $TARGET_FILE"
+          node scripts/publish-wechat.mjs "$TARGET_FILE"
