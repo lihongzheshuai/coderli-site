@@ -15,7 +15,8 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const tags = getAllTags();
-  return tags.map(item => ({
+  // Pre-generate top 15 popular tags at build time, remainder generated on-demand (ISR)
+  return tags.slice(0, 15).map(item => ({
     tag: item.tag,
   }));
 }

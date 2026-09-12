@@ -456,8 +456,20 @@ function getRelatedPosts(current: PostMeta, allPosts: PostMeta[], limit = 3): Po
   return scored.slice(0, limit).map(s => s.post);
 }
 
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#([0-9]+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
 async function highlightCodeBlocks(html: string): Promise<string> {
-  const codeBlockRegex = /<pre><code class="language-([a-zA-Z0-9_-]+)">([\s\S]*?)<\/code><\/pre>/g;
+  const codeBlockRegex = /<pre><code(?:\s+class="language-([a-zA-Z0-9_-]+)")?>([\s\S]*?)<\/code><\/pre>/g;
   const matches = Array.from(html.matchAll(codeBlockRegex));
 
   if (matches.length === 0) {
@@ -467,7 +479,7 @@ async function highlightCodeBlocks(html: string): Promise<string> {
   let result = html;
   for (const match of matches) {
     const fullMatch = match[0];
-    const rawLang = match[1];
+    const rawLang = match[1] || 'text';
     let lang = rawLang.toLowerCase();
 
     // Map common aliases
@@ -477,13 +489,8 @@ async function highlightCodeBlocks(html: string): Promise<string> {
     if (['yml', 'yaml'].includes(lang)) lang = 'yaml';
     if (['py', 'python'].includes(lang)) lang = 'python';
 
-    // Decode HTML entities before sending to Shiki
-    const rawCode = match[2]
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'");
+    // Thoroughly decode all HTML entities (numeric and named) before sending to Shiki
+    const rawCode = decodeHtmlEntities(match[2]);
 
     try {
       const highlighted = await codeToHtml(rawCode, {

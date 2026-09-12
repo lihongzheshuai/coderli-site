@@ -17,11 +17,9 @@ export const dynamicParams = true;
 export async function generateStaticParams() {
   const tree = getCategoryTree();
   const paths: { category: string[] }[] = [];
-  for (const parent of tree) {
+  // Pre-generate top parent categories at build time; subcategories are generated on-demand (ISR)
+  for (const parent of tree.slice(0, 10)) {
     paths.push({ category: [parent.name] });
-    for (const child of parent.children) {
-      paths.push({ category: [parent.name, child.name] });
-    }
   }
   return paths;
 }
