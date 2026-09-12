@@ -10,6 +10,7 @@ import Comments from '@/components/Comments';
 import LatexText from '@/components/LatexText';
 import PostNavigation from '@/components/PostNavigation';
 import RelatedPosts from '@/components/RelatedPosts';
+import PopularTagsCard from '@/components/PopularTagsCard';
 
 interface PageProps {
   params: { slug: string };
@@ -211,7 +212,7 @@ export default async function PostPage({ params }: PageProps) {
           <Comments slug={post.slug} />
         </article>
 
-        {/* Right: Sticky TOC & Sticky Sidebar Ad */}
+        {/* Right: Sticky TOC & Sticky Sidebar Ad & Popular Tags */}
         <aside className="sticky top-20 space-y-6">
           <TOC toc={post.toc} />
 
@@ -222,6 +223,8 @@ export default async function PostPage({ params }: PageProps) {
             minHeight={250}
             label="广告位 4 · 侧边栏吸顶"
           />
+
+          <PopularTagsCard limit={20} />
         </aside>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { getAllPosts, getFeaturedPost } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
 import LatexText from '@/components/LatexText';
+import PopularTagsCard from '@/components/PopularTagsCard';
 
 export const revalidate = false; // ISR static caching
 
@@ -242,13 +243,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Sticky Sidebar Google Ad (Slot 6734143049) */}
-          <div className="sticky top-20">
+          {/* Sticky Sidebar Google Ad & Popular Tags */}
+          <div className="sticky top-20 space-y-6">
             <GoogleAd
               slot="6734143049"
               minHeight={250}
               label="广告位 4 · 侧边栏吸顶"
             />
+            <PopularTagsCard limit={24} />
           </div>
         </aside>
       </div>

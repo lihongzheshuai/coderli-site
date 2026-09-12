@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { getAllPosts } from '@/lib/posts';
 import GoogleAd from '@/components/GoogleAd';
 import TopicPostList from '@/components/TopicPostList';
+import PopularTagsCard from '@/components/PopularTagsCard';
 
 const topicMetaMap: Record<
   string,
@@ -126,6 +127,8 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
             minHeight={250}
             label="广告位 4 · 侧边栏吸顶"
           />
+
+          <PopularTagsCard limit={24} />
         </aside>
       </div>
     </div>

@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { getAllTags, getPostsByTag } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
+import PopularTagsCard from '@/components/PopularTagsCard';
 
 interface TagPageProps {
   params: { tag: string };
@@ -43,8 +44,6 @@ export default function TagPage({ params }: TagPageProps) {
   if (!posts || posts.length === 0) {
     notFound();
   }
-
-  const allTags = getAllTags().slice(0, 30); // Top 30 tags for sidebar switcher
 
   return (
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
@@ -95,42 +94,13 @@ export default function TagPage({ params }: TagPageProps) {
 
         {/* Right: Sidebar */}
         <aside className="sticky top-20 space-y-6">
-          {/* Tag Cloud Switcher */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-            <div className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <span>🔥 热门技术标签</span>
-              <Link href="/tags/" className="text-xs text-teal-600 dark:text-teal-400 hover:underline">
-                全部 ({getAllTags().length}) →
-              </Link>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs">
-              {allTags.map(item => {
-                const isCurrent = item.tag.toLowerCase() === tag.toLowerCase();
-                return (
-                  <Link
-                    key={item.tag}
-                    href={`/tags/${encodeURIComponent(item.tag)}/`}
-                    className={`px-2.5 py-1 rounded-lg transition font-mono flex items-center gap-1 ${
-                      isCurrent
-                        ? 'bg-teal-600 text-white font-bold shadow-sm'
-                        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    <span>#{item.tag}</span>
-                    <span className={`text-[10px] ${isCurrent ? 'text-white/80' : 'text-slate-400'}`}>
-                      {item.count}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
           <GoogleAd
             slot="6734143049"
             minHeight={250}
             label="广告位 4 · 侧边栏吸顶"
           />
+
+          <PopularTagsCard currentTag={tag} limit={30} />
         </aside>
       </div>
     </div>
