@@ -193,9 +193,15 @@ export default function HomePage() {
               >
                 🐦 Twitter/X
               </Link>
-              <span className="px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500/20">
+              <a
+                href="https://qm.qq.com/q/fykBPjH8ru"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-500/20 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition inline-flex items-center gap-1 cursor-pointer"
+                title="点击一键加入 C++ GESP/CSP 考级答疑群"
+              >
                 👥 QQ群: 688906745
-              </span>
+              </a>
             </div>
           </div>
 

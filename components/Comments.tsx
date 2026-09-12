@@ -19,7 +19,7 @@ export default function Comments({ slug }: { slug: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!author.trim() || !email.trim() || !content.trim()) return;
+    if (!author.trim() || !content.trim()) return;
 
     setIsSubmitting(true);
     setMessage('');
@@ -73,10 +73,9 @@ export default function Comments({ slug }: { slug: string }) {
           />
           <input
             type="email"
-            required
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="邮箱 (用于 Gravatar) *"
+            placeholder="邮箱 (选填，用于匹配头像)"
             className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500"
           />
           <input

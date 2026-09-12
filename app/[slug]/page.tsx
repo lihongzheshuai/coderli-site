@@ -163,7 +163,7 @@ export default async function PostPage({ params }: PageProps) {
 
             <div className="p-4 rounded-xl border-l-4 border-teal-500 bg-teal-50/50 dark:bg-teal-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
               <strong className="text-teal-600 dark:text-teal-400 block mb-1">🤝 技术交流与答疑</strong>
-              <p>欢迎加入：<strong>C++ GESP/CSP 考级答疑群（688906745）</strong> 与 <strong>Java/Python群（982860385）</strong>，群内日常讨论，互帮互助。</p>
+              <p>欢迎加入：<a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 font-bold underline hover:text-teal-700">C++ GESP/CSP 考级答疑群（688906745）</a> 与 <a href="https://qm.qq.com/q/qwy4BSW9La" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 font-bold underline hover:text-teal-700">Java/Python交流群（982860385）</a>，点击可直接加群。</p>
             </div>
           </div>
 
@@ -202,6 +202,7 @@ export default async function PostPage({ params }: PageProps) {
                 <a href="mailto:wushikezuo@gmail.com">📫 wushikezuo@gmail.com</a>
                 <a href="https://github.com/lihongzheshuai" target="_blank">🐙 GitHub</a>
                 <a href="https://twitter.com/wushikezuohehe" target="_blank">🐦 Twitter/X</a>
+                <a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer">👥 QQ群: 688906745</a>
               </div>
             </div>
           </div>

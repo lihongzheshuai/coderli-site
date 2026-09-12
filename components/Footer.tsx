@@ -15,9 +15,6 @@ export default function Footer() {
           <p className="font-medium text-slate-800 dark:text-slate-200">
             © 2012–2026 <strong>OneCoder</strong> · 保持好奇，认真记录。
           </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-            基于 Next.js 边缘计算与增量静态渲染 (ISR) 构建 · 托管于 Vercel · 自建数据库支持
-          </p>
         </div>
 
         <div className="flex items-center gap-6 text-xs">
@@ -27,6 +24,9 @@ export default function Footer() {
           <Link href="https://twitter.com/wushikezuohehe" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             Twitter/X ↗
           </Link>
+          <a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+            QQ交流群 ↗
+          </a>
           <Link href="https://wiki.coderli.com/" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             GESP WIKI ↗
           </Link>
