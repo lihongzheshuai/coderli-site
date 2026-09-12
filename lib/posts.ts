@@ -282,6 +282,30 @@ export function getFeaturedPost(): PostMeta | null {
   return posts[0] || null;
 }
 
+export function getAllTags(): { tag: string; count: number }[] {
+  const posts = getAllPosts();
+  const counts: Record<string, number> = {};
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      if (tag && tag.trim()) {
+        const t = tag.trim();
+        counts[t] = (counts[t] || 0) + 1;
+      }
+    }
+  }
+  return Object.entries(counts)
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export function getPostsByTag(tag: string): PostMeta[] {
+  const allPosts = getAllPosts();
+  const target = tag.trim().toLowerCase();
+  return allPosts.filter(p =>
+    p.tags.some(t => t.trim().toLowerCase() === target)
+  );
+}
+
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   const allPosts = getAllPosts();
   const meta = allPosts.find(p => p.slug === slug);

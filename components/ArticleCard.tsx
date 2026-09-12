@@ -30,13 +30,15 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
         </p>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          {post.tags.slice(0, 4).map(t => (
-            <span
+          {post.tags.slice(0, 6).map(t => (
+            <Link
               key={t}
-              className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono text-xs"
+              href={`/tags/${encodeURIComponent(t)}/`}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono text-xs hover:bg-teal-50 dark:hover:bg-teal-950/60 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-500/30 border border-transparent transition cursor-pointer"
+              title={`按标签「#${t}」筛选博文`}
             >
               #{t}
-            </span>
+            </Link>
           ))}
         </div>
       </div>
