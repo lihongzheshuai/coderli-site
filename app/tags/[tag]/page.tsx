@@ -15,12 +15,17 @@ export const dynamicParams = true;
 export async function generateStaticParams() {
   const tags = getAllTags();
   return tags.map(item => ({
-    tag: encodeURIComponent(item.tag),
+    tag: item.tag,
   }));
 }
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
-  const tag = decodeURIComponent(params.tag);
+  let tag = params.tag;
+  try {
+    tag = decodeURIComponent(params.tag);
+  } catch {
+    tag = params.tag;
+  }
   return {
     title: `标签：#${tag} · OneCoder`,
     description: `OneCoder 博客中包含标签「${tag}」的技术文章与题目解析列表。`,
@@ -28,7 +33,12 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
 }
 
 export default function TagPage({ params }: TagPageProps) {
-  const tag = decodeURIComponent(params.tag);
+  let tag = params.tag;
+  try {
+    tag = decodeURIComponent(params.tag);
+  } catch {
+    tag = params.tag;
+  }
   const posts = getPostsByTag(tag);
   if (!posts || posts.length === 0) {
     notFound();
