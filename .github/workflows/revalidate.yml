@@ -1,0 +1,46 @@
+name: On-Demand Revalidate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '_posts/**'
+
+jobs:
+  revalidate:
+    name: Trigger Edge CDN Revalidation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Identify Changed Articles & Revalidate
+        env:
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET || 'onecoder-secret-token' }}
+          SITE_URL: 'https://www.coderli.com'
+        run: |
+          echo "=== Finding changed articles in _posts/ ==="
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep '^_posts/.*\.md$' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No markdown articles modified in this commit."
+            exit 0
+          fi
+
+          for FILE in $CHANGED_FILES; do
+            FILENAME=$(basename "$FILE")
+            echo "Processing: $FILENAME"
+            # Strip YYYY-MM-DD- prefix and .md extension to obtain the slug
+            SLUG=$(echo "$FILENAME" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//' | sed 's/\.md$//')
+            echo "Revalidating article slug: $SLUG"
+            
+            RESPONSE=$(curl -s -X POST "${SITE_URL}/api/revalidate?secret=${REVALIDATE_SECRET}&slug=${SLUG}")
+            echo "API Response: $RESPONSE"
+          done
+
+          echo "=== Revalidating Homepage & Taxonomy Hubs ==="
+          HOME_RESP=$(curl -s -X POST "${SITE_URL}/api/revalidate?secret=${REVALIDATE_SECRET}")
+          echo "Homepage Revalidation Response: $HOME_RESP"

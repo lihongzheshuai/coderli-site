@@ -163,6 +163,10 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
 // In-memory cache for all post metadata
 let cachedPosts: PostMeta[] | null = null;
 
+export function clearPostCache() {
+  cachedPosts = null;
+}
+
 export function getAllPosts(): PostMeta[] {
   if (cachedPosts) {
     return cachedPosts;

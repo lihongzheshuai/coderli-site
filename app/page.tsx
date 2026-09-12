@@ -38,20 +38,20 @@ export default function HomePage() {
             </h1>
             <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed mb-6">
               一个中年人的技术自留地。记录学习 C++、GESP/NOI 信奥算法、Java 架构演进与 Python 的心得体会。
-              始于 2012，现已积累 936 篇独立技术笔记。
+              始于 2012，现已积累 {posts.length} 篇独立技术笔记。
             </p>
 
             <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-100 dark:border-slate-800">
               <div>
-                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">936</span>
+                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{posts.length}</span>
                 <span className="text-xs text-slate-400 block">累计博文</span>
               </div>
               <div>
-                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">504</span>
+                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{topicStats.gesp}</span>
                 <span className="text-xs text-slate-400 block">GESP考级题解</span>
               </div>
               <div>
-                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">14 年</span>
+                <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{new Date().getFullYear() - 2012} 年</span>
                 <span className="text-xs text-slate-400 block">坚持记录</span>
               </div>
               <div>

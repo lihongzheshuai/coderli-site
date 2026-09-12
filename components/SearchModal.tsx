@@ -104,7 +104,7 @@ export default function SearchModal() {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="快速检索 936 篇博文（支持标题、洛谷题号如 B4501、技术如 SLF4J）..."
+            placeholder={indexData.length > 0 ? `快速检索全站 ${indexData.length} 篇博文（支持标题、洛谷题号如 P1873、技术如 SLF4J）...` : '快速检索全站博文（支持标题、洛谷题号如 P1873、技术如 SLF4J）...'}
             className="flex-1 bg-transparent border-none outline-none text-base text-slate-900 dark:text-slate-100 placeholder-slate-400 font-sans"
           />
           <button
@@ -118,7 +118,7 @@ export default function SearchModal() {
         <div className="overflow-y-auto p-3 space-y-1.5 flex-1">
           {isLoading && (
             <div className="py-10 text-center text-sm text-slate-400">
-              正在加载 936 篇博文索引数据...
+              正在加载全站博文索引数据...
             </div>
           )}
 

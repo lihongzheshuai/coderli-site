@@ -5,6 +5,8 @@ import Footer from '@/components/Footer';
 import SearchModal from '@/components/SearchModal';
 import CopyCodeHandler from '@/components/CopyCodeHandler';
 
+import { getAllPosts } from '@/lib/posts';
+
 export const metadata: Metadata = {
   title: 'OneCoder · 一个中年人的自留地',
   description:
@@ -27,6 +29,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const posts = getAllPosts();
+  const postCount = posts.length;
+
   return (
     <html lang="zh-CN" className="scroll-smooth">
       <head>
@@ -46,7 +51,7 @@ export default function RootLayout({
         <meta name="google-site-verification" content="EQxpnRQ0t7ULCtknIN_oBRlo8FXtZsL-OaiUcI50_wU" />
       </head>
       <body className="min-h-screen flex flex-col font-sans selection:bg-teal-500 selection:text-white">
-        <Header />
+        <Header postCount={postCount} />
         <main className="flex-1">{children}</main>
         <Footer />
         <SearchModal />

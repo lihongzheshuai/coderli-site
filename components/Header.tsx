@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function Header() {
+interface HeaderProps {
+  postCount?: number;
+}
+
+export default function Header({ postCount }: HeaderProps) {
   const pathname = usePathname();
   // Default to Light Theme as requested
   const [isDark, setIsDark] = useState(false);
@@ -101,7 +105,7 @@ export default function Header() {
               OneCoder
             </span>
             <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 leading-tight">
-              coderli.com · 936 篇博文
+              coderli.com{postCount ? ` · ${postCount} 篇博文` : ''}
             </span>
           </div>
         </Link>
