@@ -26,37 +26,36 @@ export default function HomePage() {
   return (
     <div className="pb-16">
       {/* Hero Section */}
-      <section className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 mt-6 mb-8">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-sm">
+      <section className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 mt-6 mb-8 md:mb-10">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-sm">
           <div>
-            <div className="text-xs font-mono font-semibold tracking-widest text-teal-600 dark:text-teal-400 uppercase mb-2">
+            <div className="text-xs font-mono font-semibold tracking-widest text-teal-600 dark:text-teal-400 uppercase mb-3 md:mb-4">
               ONECODER · DEVELOPER’S KNOWLEDGE BASE
             </div>
-            <h1 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug mb-3">
-              慢慢学，认真写。<br />
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug md:leading-normal mb-4 md:mb-5">
               <span className="text-teal-600 dark:text-teal-400">把每一次想明白的技术，留在这里。</span>
             </h1>
-            <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed mb-6">
+            <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed mb-6 md:mb-8">
               一个中年人的技术自留地。记录学习 C++、GESP/NOI 信奥算法、Java 架构演进与 Python 的心得体会。
               始于 2012，现已积累 {posts.length} 篇独立技术笔记。
             </p>
 
-            <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-wrap gap-6 sm:gap-8 md:gap-10 pt-5 md:pt-6 border-t border-slate-100 dark:border-slate-800">
               <div>
                 <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{posts.length}</span>
-                <span className="text-xs text-slate-400 block">累计博文</span>
+                <span className="text-xs text-slate-400 block mt-0.5">累计博文</span>
               </div>
               <div>
                 <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{topicStats.gesp}</span>
-                <span className="text-xs text-slate-400 block">GESP考级题解</span>
+                <span className="text-xs text-slate-400 block mt-0.5">GESP考级题解</span>
               </div>
               <div>
                 <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">{new Date().getFullYear() - 2012} 年</span>
-                <span className="text-xs text-slate-400 block">坚持记录</span>
+                <span className="text-xs text-slate-400 block mt-0.5">坚持记录</span>
               </div>
               <div>
                 <span className="text-2xl font-extrabold font-mono text-teal-600 dark:text-teal-400">128万+</span>
-                <span className="text-xs text-slate-400 block">全站总阅读</span>
+                <span className="text-xs text-slate-400 block mt-0.5">全站总阅读</span>
               </div>
             </div>
           </div>
