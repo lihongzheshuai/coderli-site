@@ -150,7 +150,7 @@ export default function TopicPostList({ posts, subtopics }: TopicPostListProps) 
           {filteredPosts.map((post, idx) => (
             <React.Fragment key={post.slug}>
               <ArticleCard post={post} />
-              {idx === 4 && (
+              {(idx === 4 || (idx > 4 && (idx + 1) % 15 === 5)) && (
                 <GoogleAd
                   slot="9656071817"
                   format="fluid"

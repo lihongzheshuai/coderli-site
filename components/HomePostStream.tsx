@@ -38,8 +38,8 @@ export default function HomePostStream({
         {visiblePosts.map((post, idx) => (
           <React.Fragment key={post.slug}>
             <ArticleCard post={post} />
-            {/* Insert In-Feed Google Ad after the 5th article */}
-            {idx === 4 && (
+            {/* Insert In-Feed Google Ad periodically (after 5th, 20th, 35th... articles) */}
+            {(idx === 4 || (idx > 4 && (idx + 1) % 15 === 5)) && (
               <GoogleAd
                 slot="9656071817"
                 format="fluid"

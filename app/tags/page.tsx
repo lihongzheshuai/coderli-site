@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getAllTags } from '@/lib/posts';
+import GoogleAd from '@/components/GoogleAd';
 
 export const metadata: Metadata = {
   title: '全部标签 · OneCoder',
@@ -37,7 +38,7 @@ export default function AllTagsPage() {
       </div>
 
       {/* Tags Cloud Grid */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm mb-8">
         <div className="flex flex-wrap gap-2.5">
           {tags.map(item => (
             <Link
@@ -53,6 +54,14 @@ export default function AllTagsPage() {
           ))}
         </div>
       </div>
+
+      {/* Bottom Recommendation Ad Banner */}
+      <GoogleAd
+        slot="6416549436"
+        format="auto"
+        minHeight={100}
+        label="广告位 · 标签页底部推荐"
+      />
     </div>
   );
 }
