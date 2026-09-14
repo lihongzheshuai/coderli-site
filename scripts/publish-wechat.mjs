@@ -1,8 +1,9 @@
 /**
- * OneCoder 微信公众号自动排版与草稿箱发布流水线 (升级版)
- * 1. 深度集成 MathJax SVG: 矢量级公式渲染，彻底解决微信不支持 LaTeX 痛点 (mdnice 同款逻辑)
- * 2. 自动化题解封面生成: 900x383 黄金比例卡片，涵盖考点徽章与级别
- * 3. 往期精选文章自动引用与内嵌推荐卡片
+ * OneCoder 微信公众号自动排版与草稿箱发布流水线 (移动端格式重构精简版)
+ * 1. 深度适配微信移动端代码块排版: 逐行 block 渲染，杜绝代码粘连与折行错乱
+ * 2. 深度集成 MathJax 3.x 全量宏包: 像素级 SVG 矢量公式，完美兼容微信渲染引擎
+ * 3. 移动端自适应排版: 字体、段落、列表、表格与引用块严格按照公众号设计规范调优
+ * 4. 自动生成 900x383 考级封面图与题面配图转存
  */
 
 import fs from 'fs';
@@ -17,7 +18,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import { codeToHtml } from 'shiki';
 
-// MathJax SVG components (mdnice compatible)
+// MathJax SVG components (with AllPackages for complete LaTeX coverage)
 import { mathjax } from 'mathjax-full/js/mathjax.js';
 import { TeX } from 'mathjax-full/js/input/tex.js';
 import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
@@ -40,22 +41,18 @@ function convertExToPx(svgStr) {
 function renderLatexToSvg(rawLatex, display = false) {
   try {
     let clean = rawLatex.trim();
-    // Normalize common competitive programming LaTeX macros
     clean = clean.replace(/\\mathcal\{O\}/g, 'O');
     clean = clean.replace(/\\text\{([^\}]+)\}/g, '$1');
     const node = mathDoc.convert(clean, { display });
     let svg = adaptor.innerHTML(node);
-    
-    // Convert ex units to px for 100% WeChat rendering compatibility
     svg = convertExToPx(svg);
 
-    // Ensure inline SVG has proper vertical alignment and display styling
     if (!display) {
       if (!svg.includes('display:')) {
-        svg = svg.replace('<svg style="', '<svg style="display: inline-block; margin: 0 2px; ');
+        svg = svg.replace('<svg style="', '<svg style="display: inline-block; margin: 0 1.5px; max-width: 100%; ');
       }
     } else {
-      svg = `<section style="text-align: center; margin: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 0;">${svg}</section>`;
+      svg = `<section style="text-align: center; margin: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 0; max-width: 100%;">${svg}</section>`;
     }
     return svg;
   } catch (err) {
@@ -276,7 +273,7 @@ async function resolveAndUploadImage(token, src) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Format Markdown into WeChat Rich HTML
+// 3. Format Markdown into WeChat Rich HTML (Mobile Optimized)
 // ---------------------------------------------------------------------------
 
 async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
@@ -287,13 +284,11 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   content = content.replace(/{{.*?}}/g, '');
   content = content.replace(/<!--\s*more\s*-->/g, '');
 
-  // 2. Pre-process LaTeX Math with MathJax SVG (Vector rendering, zero image block)
-  // Block Math $$...$$
+  // 2. Pre-process LaTeX Math with MathJax SVG
   content = content.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
     return renderLatexToSvg(math, true);
   });
 
-  // Inline Math $...$
   content = content.replace(/\$([^\$\n]+?)\$/g, (_, math) => {
     return renderLatexToSvg(math, false);
   });
@@ -308,13 +303,13 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   const file = await processor.process(content);
   let html = String(file);
 
-  // 4. Transform Code Blocks with Shiki and Mac-style Shell
+  // 4. Transform Code Blocks with Shiki (Rock-solid line-by-line block rendering)
   const codeBlockRegex = /<pre><code(?:\s+class="language-([a-zA-Z0-9_-]+)")?>([\s\S]*?)<\/code><\/pre>/g;
   const matches = Array.from(html.matchAll(codeBlockRegex));
 
   for (const match of matches) {
     const fullMatch = match[0];
-    const rawLang = match[1] || 'text';
+    const rawLang = match[1] || 'cpp';
     let lang = rawLang.toLowerCase();
 
     if (['c++', 'cpp'].includes(lang)) lang = 'cpp';
@@ -329,27 +324,46 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
         lang: lang,
         theme: 'github-dark',
       });
-      const preContentMatch = highlightedHtml.match(/<pre[\s\S]*?>([\s\S]*?)<\/pre>/);
-      if (preContentMatch) {
-        highlightedHtml = preContentMatch[1];
-      }
     } catch {
       highlightedHtml = `<code>${match[2]}</code>`;
     }
 
+    // Extract each line from Shiki and transform into a bulletproof display:block span
+    const lineMatches = Array.from(highlightedHtml.matchAll(/<span class="line">(.*?)<\/span>/g));
+    let lineSpans = '';
+
+    if (lineMatches.length > 0) {
+      lineSpans = lineMatches.map((m) => {
+        let lineContent = m[1];
+        if (!lineContent || lineContent.trim() === '') {
+          lineContent = '&nbsp;';
+        }
+        return `<span style="display: block; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace;">${lineContent}</span>`;
+      }).join('');
+    } else {
+      // Fallback if line splitting fails
+      const rawLines = cleanCode.split('\n');
+      lineSpans = rawLines.map((l) => {
+        const lineText = l === '' ? '&nbsp;' : l.replace(/ /g, '&nbsp;');
+        return `<span style="display: block; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace; color: #e1e4e8;">${lineText}</span>`;
+      }).join('');
+    }
+
+    // Clean, modern macOS-style code card with native horizontal scrolling
     const macCodeCard = `
-      <section style="margin: 22px 0; border-radius: 8px; overflow: hidden; background-color: #1e1e1e; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); border: 1px solid #333333;">
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; background-color: #282828; border-bottom: 1px solid #383838;">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #ff5f56; display: inline-block;"></span>
-            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #ffbd2e; display: inline-block;"></span>
-            <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #27c93f; display: inline-block;"></span>
-            <span style="margin-left: 8px; color: #94a3b8; font-size: 11px; font-family: Menlo, Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span>
+      <section style="margin: 18px 0; border-radius: 6px; overflow: hidden; background-color: #24292e; border: 1px solid #1b1f23; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background-color: #1f2428; border-bottom: 1px solid #2f363d;">
+          <div style="display: inline-block;">
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #ff5f56; margin-right: 4px;"></span>
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #ffbd2e; margin-right: 4px;"></span>
+            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #27c93f;"></span>
           </div>
-          <span style="color: #64748b; font-size: 11px; font-family: Menlo, monospace;">OneCoder Code</span>
+          <span style="color: #8b949e; font-size: 11px; font-family: Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span>
         </div>
-        <div style="padding: 14px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-          <pre style="margin: 0; padding: 0; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 12.5px; line-height: 1.65; color: #e2e8f0; white-space: pre; overflow-x: auto; background: transparent; border: none;">${highlightedHtml}</pre>
+        <div style="padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; word-break: normal; white-space: pre;">
+          <code style="display: block; font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 12px; line-height: 1.65; color: #e1e4e8; background: transparent; border: none; padding: 0; margin: 0;">
+            ${lineSpans}
+          </code>
         </div>
       </section>
     `;
@@ -372,85 +386,67 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     if (token) {
       const wxUrl = await resolveAndUploadImage(token, src);
       if (wxUrl) {
-        html = html.replace(fullImg, `<p style="text-align: center; margin: 18px 0;"><img src="${wxUrl}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: inline-block;" /></p>`);
+        html = html.replace(fullImg, `<p style="text-align: center; margin: 16px 0;"><img src="${wxUrl}" style="max-width: 100%; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: inline-block;" /></p>`);
         continue;
       }
     }
 
-    html = html.replace(fullImg, `<p style="text-align: center; margin: 18px 0;"><img src="${src}" style="max-width: 100%; border-radius: 8px;" /></p>`);
+    html = html.replace(fullImg, `<p style="text-align: center; margin: 16px 0;"><img src="${src}" style="max-width: 100%; border-radius: 6px;" /></p>`);
   }
 
-  // 6. Typography & WeChat Formatting
-  html = html.replace(/<h2>(.*?)<\/h2>/g, '<h2 style="font-size: 17.5px; font-weight: bold; color: #0d9488; border-left: 4.5px solid #0d9488; padding-left: 10px; margin: 30px 0 14px 0; line-height: 1.45; letter-spacing: 0.5px;">$1</h2>');
-  html = html.replace(/<h3>(.*?)<\/h3>/g, '<h3 style="font-size: 15.5px; font-weight: 600; color: #1e293b; margin: 22px 0 10px 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;">🔹 $1</h3>');
-  html = html.replace(/<h4>(.*?)<\/h4>/g, '<h4 style="font-size: 14.5px; font-weight: 600; color: #334155; margin: 16px 0 8px 0;">$1</h4>');
+  // 6. Typography Styling optimized for Mobile WeChat
+  html = html.replace(/<h2>(.*?)<\/h2>/g, '<h2 style="font-size: 16.5px; font-weight: bold; color: #0d9488; border-left: 4px solid #0d9488; padding-left: 9px; margin: 26px 0 12px 0; line-height: 1.4; letter-spacing: 0.3px;">$1</h2>');
+  html = html.replace(/<h3>(.*?)<\/h3>/g, '<h3 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 20px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #f1f5f9;">🔹 $1</h3>');
+  html = html.replace(/<h4>(.*?)<\/h4>/g, '<h4 style="font-size: 14px; font-weight: 600; color: #334155; margin: 14px 0 6px 0;">$1</h4>');
 
-  html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.3px; text-align: justify;">$1</p>');
-  html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 4px solid #14b8a6; background-color: #f0fdfa; padding: 12px 16px; margin: 18px 0; color: #0f766e; font-size: 14px; border-radius: 0 6px 6px 0; line-height: 1.7;">$1</blockquote>');
+  html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.5px; text-align: justify; word-break: break-word;">$1</p>');
+  html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</blockquote>');
 
-  // List formatting
-  html = html.replace(/<ul>([\s\S]*?)<\/ul>/g, '<ul style="padding-left: 20px; margin: 12px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ul>');
-  html = html.replace(/<ol>([\s\S]*?)<\/ol>/g, '<ol style="padding-left: 20px; margin: 12px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ol>');
-  html = html.replace(/<li>(.*?)<\/li>/g, '<li style="margin-bottom: 6px;">$1</li>');
+  // Lists: Clean indentation and line height on mobile
+  html = html.replace(/<ul>([\s\S]*?)<\/ul>/g, '<ul style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ul>');
+  html = html.replace(/<ol>([\s\S]*?)<\/ol>/g, '<ol style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ol>');
+  html = html.replace(/<li>(.*?)<\/li>/g, '<li style="margin: 4px 0;">$1</li>');
 
-  // Tables
-  html = html.replace(/<table>([\s\S]*?)<\/table>/g, '<div style="overflow-x: auto; margin: 20px 0;"><table style="width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left; background-color: #ffffff; border: 1px solid #e2e8f0;">$1</table></div>');
-  html = html.replace(/<th>(.*?)<\/th>/g, '<th style="padding: 9px 12px; background-color: #f8fafc; font-weight: 600; color: #1e293b; border: 1px solid #e2e8f0;">$1</th>');
-  html = html.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 8px 12px; border: 1px solid #e2e8f0; color: #475569;">$1</td>');
+  // Tables: Horizontal scroll wrapper to prevent viewport overflow on phones
+  html = html.replace(/<table>([\s\S]*?)<\/table>/g, '<section style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border: 1px solid #e2e8f0; border-radius: 6px;"><table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; background-color: #ffffff;">$1</table></section>');
+  html = html.replace(/<th>(.*?)<\/th>/g, '<th style="padding: 8px 10px; background-color: #f8fafc; font-weight: 600; color: #1e293b; border-bottom: 1px solid #e2e8f0;">$1</th>');
+  html = html.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 7px 10px; border-bottom: 1px solid #f1f5f9; color: #475569;">$1</td>');
 
-  // Inline code (not inside pre)
-  html = html.replace(/<code>([^<]+)<\/code>/g, '<code style="background-color: #f1f5f9; color: #0f766e; padding: 2px 6px; border-radius: 4px; font-family: Menlo, monospace; font-size: 13px;">$1</code>');
+  // Inline code snippets
+  html = html.replace(/<code>([^<]+)<\/code>/g, '<code style="background-color: #f1f5f9; color: #0f766e; padding: 2px 5px; border-radius: 3px; font-family: Consolas, Monaco, monospace; font-size: 13px; margin: 0 2px;">$1</code>');
 
-  // 7. Header Metadata Card & Album Classification
-  let gespChineseLevel = '六级';
-  const levelMatch =
-    (metadata.categories || []).find((c) =>
-      ['一级', '二级', '三级', '四级', '五级', '六级', '七级', '八级'].includes(c),
-    ) ||
-    (metadata.title || '').match(/GESP\s*(一级|二级|三级|四级|五级|六级|七级|八级)/)?.[1] ||
-    '六级';
-  gespChineseLevel = levelMatch;
-  const albumTitle = `GESP C++ ${gespChineseLevel}练习题`;
-
+  // 7. Clean, Minimal Header Card
   const headerCard = `
-    <section style="margin-bottom: 24px; padding: 16px 20px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 8px; border: 1px solid #ccfbf1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-        <span style="font-size: 13px; color: #0d9488; font-weight: bold; background: #ccfbf1; padding: 3px 10px; border-radius: 4px; display: inline-block;">
-          📖 合集标签：#${albumTitle}#
-        </span>
-        <span style="font-size: 12px; color: #64748b; font-weight: 500;">
-          OneCoder 算法考级专栏
-        </span>
+    <section style="margin-bottom: 22px; padding: 14px 18px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 6px; border: 1px solid #ccfbf1;">
+      <div style="font-size: 12px; color: #0d9488; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px;">
+        💡 GESP 考级与信奥算法精选
       </div>
-      <div style="font-size: 18.5px; font-weight: bold; color: #0f172a; line-height: 1.45; margin: 8px 0 10px 0;">
+      <div style="font-size: 18px; font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 8px;">
         ${metadata.title || ''}
       </div>
-      <div style="display: flex; gap: 12px; font-size: 12px; color: #64748b; align-items: center; flex-wrap: wrap;">
+      <div style="font-size: 12px; color: #64748b;">
         <span>✍️ 作者：${metadata.author || 'OneCoder'}</span>
-        <span>•</span>
+        <span style="margin: 0 6px;">•</span>
         <span>🏷️ 分类：${(metadata.categories || []).join(' / ')}</span>
       </div>
     </section>
   `;
 
-  // 8. Footer Call-to-Action Card & Blog Link
+  // 8. Clean Footer Call-to-Action Card
   const footerCard = `
-    <section style="margin-top: 36px; padding-top: 24px; border-top: 1px dashed #cbd5e1; text-align: center;">
-      <p style="text-align: center; margin: 0 0 16px 0; font-size: 13.5px; color: #0d9488; font-weight: bold;">
-        📌 本题解已收录至专栏合集：#${albumTitle}#
-      </p>
-      <section style="margin-bottom: 20px; padding: 16px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid #0d9488; text-align: left;">
-        <div style="font-size: 14px; font-weight: bold; color: #0f766e; margin-bottom: 6px;">📚 往期关联真题与系统化备考：</div>
+    <section style="margin-top: 32px; padding-top: 20px; border-top: 1px dashed #cbd5e1; text-align: center;">
+      <section style="margin-bottom: 18px; padding: 14px; background-color: #f8fafc; border-radius: 6px; border-left: 4px solid #0d9488; text-align: left;">
+        <div style="font-size: 13.5px; font-weight: bold; color: #0f766e; margin-bottom: 5px;">📚 往期关联真题与系统化备考：</div>
         <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">
-          本站已收录超 900+ 篇计算机与算法专题。由于微信公众号不支持外部超链接直接跳转，建议点击左下角<strong>「阅读原文」</strong>直达个人网站，即可使用全局检索（<code>Ctrl+K</code>）、在线复制代码与浏览完整知识库！
+          本站已收录超 900+ 篇计算机与算法专题。由于微信公众号不支持外部链接直接跳转，建议点击左下角<strong>「阅读原文」</strong>直达个人网站，即可使用全局检索（<code>Ctrl+K</code>）、在线复制代码与浏览完整知识库！
         </p>
       </section>
-      ${metadata.qrcodeUrl ? `<p style="margin: 16px 0;"><img src="${metadata.qrcodeUrl}" style="width: 140px; height: 140px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" /><br><span style="font-size: 12px; color: #94a3b8;">长按关注「OneCoder」公众号</span></p>` : ''}
+      ${metadata.qrcodeUrl ? `<p style="margin: 14px 0;"><img src="${metadata.qrcodeUrl}" style="width: 130px; height: 130px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);" /><br><span style="font-size: 12px; color: #94a3b8;">长按关注「OneCoder」公众号</span></p>` : ''}
     </section>
   `;
 
   return `
-    <section style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15px; color: #334155; line-height: 1.8; max-width: 677px; margin: 0 auto; padding: 10px 6px;">
+    <section style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15px; color: #334155; line-height: 1.8; max-width: 100%; margin: 0 auto; padding: 0 4px; box-sizing: border-box; word-break: break-word;">
       ${headerCard}
       ${html}
       ${footerCard}
@@ -533,7 +529,7 @@ async function main() {
     }
   }
 
-  // 3. Format Markdown into WeChat Rich HTML with MathJax SVG
+  // 3. Format Markdown into WeChat Rich HTML
   console.log(`[WeChat] Converting Markdown & LaTeX to MathJax SVG Rich Text...`);
   const wechatHtml = await formatMarkdownForWechat(content, token, {
     title: data.title || slug,
