@@ -28,6 +28,9 @@ async function handleRevalidate(req: NextRequest) {
     revalidatePath('/categories');
     revalidatePath('/tags');
 
+    // 5. Revalidate dynamic Sitemap
+    revalidatePath('/sitemap.xml');
+
     const totalPosts = getAllPosts().length;
 
     return NextResponse.json({
