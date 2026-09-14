@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SearchModal from '@/components/SearchModal';
 import CopyCodeHandler from '@/components/CopyCodeHandler';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
 
 import { getAllPosts } from '@/lib/posts';
 
@@ -49,8 +51,44 @@ export default function RootLayout({
         />
         {/* Google Verification */}
         <meta name="google-site-verification" content="EQxpnRQ0t7ULCtknIN_oBRlo8FXtZsL-OaiUcI50_wU" />
+
+        {/* Google Analytics (GA4) */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-5L9P03RR0R"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-5L9P03RR0R');
+            `,
+          }}
+        />
+
+        {/* 百度统计 (Baidu Tongji) */}
+        <Script
+          id="baidu-tongji"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _hmt = _hmt || [];
+              (function() {
+                var hm = document.createElement("script");
+                hm.src = "https://hm.baidu.com/hm.js?c38895d905174718ae7d95e42ce528c7";
+                var s = document.getElementsByTagName("script")[0]; 
+                s.parentNode.insertBefore(hm, s);
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+        <AnalyticsTracker />
         <Header postCount={postCount} />
         <main className="flex-1">{children}</main>
         <Footer />
