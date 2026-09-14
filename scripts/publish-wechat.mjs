@@ -1,9 +1,9 @@
 /**
- * OneCoder 微信公众号自动排版与草稿箱发布流水线 (终极排版修复版)
- * 1. 彻底解决微信端代码块粘连: 逐行 <p> 标签独立渲染，100% 保持缩进、换行与高亮
- * 2. 彻底解决列表幽灵空点: 剔除列表标签内所有换行符，消除移动端多余空圆点
- * 3. MathJax 全量 LaTeX 宏包矢量支持 (AllPackages)，并修复像素级物理尺寸
- * 4. 严苛移动端排版体验，杜绝页面横向晃动
+ * OneCoder 微信公众号自动排版与草稿箱发布流水线 (终极微信高保真排版版)
+ * 1. 采用 mdnice 同款底层逻辑: 逐行 &nbsp; 物理缩进 + <br/> 绝对换行，彻底根除代码粘连
+ * 2. 彻底消除幽灵空圆点: 列表标签之间剔除所有空白符，微信端列表 100% 严整对齐
+ * 3. MathJax 全量 LaTeX 宏包支持 (AllPackages) + 像素级尺寸计算 (px)
+ * 4. 移动端极简设计，自适应防溢出，阅读体验沉浸规整
  */
 
 import fs from 'fs';
@@ -16,9 +16,9 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-import { codeToHtml } from 'shiki';
+import hljs from 'highlight.js';
 
-// MathJax SVG components (with AllPackages for complete LaTeX coverage)
+// MathJax SVG components (AllPackages for full LaTeX compatibility)
 import { mathjax } from 'mathjax-full/js/mathjax.js';
 import { TeX } from 'mathjax-full/js/input/tex.js';
 import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
@@ -271,7 +271,7 @@ async function resolveAndUploadImage(token, src) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Format Markdown into WeChat Rich HTML (100% Robust)
+// 3. Format Markdown into WeChat Rich HTML (mdnice Compatible Code & Lists)
 // ---------------------------------------------------------------------------
 
 async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
@@ -301,10 +301,27 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   const file = await processor.process(content);
   let html = String(file);
 
-  // 4. Transform Code Blocks: Each line becomes an explicit <p> tag
-  // In WeChat's rich text engine, <pre> and <span> blocks collapse without <p>!
+  // 4. Transform Code Blocks using mdnice's Proven Architecture:
+  // - Line-by-line syntax highlighting
+  // - Leading spaces strictly preserved via &nbsp;
+  // - Line breaks explicitly enforced via <br/> (WeChat can NEVER collapse <br/>)
   const codeBlockRegex = /<pre><code(?:\s+class="language-([a-zA-Z0-9_-]+)")?>([\s\S]*?)<\/code><\/pre>/g;
   const matches = Array.from(html.matchAll(codeBlockRegex));
+
+  const hljsThemeMap = {
+    'hljs-keyword': 'color: #f97583; font-weight: bold;',
+    'hljs-built_in': 'color: #79b8ff;',
+    'hljs-type': 'color: #b392f0; font-weight: bold;',
+    'hljs-number': 'color: #79b8ff;',
+    'hljs-string': 'color: #9ecbff;',
+    'hljs-comment': 'color: #6a737d; font-style: italic;',
+    'hljs-title': 'color: #b392f0; font-weight: bold;',
+    'hljs-meta': 'color: #f97583;',
+    'hljs-params': 'color: #e1e4e8;',
+    'hljs-function': 'color: #e1e4e8;',
+    'hljs-variable': 'color: #79b8ff;',
+    'hljs-literal': 'color: #79b8ff;',
+  };
 
   for (const match of matches) {
     const fullMatch = match[0];
@@ -316,35 +333,32 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     if (['sh', 'bash', 'shell'].includes(lang)) lang = 'bash';
 
     const cleanCode = decodeHtmlEntities(match[2]);
+    const lines = cleanCode.split('\n');
 
-    let highlightedHtml = '';
-    try {
-      highlightedHtml = await codeToHtml(cleanCode, {
-        lang: lang,
-        theme: 'github-dark',
-      });
-    } catch {
-      highlightedHtml = `<code>${match[2]}</code>`;
-    }
+    // Process line by line with explicit &nbsp; indentation and <br/> line breaks
+    const highlightedLines = lines.map((line) => {
+      if (!line || line.trim() === '') {
+        return '&nbsp;';
+      }
+      const matchSpaces = line.match(/^(\s+)/);
+      const leadingSpaces = matchSpaces ? matchSpaces[1].length : 0;
+      const trimmed = line.slice(leadingSpaces);
 
-    // Extract line spans from Shiki and convert each line to a dedicated <p> tag
-    const lineMatches = Array.from(highlightedHtml.matchAll(/<span class="line">(.*?)<\/span>/g));
-    let lineParagraphs = '';
+      let hl = '';
+      try {
+        hl = hljs.highlight(trimmed, { language: lang }).value;
+      } catch {
+        hl = trimmed.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
 
-    if (lineMatches.length > 0) {
-      lineParagraphs = lineMatches.map((m) => {
-        let lineContent = m[1];
-        if (!lineContent || lineContent.trim() === '') {
-          lineContent = '&nbsp;';
-        }
-        return `<p style="margin: 0; padding: 0; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace;">${lineContent}</p>`;
-      }).join('');
-    } else {
-      const rawLines = cleanCode.split('\n');
-      lineParagraphs = rawLines.map((l) => {
-        const lineText = l === '' ? '&nbsp;' : l.replace(/ /g, '&nbsp;');
-        return `<p style="margin: 0; padding: 0; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace; color: #e1e4e8;">${lineText}</p>`;
-      }).join('');
+      return '&nbsp;'.repeat(leadingSpaces) + hl;
+    });
+
+    let codeBody = highlightedLines.join('<br/>');
+
+    // Inline syntax highlight styles
+    for (const [cls, sty] of Object.entries(hljsThemeMap)) {
+      codeBody = codeBody.replaceAll(`class="${cls}"`, `style="${sty}"`);
     }
 
     const macCodeCard = `
@@ -357,8 +371,10 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
           </div>
           <span style="color: #8b949e; font-size: 11px; font-family: Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span>
         </div>
-        <div style="padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; word-break: normal; white-space: pre;">
-          ${lineParagraphs}
+        <div style="padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+          <section style="margin: 0; padding: 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.65; color: #e1e4e8; background: transparent; border: none; white-space: pre-wrap; word-break: break-all;">
+            ${codeBody}
+          </section>
         </div>
       </section>
     `;
@@ -397,9 +413,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.5px; text-align: justify; word-break: break-word;">$1</p>');
   html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</blockquote>');
 
-  // 7. CRITICAL FIX: Eliminate empty phantom bullets in lists!
-  // WeChat parses newlines inside <ul>/<ol> as empty <li> bullet items.
-  // We strictly strip all newlines and whitespace between list tags.
+  // 7. CRITICAL FIX: Eliminate phantom bullets in lists
   html = html.replace(/<ul([^>]*)>[\s\r\n]*/gi, '<ul$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
   html = html.replace(/[\s\r\n]*<\/ul>/gi, '</ul>');
   html = html.replace(/<ol([^>]*)>[\s\r\n]*/gi, '<ol$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
@@ -408,7 +422,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/<li([^>]*)>[\s\r\n]*/gi, '<li$1 style="margin: 4px 0;">');
   html = html.replace(/[\s\r\n]*<\/li>/gi, '</li>');
 
-  // Tables: Horizontal scroll wrapper to prevent viewport overflow on phones
+  // Tables
   html = html.replace(/<table>([\s\S]*?)<\/table>/g, '<section style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border: 1px solid #e2e8f0; border-radius: 6px;"><table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; background-color: #ffffff;">$1</table></section>');
   html = html.replace(/<th>(.*?)<\/th>/g, '<th style="padding: 8px 10px; background-color: #f8fafc; font-weight: 600; color: #1e293b; border-bottom: 1px solid #e2e8f0;">$1</th>');
   html = html.replace(/<td>(.*?)<\/td>/g, '<td style="padding: 7px 10px; border-bottom: 1px solid #f1f5f9; color: #475569;">$1</td>');
@@ -416,7 +430,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   // Inline code snippets
   html = html.replace(/<code>([^<]+)<\/code>/g, '<code style="background-color: #f1f5f9; color: #0f766e; padding: 2px 5px; border-radius: 3px; font-family: Consolas, Monaco, monospace; font-size: 13px; margin: 0 2px;">$1</code>');
 
-  // 8. Minimal, High-Value Header Card (No awkward text headers)
+  // 8. Minimal, High-Value Header Card
   const headerCard = `
     <section style="margin-bottom: 22px; padding: 14px 18px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 6px; border: 1px solid #ccfbf1;">
       <div style="font-size: 12px; color: #0d9488; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px;">
