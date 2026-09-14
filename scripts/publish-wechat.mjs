@@ -332,25 +332,19 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     if (['c#', 'csharp'].includes(lang)) lang = 'csharp';
     if (['sh', 'bash', 'shell'].includes(lang)) lang = 'bash';
 
-    const cleanCode = decodeHtmlEntities(match[2]);
+    const cleanCode = decodeHtmlEntities(match[2]).trim();
     const lines = cleanCode.split('\n');
 
     // Special handling for Sample Data (text / plaintext / sample / input / output)
-    // Render as a clean, lightweight, left-aligned card without heavy dark theme
+    // Plain, clean, left-aligned text without any cards, boxes, or background wrappers
     if (['text', 'plaintext', 'output', 'input', 'sample'].includes(lang)) {
       const cleanLines = lines.map((l) => {
         if (!l || l.trim() === '') return '&nbsp;';
         return l.replace(/ /g, '&nbsp;');
       }).join('<br/>');
 
-      const sampleCard = `
-        <section style="margin: 6px 0 14px 0; border-radius: 4px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #94a3b8; padding: 9px 12px; text-align: left;">
-          <section style="margin: 0; padding: 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.6; color: #0f172a; text-align: left; white-space: pre-wrap; word-break: break-all;">
-            ${cleanLines}
-          </section>
-        </section>
-      `;
-      html = html.replace(fullMatch, sampleCard);
+      const samplePlain = `<p style="margin: 4px 0 14px 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.6; color: #1e293b; text-align: left;">${cleanLines}</p>`;
+      html = html.replace(fullMatch, samplePlain);
       continue;
     }
     const highlightedLines = lines.map((line) => {
@@ -426,7 +420,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/<h2>(.*?)<\/h2>/g, '<h2 style="font-size: 16.5px; font-weight: bold; color: #0d9488; border-left: 4px solid #0d9488; padding-left: 9px; margin: 26px 0 12px 0; line-height: 1.4; letter-spacing: 0.3px;">$1</h2>');
   html = html.replace(/<h3>(.*?)<\/h3>/g, '<h3 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 20px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #f1f5f9;">🔹 $1</h3>');
   html = html.replace(/<h4>(.*?)<\/h4>/g, '<h4 style="font-size: 14px; font-weight: 600; color: #334155; margin: 14px 0 6px 0;">$1</h4>');
-  html = html.replace(/<h5>(.*?)<\/h5>/g, '<h5 style="font-size: 13px; font-weight: bold; color: #475569; margin: 12px 0 4px 0; text-align: left; letter-spacing: 0.2px;">$1</h5>');
+  html = html.replace(/<h5>(.*?)<\/h5>/g, '<p style="font-size: 14px; font-weight: bold; color: #334155; margin: 14px 0 4px 0; text-align: left;">$1</p>');
 
   html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.5px; text-align: justify; word-break: break-word;">$1</p>');
   html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</blockquote>');
