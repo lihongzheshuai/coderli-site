@@ -514,22 +514,14 @@ async function main() {
 
   const token = await getAccessToken();
 
-  // 1. Resolve or Generate Dedicated 900x383 Cover Image
+  // 1. Resolve Fixed Universal GESP/CSP Cover Image (or Dedicated Cover)
   let thumbMediaId = null;
-  const coverPath = path.join(process.cwd(), 'public', 'images', 'covers', `${slug}.png`);
-  
-  if (!fs.existsSync(coverPath)) {
-    console.log(`[WeChat] Generating dedicated cover image for ${slug}...`);
-    try {
-      execSync(`python3 /home/ubuntu/scripts/luogu_solver/generate_cover.py "${data.title || slug}" "${coverPath}"`, { stdio: 'inherit' });
-    } catch (e) {
-      console.warn(`[WeChat] Cover generation warning:`, e.message);
-    }
-  }
+  const fixedUniversalCover = path.join(process.cwd(), 'public', 'images', 'gesp_csp_default_cover.png');
+  const dedicatedCover = path.join(process.cwd(), 'public', 'images', 'covers', `${slug}.png`);
 
   const coverCandidates = [
-    coverPath,
-    path.join(process.cwd(), 'public', 'images', 'covers', 'p1002-cover.png'),
+    fixedUniversalCover,
+    dedicatedCover,
     path.join(process.cwd(), 'public', 'images', 'wechat_qrcode.jpg'),
   ];
 
