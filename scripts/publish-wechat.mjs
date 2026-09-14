@@ -1,9 +1,9 @@
 /**
- * OneCoder 微信公众号自动排版与草稿箱发布流水线 (移动端格式重构精简版)
- * 1. 深度适配微信移动端代码块排版: 逐行 block 渲染，杜绝代码粘连与折行错乱
- * 2. 深度集成 MathJax 3.x 全量宏包: 像素级 SVG 矢量公式，完美兼容微信渲染引擎
- * 3. 移动端自适应排版: 字体、段落、列表、表格与引用块严格按照公众号设计规范调优
- * 4. 自动生成 900x383 考级封面图与题面配图转存
+ * OneCoder 微信公众号自动排版与草稿箱发布流水线 (终极排版修复版)
+ * 1. 彻底解决微信端代码块粘连: 逐行 <p> 标签独立渲染，100% 保持缩进、换行与高亮
+ * 2. 彻底解决列表幽灵空点: 剔除列表标签内所有换行符，消除移动端多余空圆点
+ * 3. MathJax 全量 LaTeX 宏包矢量支持 (AllPackages)，并修复像素级物理尺寸
+ * 4. 严苛移动端排版体验，杜绝页面横向晃动
  */
 
 import fs from 'fs';
@@ -236,7 +236,6 @@ async function resolveAndUploadImage(token, src) {
     const ext = path.extname(fileName).toLowerCase().replace('.', '') || 'png';
     const mime = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : (ext === 'gif' ? 'image/gif' : 'image/png');
 
-    // 1. Upload to WeChat Article CDN (for article inline rendering)
     console.log(`[WeChat] Uploading article image (${fileName}) to WeChat CDN...`);
     const formCdn = new FormData();
     formCdn.append('media', new Blob([fileBuffer], { type: mime }), fileName);
@@ -245,7 +244,6 @@ async function resolveAndUploadImage(token, src) {
       body: formCdn
     });
 
-    // 2. Also register in WeChat Permanent Material Library (微信公众号后台素材库)
     try {
       const formMat = new FormData();
       formMat.append('media', new Blob([fileBuffer], { type: mime }), fileName);
@@ -273,7 +271,7 @@ async function resolveAndUploadImage(token, src) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Format Markdown into WeChat Rich HTML (Mobile Optimized)
+// 3. Format Markdown into WeChat Rich HTML (100% Robust)
 // ---------------------------------------------------------------------------
 
 async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
@@ -303,7 +301,8 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   const file = await processor.process(content);
   let html = String(file);
 
-  // 4. Transform Code Blocks with Shiki (Rock-solid line-by-line block rendering)
+  // 4. Transform Code Blocks: Each line becomes an explicit <p> tag
+  // In WeChat's rich text engine, <pre> and <span> blocks collapse without <p>!
   const codeBlockRegex = /<pre><code(?:\s+class="language-([a-zA-Z0-9_-]+)")?>([\s\S]*?)<\/code><\/pre>/g;
   const matches = Array.from(html.matchAll(codeBlockRegex));
 
@@ -328,28 +327,26 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
       highlightedHtml = `<code>${match[2]}</code>`;
     }
 
-    // Extract each line from Shiki and transform into a bulletproof display:block span
+    // Extract line spans from Shiki and convert each line to a dedicated <p> tag
     const lineMatches = Array.from(highlightedHtml.matchAll(/<span class="line">(.*?)<\/span>/g));
-    let lineSpans = '';
+    let lineParagraphs = '';
 
     if (lineMatches.length > 0) {
-      lineSpans = lineMatches.map((m) => {
+      lineParagraphs = lineMatches.map((m) => {
         let lineContent = m[1];
         if (!lineContent || lineContent.trim() === '') {
           lineContent = '&nbsp;';
         }
-        return `<span style="display: block; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace;">${lineContent}</span>`;
+        return `<p style="margin: 0; padding: 0; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace;">${lineContent}</p>`;
       }).join('');
     } else {
-      // Fallback if line splitting fails
       const rawLines = cleanCode.split('\n');
-      lineSpans = rawLines.map((l) => {
+      lineParagraphs = rawLines.map((l) => {
         const lineText = l === '' ? '&nbsp;' : l.replace(/ /g, '&nbsp;');
-        return `<span style="display: block; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace; color: #e1e4e8;">${lineText}</span>`;
+        return `<p style="margin: 0; padding: 0; line-height: 1.65; font-size: 12px; white-space: pre; font-family: Consolas, Monaco, 'Courier New', monospace; color: #e1e4e8;">${lineText}</p>`;
       }).join('');
     }
 
-    // Clean, modern macOS-style code card with native horizontal scrolling
     const macCodeCard = `
       <section style="margin: 18px 0; border-radius: 6px; overflow: hidden; background-color: #24292e; border: 1px solid #1b1f23; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background-color: #1f2428; border-bottom: 1px solid #2f363d;">
@@ -361,9 +358,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
           <span style="color: #8b949e; font-size: 11px; font-family: Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span>
         </div>
         <div style="padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; word-break: normal; white-space: pre;">
-          <code style="display: block; font-family: Consolas, Monaco, 'Courier New', monospace; font-size: 12px; line-height: 1.65; color: #e1e4e8; background: transparent; border: none; padding: 0; margin: 0;">
-            ${lineSpans}
-          </code>
+          ${lineParagraphs}
         </div>
       </section>
     `;
@@ -402,10 +397,16 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.5px; text-align: justify; word-break: break-word;">$1</p>');
   html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</blockquote>');
 
-  // Lists: Clean indentation and line height on mobile
-  html = html.replace(/<ul>([\s\S]*?)<\/ul>/g, '<ul style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ul>');
-  html = html.replace(/<ol>([\s\S]*?)<\/ol>/g, '<ol style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">$1</ol>');
-  html = html.replace(/<li>(.*?)<\/li>/g, '<li style="margin: 4px 0;">$1</li>');
+  // 7. CRITICAL FIX: Eliminate empty phantom bullets in lists!
+  // WeChat parses newlines inside <ul>/<ol> as empty <li> bullet items.
+  // We strictly strip all newlines and whitespace between list tags.
+  html = html.replace(/<ul([^>]*)>[\s\r\n]*/gi, '<ul$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
+  html = html.replace(/[\s\r\n]*<\/ul>/gi, '</ul>');
+  html = html.replace(/<ol([^>]*)>[\s\r\n]*/gi, '<ol$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
+  html = html.replace(/[\s\r\n]*<\/ol>/gi, '</ol>');
+  html = html.replace(/<\/li>[\s\r\n]*<li/gi, '</li><li');
+  html = html.replace(/<li([^>]*)>[\s\r\n]*/gi, '<li$1 style="margin: 4px 0;">');
+  html = html.replace(/[\s\r\n]*<\/li>/gi, '</li>');
 
   // Tables: Horizontal scroll wrapper to prevent viewport overflow on phones
   html = html.replace(/<table>([\s\S]*?)<\/table>/g, '<section style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border: 1px solid #e2e8f0; border-radius: 6px;"><table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; background-color: #ffffff;">$1</table></section>');
@@ -415,7 +416,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   // Inline code snippets
   html = html.replace(/<code>([^<]+)<\/code>/g, '<code style="background-color: #f1f5f9; color: #0f766e; padding: 2px 5px; border-radius: 3px; font-family: Consolas, Monaco, monospace; font-size: 13px; margin: 0 2px;">$1</code>');
 
-  // 7. Clean, Minimal Header Card
+  // 8. Minimal, High-Value Header Card (No awkward text headers)
   const headerCard = `
     <section style="margin-bottom: 22px; padding: 14px 18px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 6px; border: 1px solid #ccfbf1;">
       <div style="font-size: 12px; color: #0d9488; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px;">
@@ -432,7 +433,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     </section>
   `;
 
-  // 8. Clean Footer Call-to-Action Card
+  // 9. Clean Footer Call-to-Action Card
   const footerCard = `
     <section style="margin-top: 32px; padding-top: 20px; border-top: 1px dashed #cbd5e1; text-align: center;">
       <section style="margin-bottom: 18px; padding: 14px; background-color: #f8fafc; border-radius: 6px; border-left: 4px solid #0d9488; text-align: left;">
