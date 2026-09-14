@@ -20,15 +20,22 @@ import { codeToHtml } from 'shiki';
 // MathJax SVG components (mdnice compatible)
 import { mathjax } from 'mathjax-full/js/mathjax.js';
 import { TeX } from 'mathjax-full/js/input/tex.js';
+import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages.js';
 import { SVG } from 'mathjax-full/js/output/svg.js';
 import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor.js';
 import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
 
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
-const tex = new TeX({ packages: ['base', 'ams', 'newcommand'] });
+const tex = new TeX({ packages: AllPackages });
 const svgJax = new SVG({ fontCache: 'none' });
 const mathDoc = mathjax.document('', { InputJax: tex, OutputJax: svgJax });
+
+function convertExToPx(svgStr) {
+  return svgStr
+    .replace(/(width|height)=["']([0-9\.]+)ex["']/g, (_, prop, val) => `${prop}="${(parseFloat(val) * 8.5).toFixed(1)}px"`)
+    .replace(/vertical-align:\s*(-?[0-9\.]+)ex/g, (_, val) => `vertical-align: ${(parseFloat(val) * 8.5).toFixed(1)}px`);
+}
 
 function renderLatexToSvg(rawLatex, display = false) {
   try {
@@ -39,10 +46,13 @@ function renderLatexToSvg(rawLatex, display = false) {
     const node = mathDoc.convert(clean, { display });
     let svg = adaptor.innerHTML(node);
     
-    // Ensure inline SVG has proper vertical alignment with text
+    // Convert ex units to px for 100% WeChat rendering compatibility
+    svg = convertExToPx(svg);
+
+    // Ensure inline SVG has proper vertical alignment and display styling
     if (!display) {
-      if (!svg.includes('vertical-align')) {
-        svg = svg.replace('<svg ', '<svg style="vertical-align: -0.25ex; display: inline-block; margin: 0 2px;" ');
+      if (!svg.includes('display:')) {
+        svg = svg.replace('<svg style="', '<svg style="display: inline-block; margin: 0 2px; ');
       }
     } else {
       svg = `<section style="text-align: center; margin: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 0;">${svg}</section>`;
@@ -158,19 +168,52 @@ async function uploadPermanentImage(token, filePath) {
   return { mediaId: data.media_id, url: data.url };
 }
 
+const IMAGE_CACHE_FILE = path.join(process.cwd(), '.wechat_img_cache.json');
+
+function getCachedImageUrl(src) {
+  if (fs.existsSync(IMAGE_CACHE_FILE)) {
+    try {
+      const cache = JSON.parse(fs.readFileSync(IMAGE_CACHE_FILE, 'utf8'));
+      return cache[src];
+    } catch {}
+  }
+  return null;
+}
+
+function setCachedImageUrl(src, wxUrl) {
+  let cache = {};
+  if (fs.existsSync(IMAGE_CACHE_FILE)) {
+    try {
+      cache = JSON.parse(fs.readFileSync(IMAGE_CACHE_FILE, 'utf8'));
+    } catch {}
+  }
+  cache[src] = wxUrl;
+  fs.writeFileSync(IMAGE_CACHE_FILE, JSON.stringify(cache, null, 2));
+}
+
 async function resolveAndUploadImage(token, src) {
   try {
+    const cached = getCachedImageUrl(src);
+    if (cached) {
+      console.log(`[WeChat] Using cached WeChat CDN url for: ${src}`);
+      return cached;
+    }
+
     let fileBuffer;
     let fileName = 'image.png';
 
     if (src.startsWith('http://') || src.startsWith('https://')) {
       console.log(`[WeChat] Downloading external image: ${src}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
       const resp = await fetch(src, {
+        signal: controller.signal,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Referer': 'https://www.luogu.com.cn/'
         }
       });
+      clearTimeout(timeoutId);
       if (!resp.ok) {
         throw new Error(`Download failed with status: ${resp.status}`);
       }
@@ -222,6 +265,7 @@ async function resolveAndUploadImage(token, src) {
 
     if (cdnRes && cdnRes.url) {
       console.log(`[WeChat] Image uploaded successfully -> ${cdnRes.url}`);
+      setCachedImageUrl(src, cdnRes.url);
       return cdnRes.url;
     }
     return null;
@@ -357,13 +401,28 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   // Inline code (not inside pre)
   html = html.replace(/<code>([^<]+)<\/code>/g, '<code style="background-color: #f1f5f9; color: #0f766e; padding: 2px 6px; border-radius: 4px; font-family: Menlo, monospace; font-size: 13px;">$1</code>');
 
-  // 7. Header Metadata Card
+  // 7. Header Metadata Card & Album Classification
+  let gespChineseLevel = '六级';
+  const levelMatch =
+    (metadata.categories || []).find((c) =>
+      ['一级', '二级', '三级', '四级', '五级', '六级', '七级', '八级'].includes(c),
+    ) ||
+    (metadata.title || '').match(/GESP\s*(一级|二级|三级|四级|五级|六级|七级|八级)/)?.[1] ||
+    '六级';
+  gespChineseLevel = levelMatch;
+  const albumTitle = `GESP C++ ${gespChineseLevel}练习题`;
+
   const headerCard = `
     <section style="margin-bottom: 24px; padding: 16px 20px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 8px; border: 1px solid #ccfbf1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <div style="font-size: 13px; color: #0d9488; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
-        💡 GESP 考级与信奥算法题解精选
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+        <span style="font-size: 13px; color: #0d9488; font-weight: bold; background: #ccfbf1; padding: 3px 10px; border-radius: 4px; display: inline-block;">
+          📖 合集标签：#${albumTitle}#
+        </span>
+        <span style="font-size: 12px; color: #64748b; font-weight: 500;">
+          OneCoder 算法考级专栏
+        </span>
       </div>
-      <div style="font-size: 19px; font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 10px;">
+      <div style="font-size: 18.5px; font-weight: bold; color: #0f172a; line-height: 1.45; margin: 8px 0 10px 0;">
         ${metadata.title || ''}
       </div>
       <div style="display: flex; gap: 12px; font-size: 12px; color: #64748b; align-items: center; flex-wrap: wrap;">
@@ -377,6 +436,9 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   // 8. Footer Call-to-Action Card & Blog Link
   const footerCard = `
     <section style="margin-top: 36px; padding-top: 24px; border-top: 1px dashed #cbd5e1; text-align: center;">
+      <p style="text-align: center; margin: 0 0 16px 0; font-size: 13.5px; color: #0d9488; font-weight: bold;">
+        📌 本题解已收录至专栏合集：#${albumTitle}#
+      </p>
       <section style="margin-bottom: 20px; padding: 16px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid #0d9488; text-align: left;">
         <div style="font-size: 14px; font-weight: bold; color: #0f766e; margin-bottom: 6px;">📚 往期关联真题与系统化备考：</div>
         <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">
