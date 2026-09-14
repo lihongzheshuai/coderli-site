@@ -133,7 +133,7 @@ async function requestWechatApi(endpoint, options = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// 2. Upload Material / Image to WeChat CDN
+// 2. Upload Material / Image to WeChat CDN & Material Library
 // ---------------------------------------------------------------------------
 
 async function uploadPermanentImage(token, filePath) {
@@ -154,29 +154,81 @@ async function uploadPermanentImage(token, filePath) {
     throw new Error(`Failed to upload permanent image: ${JSON.stringify(data)}`);
   }
 
-  console.log(`[WeChat] Image uploaded. MediaId: ${data.media_id}, URL: ${data.url}`);
+  console.log(`[WeChat] Image uploaded to Material Library. MediaId: ${data.media_id}, URL: ${data.url}`);
   return { mediaId: data.media_id, url: data.url };
 }
 
-async function uploadArticleImage(token, filePath) {
-  console.log(`[WeChat] Uploading inline article image to WeChat CDN: ${filePath}`);
-  const fileBuffer = fs.readFileSync(filePath);
-  const fileName = path.basename(filePath);
+async function resolveAndUploadImage(token, src) {
+  try {
+    let fileBuffer;
+    let fileName = 'image.png';
 
-  const formData = new FormData();
-  formData.append('media', new Blob([fileBuffer]), fileName);
+    if (src.startsWith('http://') || src.startsWith('https://')) {
+      console.log(`[WeChat] Downloading external image: ${src}`);
+      const resp = await fetch(src, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://www.luogu.com.cn/'
+        }
+      });
+      if (!resp.ok) {
+        throw new Error(`Download failed with status: ${resp.status}`);
+      }
+      const ab = await resp.arrayBuffer();
+      fileBuffer = Buffer.from(ab);
+      const urlPath = new URL(src).pathname;
+      fileName = path.basename(urlPath) || 'diagram.png';
+      if (!fileName.includes('.')) fileName += '.png';
+    } else {
+      let localFilePath = src;
+      if (!path.isAbsolute(localFilePath)) {
+        const cleanPath = src.replace(/^\.?\/?/, '');
+        localFilePath = path.join(process.cwd(), 'public', cleanPath);
+      }
+      if (!fs.existsSync(localFilePath)) {
+        console.warn(`[WeChat] Local image not found: ${localFilePath}`);
+        return null;
+      }
+      fileBuffer = fs.readFileSync(localFilePath);
+      fileName = path.basename(localFilePath);
+    }
 
-  const endpoint = `/cgi-bin/media/uploadimg?access_token=${token}`;
-  const data = await requestWechatApi(endpoint, {
-    method: 'POST',
-    body: formData,
-  });
+    const ext = path.extname(fileName).toLowerCase().replace('.', '') || 'png';
+    const mime = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : (ext === 'gif' ? 'image/gif' : 'image/png');
 
-  if (!data.url) {
-    throw new Error(`Failed to upload article image: ${JSON.stringify(data)}`);
+    // 1. Upload to WeChat Article CDN (for article inline rendering)
+    console.log(`[WeChat] Uploading article image (${fileName}) to WeChat CDN...`);
+    const formCdn = new FormData();
+    formCdn.append('media', new Blob([fileBuffer], { type: mime }), fileName);
+    const cdnRes = await requestWechatApi(`/cgi-bin/media/uploadimg?access_token=${token}`, {
+      method: 'POST',
+      body: formCdn
+    });
+
+    // 2. Also register in WeChat Permanent Material Library (微信公众号后台素材库)
+    try {
+      const formMat = new FormData();
+      formMat.append('media', new Blob([fileBuffer], { type: mime }), fileName);
+      const matRes = await requestWechatApi(`/cgi-bin/material/add_material?access_token=${token}&type=image`, {
+        method: 'POST',
+        body: formMat
+      });
+      if (matRes && matRes.media_id) {
+        console.log(`[WeChat] Registered to WeChat Material Library (MediaId: ${matRes.media_id})`);
+      }
+    } catch (e) {
+      console.warn(`[WeChat] Material library register warning:`, e.message);
+    }
+
+    if (cdnRes && cdnRes.url) {
+      console.log(`[WeChat] Image uploaded successfully -> ${cdnRes.url}`);
+      return cdnRes.url;
+    }
+    return null;
+  } catch (err) {
+    console.warn(`[WeChat] Failed to process image (${src}):`, err.message);
+    return null;
   }
-
-  return data.url;
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +313,7 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     html = html.replace(fullMatch, macCodeCard);
   }
 
-  // 5. Transform Images: upload local images to WeChat CDN
+  // 5. Transform Images: upload both local & remote images to WeChat CDN & Material Library
   const imgRegex = /<img\s+([^>]*?)src=["']([^"']+)["']([^>]*?)>/g;
   const imgMatches = Array.from(html.matchAll(imgRegex));
 
@@ -269,18 +321,15 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     const fullImg = match[0];
     let src = match[2];
 
-    if (src.startsWith('/') || src.startsWith('./') || src.startsWith('../')) {
-      const cleanPath = src.replace(/^\.?\/?/, '');
-      const localFilePath = path.join(process.cwd(), 'public', cleanPath);
+    if (src.includes('mmbiz.qpic.cn')) {
+      continue;
+    }
 
-      if (fs.existsSync(localFilePath) && token) {
-        try {
-          const wxCdnUrl = await uploadArticleImage(token, localFilePath);
-          html = html.replace(fullImg, `<p style="text-align: center; margin: 18px 0;"><img src="${wxCdnUrl}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08);" /></p>`);
-          continue;
-        } catch (e) {
-          console.warn(`[WeChat Image Upload Failed for ${src}]:`, e.message);
-        }
+    if (token) {
+      const wxUrl = await resolveAndUploadImage(token, src);
+      if (wxUrl) {
+        html = html.replace(fullImg, `<p style="text-align: center; margin: 18px 0;"><img src="${wxUrl}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: inline-block;" /></p>`);
+        continue;
       }
     }
 
@@ -416,7 +465,7 @@ async function main() {
   const qrcodeLocal = path.join(process.cwd(), 'public', 'images', 'wechat_qrcode.jpg');
   if (fs.existsSync(qrcodeLocal)) {
     try {
-      qrcodeUrl = await uploadArticleImage(token, qrcodeLocal);
+      qrcodeUrl = await resolveAndUploadImage(token, qrcodeLocal);
     } catch (e) {
       console.warn('QR code upload failed:', e.message);
     }
