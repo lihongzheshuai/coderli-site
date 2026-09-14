@@ -336,15 +336,19 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     const lines = cleanCode.split('\n');
 
     // Special handling for Sample Data (text / plaintext / sample / input / output)
-    // Plain, clean, left-aligned text without any cards, boxes, or background wrappers
+    // Clean, GitHub-style light gray background box (#f6f8fa), strictly left-aligned
     if (['text', 'plaintext', 'output', 'input', 'sample'].includes(lang)) {
       const cleanLines = lines.map((l) => {
         if (!l || l.trim() === '') return '&nbsp;';
         return l.replace(/ /g, '&nbsp;');
       }).join('<br/>');
 
-      const samplePlain = `<p style="margin: 4px 0 14px 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.6; color: #1e293b; text-align: left;">${cleanLines}</p>`;
-      html = html.replace(fullMatch, samplePlain);
+      const sampleBox = `
+        <section style="margin: 4px 0 14px 0; padding: 8px 12px; background-color: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 4px; text-align: left;">
+          <p style="margin: 0; padding: 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 13.5px; line-height: 1.55; color: #24292e; text-align: left; white-space: pre-wrap; word-break: break-all;">${cleanLines}</p>
+        </section>
+      `;
+      html = html.replace(fullMatch, sampleBox);
       continue;
     }
     const highlightedLines = lines.map((line) => {
