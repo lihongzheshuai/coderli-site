@@ -5,7 +5,7 @@ date: 2026-09-15 15:01:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP一级, 分支结构, 浮点数, 格式化输出]
+tags: [GESP, C++, GESP一级, 分支结构, 浮点数, 格式化输出, 真题, 2026年9月, GESP202609]
 categories: [GESP, 一级, 基础语法]
 ---
 
