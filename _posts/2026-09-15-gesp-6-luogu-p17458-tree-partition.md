@@ -5,7 +5,7 @@ date: 2026-09-15 15:55:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP六级, CSP-J, 树形结构, DFS, 贪心]
+tags: [GESP, C++, GESP六级, CSP-J, 树形结构, DFS, 贪心, 真题, 2026年9月, GESP202609]
 categories: [GESP, 六级, 树与二叉树, CSP-J]
 ---
 
