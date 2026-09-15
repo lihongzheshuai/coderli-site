@@ -5,7 +5,7 @@ date: 2026-09-15 15:30:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP四级, CSP-J, 递归, 递推, 分治]
+tags: [GESP, C++, GESP四级, CSP-J, 递归, 递推, 分治, 真题, 2026年9月, GESP202609]
 categories: [GESP, 四级, 递归递推, CSP-J]
 ---
 
