@@ -5,7 +5,7 @@ date: 2026-09-15 16:15:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP八级, CSP-S, 高级图论, 最短路, Dijkstra, 离线处理]
+tags: [GESP, C++, GESP八级, CSP-S, 高级图论, 最短路, Dijkstra, 离线处理, 真题, 2026年9月, GESP202609]
 categories: [GESP, 八级, 高级图论, CSP-S]
 ---
 
