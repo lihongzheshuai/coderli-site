@@ -5,7 +5,7 @@ date: 2026-09-15 16:10:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP八级, CSP-S, 高级图论, 仙人掌图, 生成树, DFS]
+tags: [GESP, C++, GESP八级, CSP-S, 高级图论, 仙人掌图, 生成树, DFS, 真题, 2026年9月, GESP202609]
 categories: [GESP, 八级, 高级图论, CSP-S]
 ---
 
