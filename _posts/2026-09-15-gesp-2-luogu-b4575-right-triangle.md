@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 【勾股定理与数列平方递推】GESP二级题解：luogu-B4575 [GESP202609 二级] 直角三角形
-date: 2026-09-15 12:00:00 +0800
+date: 2026-09-15 15:10:00 +0800
 author: OneCoder
 comments: true
 math: true
