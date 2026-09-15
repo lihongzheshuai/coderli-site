@@ -5,7 +5,7 @@ date: 2026-09-15 15:35:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP四级, CSP-J, 二维数组, 排序]
+tags: [GESP, C++, GESP四级, CSP-J, 二维数组, 排序, 真题, 2026年9月, GESP202609]
 categories: [GESP, 四级, 二维数组, CSP-J]
 ---
 
