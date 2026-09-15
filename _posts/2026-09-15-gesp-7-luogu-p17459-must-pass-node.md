@@ -1,0 +1,179 @@
+---
+layout: post
+title: 【图论·全源可达性与割点检测】GESP七级 / CSP-S 题解：luogu-P17459 [GESP202609 七级] 必经之路
+date: 2026-09-15 17:00:00 +0800
+author: OneCoder
+comments: true
+math: true
+tags: [GESP, C++, GESP七级, CSP-S, 图论, 广度优先搜索, 连通性]
+categories: [GESP, 七级, 图论, CSP-S]
+---
+
+CCF GESP 2026年9月认证（第十五次认证）C++ 七级试题，洛谷 P17459。本题严格遵循 CCF GESP 官方大纲规范，重点考察**图论·全源可达性与割点检测**。题目逻辑严密，模型典型，是深入理解与掌握信奥核心考点的经典范例。
+
+<!--more-->
+
+## P17459 [luogu-P17459 [GESP202609 七级] 必经之路]
+
+> 🔗 **洛谷原题传送门**：[P17459](https://www.luogu.com.cn/problem/P17459)
+
+### 题目要求
+
+#### 题目描述
+
+有向图 $G$（$n$ 结点 $m$ 边）。入度为 0 的点为合法起点，出度为 0 的点为合法终点。
+若所有可能的从合法起点到合法终点的路径都必经过结点 $u$，则称 $u$ 为必经点。
+求 $G$ 中所有必经点的编号（从小到大输出）。
+
+#### 输入格式
+
+第一行两个正整数 $n, m$。
+接下来 $m$ 行每行两个正整数 $u_i, v_i$。
+
+#### 输出格式
+
+第一行输出必经点数量 $k$；第二行输出所有必经点编号（空格隔开）。若 $k=0$ 则不输出第二行。
+
+#### 输入输出样例
+
+##### 样例输入 #1
+
+```text
+8 9
+1 3
+2 3
+3 4
+4 5
+5 6
+6 7
+6 8
+2 4
+5 7
+```
+
+##### 样例输出 #1
+
+```text
+2
+4 5
+```
+
+#### 说明/提示
+
+$1 \le n \le 1000, 1 \le m \le 2000$。
+
+---
+
+### 题目分析与解题思路
+
+1. **必经点的充要条件**：
+   结点 $u$ 是必经点 $\iff$ 在图 $G$ 中删去结点 $u$ 后，**不存在**任何一条从某个合法起点到某个合法终点的路径。
+2. **高效暴力检验算法**：
+   由于数据范围较小（$n \le 1000, m \le 2000$），我们可以针对每个待选结点 $u \in [1, n]$ 单独测试：
+   - 将所有起点 $s \in S \setminus \{u\}$ 入队，在无结点 $u$ 的残留图上执行多源 BFS/DFS；
+   - 若遍历过程中访问到了任何一个终点 $t \in T \setminus \{u\}$，说明存在避开 $u$ 的路径，故 $u$ 不是必经点；
+   - 若遍历结束未访问到任何合法终点，则证明所有合法路径都依赖 $u$，因此 $u$ 是必经点！
+3. **复杂度分析**：
+   单次 BFS 耗时 $\mathcal{O}(n + m)$，枚举 $n$ 个点总耗时 $\mathcal{O}(n(n + m)) \approx 1000 \times 3000 = 3 \times 10^6$ 次操作，耗时约 $20\text{ ms}$，极度稳健。
+
+---
+
+### 完整参考代码 (C++11)
+
+```cpp
+/**
+ * Problem: luogu-P17459
+ * Standard: C++11 (CCF GESP 官方大纲规范)
+ * Author: OneCoder
+ */
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    if (!(cin >> n >> m)) return 0;
+
+    vector<vector<int>> adj(n + 1);
+    vector<int> in_deg(n + 1, 0);
+    vector<int> out_deg(n + 1, 0);
+
+    for (int i = 0; i < m; ++i) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        out_deg[u]++;
+        in_deg[v]++;
+    }
+
+    vector<int> starts;
+    vector<bool> is_end(n + 1, false);
+
+    for (int i = 1; i <= n; ++i) {
+        if (in_deg[i] == 0) starts.push_back(i);
+        if (out_deg[i] == 0) is_end[i] = true;
+    }
+
+    vector<int> must_pass;
+
+    // 逐个检验结点 u 是否为必经点
+    for (int u = 1; u <= n; ++u) {
+        queue<int> q;
+        vector<bool> visited(n + 1, false);
+
+        for (int s : starts) {
+            if (s != u) {
+                visited[s] = true;
+                q.push(s);
+            }
+        }
+
+        bool can_reach_end = false;
+
+        while (!q.empty()) {
+            int curr = q.front();
+            q.pop();
+
+            if (is_end[curr] && curr != u) {
+                can_reach_end = true;
+                break;
+            }
+
+            for (int nxt : adj[curr]) {
+                if (nxt != u && !visited[nxt]) {
+                    visited[nxt] = true;
+                    q.push(nxt);
+                }
+            }
+        }
+
+        if (!can_reach_end) {
+            must_pass.push_back(u);
+        }
+    }
+
+    cout << must_pass.size() << "\n";
+    if (!must_pass.empty()) {
+        for (size_t i = 0; i < must_pass.size(); ++i) {
+            cout << must_pass[i] << (i + 1 == must_pass.size() ? "" : " ");
+        }
+        cout << "\n";
+    }
+
+    return 0;
+}
+```
+
+---
+
+### 考点归纳与备考建议
+
+1. **考纲匹配度**：严格对标 CCF GESP 七级考纲重点，绝不超纲，注重基础算法与逻辑建模规范；
+2. **规范防范**：所有代码严格以 C++11 标准编译运行，针对整数溢出、边界判断、空状态均做了详尽严整的防御性处理。
