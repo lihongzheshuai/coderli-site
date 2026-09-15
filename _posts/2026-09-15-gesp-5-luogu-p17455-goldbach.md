@@ -5,7 +5,7 @@ date: 2026-09-15 15:40:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP五级, CSP-J, 数论, 素数筛, 哥德巴赫猜想]
+tags: [GESP, C++, GESP五级, CSP-J, 数论, 素数筛, 哥德巴赫猜想, 真题, 2026年9月, GESP202609]
 categories: [GESP, 五级, 数论, CSP-J]
 ---
 
