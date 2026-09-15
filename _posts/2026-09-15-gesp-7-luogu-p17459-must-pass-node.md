@@ -5,7 +5,7 @@ date: 2026-09-15 16:00:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP七级, CSP-S, 图论, 广度优先搜索, 连通性]
+tags: [GESP, C++, GESP七级, CSP-S, 图论, 广度优先搜索, 连通性, 真题, 2026年9月, GESP202609]
 categories: [GESP, 七级, 图论, CSP-S]
 ---
 
