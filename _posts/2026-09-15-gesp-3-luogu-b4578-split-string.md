@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 【字符串模拟与动态子串检索】GESP三级 / CSP-J 题解：luogu-B4578 [GESP202609 三级] 分割字符串
-date: 2026-09-15 13:30:00 +0800
+date: 2026-09-15 15:25:00 +0800
 author: OneCoder
 comments: true
 math: true
