@@ -5,7 +5,7 @@ date: 2026-09-15 15:10:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP二级, 勾股定理, 递推, 数学函数]
+tags: [GESP, C++, GESP二级, 勾股定理, 递推, 数学函数, 真题, 2026年9月, GESP202609]
 categories: [GESP, 二级, 基础算法]
 ---
 
