@@ -5,7 +5,7 @@ date: 2026-09-15 15:20:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP三级, CSP-J, 位运算, 二进制]
+tags: [GESP, C++, GESP三级, CSP-J, 位运算, 二进制, 真题, 2026年9月, GESP202609]
 categories: [GESP, 三级, 位运算, CSP-J]
 ---
 
