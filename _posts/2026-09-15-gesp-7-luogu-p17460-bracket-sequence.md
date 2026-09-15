@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 【括号序列平衡度与子序列计数DP】GESP七级 / CSP-S 题解：luogu-P17460 [GESP202609 七级] 括号序列
-date: 2026-09-15 17:30:00 +0800
+date: 2026-09-15 16:05:00 +0800
 author: OneCoder
 comments: true
 math: true
