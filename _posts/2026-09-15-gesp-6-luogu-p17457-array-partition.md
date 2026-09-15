@@ -5,7 +5,7 @@ date: 2026-09-15 15:50:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP六级, CSP-J, 动态规划, 前缀和]
+tags: [GESP, C++, GESP六级, CSP-J, 动态规划, 前缀和, 真题, 2026年9月, GESP202609]
 categories: [GESP, 六级, 动态规划, CSP-J]
 ---
 
