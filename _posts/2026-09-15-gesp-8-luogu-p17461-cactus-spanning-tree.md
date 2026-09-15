@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 【仙人掌图性质与乘法原理生成树计数】GESP八级 / CSP-S 题解：luogu-P17461 [GESP202609 八级] 生成树计数
-date: 2026-09-15 18:00:00 +0800
+date: 2026-09-15 16:10:00 +0800
 author: OneCoder
 comments: true
 math: true
