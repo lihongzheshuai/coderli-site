@@ -5,7 +5,7 @@ date: 2026-09-15 15:15:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP二级, 二维数组, ASCII, 字符变换]
+tags: [GESP, C++, GESP二级, 二维数组, ASCII, 字符变换, 真题, 2026年9月, GESP202609]
 categories: [GESP, 二级, 基础语法]
 ---
 
