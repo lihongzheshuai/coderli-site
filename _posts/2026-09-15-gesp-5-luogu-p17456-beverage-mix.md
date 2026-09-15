@@ -5,7 +5,7 @@ date: 2026-09-15 15:45:00 +0800
 author: OneCoder
 comments: true
 math: true
-tags: [GESP, C++, GESP五级, CSP-J, 贪心, 排序不等式]
+tags: [GESP, C++, GESP五级, CSP-J, 贪心, 排序不等式, 真题, 2026年9月, GESP202609]
 categories: [GESP, 五级, 贪心算法, CSP-J]
 ---
 
