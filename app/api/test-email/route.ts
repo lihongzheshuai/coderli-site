@@ -22,11 +22,14 @@ export async function GET(req: NextRequest) {
   const hasResend = !!rawKey;
   const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 
-  const recipient = (
+  let recipient = (
     process.env.COMMENT_NOTIFICATION_EMAIL ||
     process.env.ADMIN_EMAIL ||
     'wushikezuo@gmail.com'
   ).trim();
+  if (recipient.toLowerCase() === 'shikezuo@gmail.com') {
+    recipient = 'wushikezuo@gmail.com';
+  }
 
   const activeProvider = hasResend ? 'resend' : hasSmtp ? 'smtp' : 'none';
 

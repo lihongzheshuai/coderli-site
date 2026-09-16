@@ -225,10 +225,16 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
   messageId?: string;
   error?: string;
 }> {
-  const recipient =
+  let recipient = (
     process.env.COMMENT_NOTIFICATION_EMAIL ||
     process.env.ADMIN_EMAIL ||
-    'wushikezuo@gmail.com';
+    'wushikezuo@gmail.com'
+  ).trim();
+
+  // Auto-correct common typo in env var
+  if (recipient.toLowerCase() === 'shikezuo@gmail.com') {
+    recipient = 'wushikezuo@gmail.com';
+  }
 
   const siteUrl = (
     data.siteUrl ||
