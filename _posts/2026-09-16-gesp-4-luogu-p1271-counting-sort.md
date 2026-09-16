@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【计数排序与初级排序】GESP四级 / CSP-J 题解：luogu-P1271 【深基9.例1】选举学生会
+title: 【GESP/CSP练习】GESP四级 / CSP-J 题解：luogu-P1271 【深基9.例1】选举学生会
 date: 2026-09-16 07:05:00 +0800
 author: OneCoder
 comments: true
