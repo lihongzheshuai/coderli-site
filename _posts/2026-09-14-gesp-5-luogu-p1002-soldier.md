@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【动态规划·路径计数】GESP六级 / CSP-J 题解：luogu-P1002 [NOIP2002 普及组] 过河卒
+title: 【GESP/CSP练习】GESP六级 / CSP-J 题解：luogu-P1002 [NOIP2002 普及组] 过河卒
 date: 2026-09-14 10:30:00 +0800
 author: OneCoder
 comments: true
