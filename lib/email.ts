@@ -263,10 +263,24 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
   });
 
   // 1. Resend API (Recommended on Vercel Serverless: HTTP REST, no TCP port blocking, instant delivery)
-  if (process.env.RESEND_API_KEY) {
+  const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
+  if (resendApiKey) {
     try {
-      const configuredFrom = (process.env.RESEND_FROM || '').trim();
-      const resendFrom = configuredFrom || 'OneCoder <onboarding@resend.dev>';
+      let resendFrom = (process.env.RESEND_FROM || '').trim();
+
+      // Guard: Resend strictly disallows using public provider domains (like gmail/qq/163) in from.
+      // If user mistakenly configured from as their personal email, automatically fallback to onboarding@resend.dev
+      if (
+        !resendFrom ||
+        resendFrom.includes('@gmail.com') ||
+        resendFrom.includes('@qq.com') ||
+        resendFrom.includes('@163.com') ||
+        resendFrom.includes('@126.com') ||
+        resendFrom.includes('@hotmail.com') ||
+        resendFrom.includes('@outlook.com')
+      ) {
+        resendFrom = 'OneCoder <onboarding@resend.dev>';
+      }
 
       // Only pass reply_to if it is a syntactically valid email to avoid Resend 422 errors
       const isValidEmail = (em?: string) => !!(em && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.trim()));
@@ -287,7 +301,7 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          Authorization: `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify(payload),
       });
@@ -297,7 +311,10 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
       if (!res.ok) {
         const errMsg = resData?.message || JSON.stringify(resData);
         console.error(`[Email Notification] Resend API error (${res.status}):`, errMsg);
-        return { success: false, error: `Resend API (${res.status}): ${errMsg}` };
+        return {
+          success: false,
+          error: `Resend API (${res.status}): ${errMsg}`,
+        };
       }
 
       console.log('[Email Notification] Sent via Resend successfully to:', recipient, 'id:', resData.id);

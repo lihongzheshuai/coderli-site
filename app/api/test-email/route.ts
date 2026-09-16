@@ -5,40 +5,41 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 export const maxDuration = 15;
 
-export async function GET(req: NextRequest) {
-  const secret = req.nextUrl.searchParams.get('secret');
-  const expectedSecret = process.env.REVALIDATE_SECRET;
+let lastCallTimestamp = 0;
 
-  // Protect test endpoint in production unless correct secret is supplied
-  if (process.env.NODE_ENV === 'production' && (!expectedSecret || secret !== expectedSecret)) {
+export async function GET(req: NextRequest) {
+  // Simple rate limiting to prevent spamming: 1 request per 5 seconds
+  const now = Date.now();
+  if (now - lastCallTimestamp < 5000) {
     return NextResponse.json(
-      {
-        error: 'Unauthorized: invalid or missing secret query param (?secret=YOUR_TOKEN)',
-      },
-      { status: 401 }
+      { error: 'Rate limit: please wait 5 seconds before running another test.' },
+      { status: 429 }
     );
   }
+  lastCallTimestamp = now;
 
-  const recipient =
+  const rawKey = (process.env.RESEND_API_KEY || '').trim();
+  const hasResend = !!rawKey;
+  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+
+  const recipient = (
     process.env.COMMENT_NOTIFICATION_EMAIL ||
     process.env.ADMIN_EMAIL ||
-    'wushikezuo@gmail.com';
-
-  const hasResend = !!process.env.RESEND_API_KEY;
-  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+    'wushikezuo@gmail.com'
+  ).trim();
 
   const activeProvider = hasResend ? 'resend' : hasSmtp ? 'smtp' : 'none';
 
   const testSlug = '2024-12-10-gesp-2-exam-syllabus-network';
-  const testTitle = 'GESP C++ 2级考试大纲知识点：计算机网络基础 (测试文章)';
+  const testTitle = '【在线测试】读者留言邮件通知连通性验证';
 
   const result = await sendCommentNotification({
     slug: testSlug,
     postTitle: testTitle,
-    author: '测试读者 (Vercel Test)',
-    email: 'test-reader@example.com',
+    author: 'Vercel 连通性测试员',
+    email: 'test-bot@coderli.com',
     site: 'https://www.coderli.com',
-    content: '这是一条来自 Vercel 线上环境的自动测试留言。如果您收到了这封邮件，说明邮件通知系统已完全配置成功！',
+    content: '这是一条用于排查 Vercel 与 Resend 发信连通性的线上测试留言。如果您在 Gmail 收到此邮件，说明系统已全线打通！',
   });
 
   return NextResponse.json({
@@ -47,11 +48,13 @@ export async function GET(req: NextRequest) {
       activeProvider,
       recipient,
       hasResendApiKey: hasResend,
-      resendKeyPrefix: process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.slice(0, 6)}***` : null,
-      resendFrom: process.env.RESEND_FROM || 'OneCoder <onboarding@resend.dev>',
+      resendKeyLength: rawKey.length,
+      resendKeyPrefix: hasResend ? `${rawKey.slice(0, 6)}***` : null,
+      resendFromConfigured: process.env.RESEND_FROM || '(未配置，系统默认使用 OneCoder <onboarding@resend.dev>)',
       hasSmtpConfig: hasSmtp,
       smtpHost: process.env.SMTP_HOST || null,
       smtpUser: process.env.SMTP_USER || null,
+      vercelEnv: process.env.VERCEL_ENV || 'production',
     },
   });
 }
