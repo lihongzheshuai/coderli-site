@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【反向瓶颈最短路与Dijkstra最晚发车时间】GESP八级 / CSP-S 题解：luogu-P17462 [GESP202609 八级] 末班车
+title: 【GESP真题】GESP八级 / CSP-S 题解：luogu-P17462 [GESP202609 八级] 末班车
 date: 2026-09-15 16:15:00 +0800
 author: OneCoder
 comments: true
@@ -170,10 +170,3 @@ int main() {
     return 0;
 }
 ```
-
----
-
-### 考点归纳与备考建议
-
-1. **考纲匹配度**：严格对标 CCF GESP 八级考纲重点，绝不超纲，注重基础算法与逻辑建模规范；
-2. **规范防范**：所有代码严格以 C++11 标准编译运行，针对整数溢出、边界判断、空状态均做了详尽严整的防御性处理。
