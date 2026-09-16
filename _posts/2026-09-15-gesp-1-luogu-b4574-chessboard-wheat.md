@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 【单层循环累加与倍增递推】GESP一级题解：luogu-B4574 [GESP202609 一级] 棋盘上的奖赏
+title: 【GESP真题】GESP一级题解：luogu-B4574 [GESP202609 一级] 棋盘上的奖赏
 date: 2026-09-15 15:05:00 +0800
 author: OneCoder
 comments: true
