@@ -268,10 +268,13 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
     try {
       let resendFrom = (process.env.RESEND_FROM || '').trim();
 
-      // Guard: Resend strictly disallows using public provider domains (like gmail/qq/163) in from.
-      // If user mistakenly configured from as their personal email, automatically fallback to onboarding@resend.dev
-      if (
-        !resendFrom ||
+      // Ensure valid "Name <email@domain.com>" or "email@domain.com" format required by Resend
+      if (!resendFrom) {
+        resendFrom = 'OneCoder Blog <onboarding@resend.dev>';
+      } else if (!resendFrom.includes('@')) {
+        // If user only configured a display name like "OneCoder Blog", append the official Resend test address
+        resendFrom = `${resendFrom} <onboarding@resend.dev>`;
+      } else if (
         resendFrom.includes('@gmail.com') ||
         resendFrom.includes('@qq.com') ||
         resendFrom.includes('@163.com') ||
@@ -279,7 +282,7 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
         resendFrom.includes('@hotmail.com') ||
         resendFrom.includes('@outlook.com')
       ) {
-        resendFrom = 'OneCoder <onboarding@resend.dev>';
+        resendFrom = 'OneCoder Blog <onboarding@resend.dev>';
       }
 
       // Only pass reply_to if it is a syntactically valid email to avoid Resend 422 errors
