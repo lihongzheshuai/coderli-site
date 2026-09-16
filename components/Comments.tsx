@@ -6,7 +6,7 @@ import { CommentItem } from '@/lib/db';
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
-export default function Comments({ slug }: { slug: string }) {
+export default function Comments({ slug, postTitle }: { slug: string; postTitle?: string }) {
   const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`/api/comments/${slug}/`, fetcher);
   const [author, setAuthor] = useState('');
   const [email, setEmail] = useState('');
@@ -28,7 +28,7 @@ export default function Comments({ slug }: { slug: string }) {
       const res = await fetch(`/api/comments/${slug}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ author, email, site, content }),
+        body: JSON.stringify({ author, email, site, content, postTitle }),
       });
 
       const result = await res.json();

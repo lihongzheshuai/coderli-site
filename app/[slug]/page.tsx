@@ -209,7 +209,7 @@ export default async function PostPage({ params }: PageProps) {
           </div>
 
           {/* Comments Section */}
-          <Comments slug={post.slug} />
+          <Comments slug={post.slug} postTitle={post.title} />
         </article>
 
         {/* Right: Sticky TOC & Sticky Sidebar Ad & Popular Tags */}
