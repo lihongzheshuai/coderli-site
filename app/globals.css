@@ -199,12 +199,12 @@ body {
 /* Base Pre & Shiki styles */
 .code-block pre.shiki {
   margin: 0 !important;
-  padding: 1rem 0 !important;
+  padding: 0.75rem 0 !important;
   background-color: var(--code-editor-bg) !important;
   overflow-x: auto;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.93rem;
-  line-height: 1.7;
+  font-size: 0.92rem;
+  line-height: 1.65;
   tab-size: 4;
   -moz-tab-size: 4;
   font-feature-settings: 'calt' 1, 'liga' 1;
@@ -212,7 +212,8 @@ body {
 
 /* Code element container inside pre */
 .code-block pre.shiki code {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 100%;
   width: max-content;
   box-sizing: border-box;
@@ -224,8 +225,8 @@ body {
   align-items: stretch;
   min-width: 100%;
   width: max-content;
-  min-height: 1.7rem;
   box-sizing: border-box;
+  line-height: 1.65;
   transition: background-color 0.12s ease;
 }
 
@@ -254,6 +255,7 @@ body {
   border-right: 1px solid var(--line-num-border);
   font-variant-numeric: tabular-nums;
   font-size: 0.82rem;
+  line-height: 1.65;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -264,10 +266,11 @@ body {
 
 /* Line Code Content */
 .code-block .line-content {
-  padding-left: 1.15rem;
-  padding-right: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 1.25rem;
   flex: 1;
   white-space: pre;
+  line-height: 1.65;
   box-sizing: border-box;
 }
 
@@ -277,27 +280,7 @@ body {
 }
 
 .code-block.hide-line-numbers .line-content {
-  padding-left: 1.35rem !important;
-}
-
-/* Word-wrap Toggled On */
-.code-block.code-wrap pre.shiki code {
-  width: 100% !important;
-}
-
-.code-block.code-wrap .line {
-  width: 100% !important;
-  align-items: flex-start;
-}
-
-.code-block.code-wrap .line-number {
-  align-items: flex-start;
-  padding-top: 0.15rem;
-}
-
-.code-block.code-wrap .line-content {
-  white-space: pre-wrap !important;
-  word-break: break-all;
+  padding-left: 1.25rem !important;
 }
 
 /* Custom Scrollbars for Code Blocks */

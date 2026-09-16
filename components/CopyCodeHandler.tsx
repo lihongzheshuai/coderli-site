@@ -68,19 +68,6 @@ export default function CopyCodeHandler() {
         linesBtn.classList.toggle('text-teal-400', !isCurrentlyHidden);
         return;
       }
-
-      // 3. Toggle word wrap handler
-      const wrapBtn = target.closest('.toggle-wrap-btn') as HTMLElement | null;
-      if (wrapBtn) {
-        const codeBlock = wrapBtn.closest('.code-block');
-        if (!codeBlock) return;
-        const isWrapped = codeBlock.classList.toggle('code-wrap');
-        wrapBtn.setAttribute('title', isWrapped ? '取消折行' : '自动折行');
-        wrapBtn.classList.toggle('text-teal-400', isWrapped);
-        wrapBtn.classList.toggle('bg-teal-500/10', isWrapped);
-        wrapBtn.classList.toggle('border-teal-500/30', isWrapped);
-        return;
-      }
     }
 
     document.addEventListener('click', handleDocumentClick);

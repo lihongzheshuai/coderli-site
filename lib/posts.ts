@@ -611,13 +611,6 @@ async function highlightCodeBlocks(html: string): Promise<string> {
                 </svg>
                 <span class="btn-text hidden sm:inline">行号</span>
               </button>
-              <button type="button" class="code-action-btn toggle-wrap-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="自动折行/单行滚动" aria-label="切换自动换行">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="9 10 4 15 9 20"></polyline>
-                  <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
-                </svg>
-                <span class="btn-text hidden sm:inline">折行</span>
-              </button>
               <button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" data-code="${encodeURIComponent(rawCode)}" title="复制代码" aria-label="复制代码">
                 <svg class="copy-icon w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
