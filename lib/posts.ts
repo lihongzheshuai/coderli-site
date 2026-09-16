@@ -20,8 +20,8 @@ import remarkRehype from 'remark-rehype';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
-import { codeToHtml } from 'shiki';
-import { PostMeta, PostDetail } from '../types/post';
+import { codeToHtml, bundledLanguages, isPlainLang, isSpecialLang } from 'shiki';
+import type { PostMeta, PostDetail } from '../types/post';
 
 const postsDirectory = path.join(process.cwd(), '_posts');
 
@@ -472,8 +472,88 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&amp;/g, '&');
 }
 
+function getLangDisplayName(lang: string): string {
+  const map: Record<string, string> = {
+    cpp: 'C++',
+    csharp: 'C#',
+    cs: 'C#',
+    c: 'C',
+    java: 'Java',
+    python: 'Python',
+    py: 'Python',
+    javascript: 'JavaScript',
+    js: 'JavaScript',
+    typescript: 'TypeScript',
+    ts: 'TypeScript',
+    bash: 'Bash',
+    sh: 'Bash',
+    shell: 'Shell',
+    zsh: 'Zsh',
+    sql: 'SQL',
+    html: 'HTML',
+    css: 'CSS',
+    json: 'JSON',
+    yaml: 'YAML',
+    yml: 'YAML',
+    xml: 'XML',
+    markdown: 'Markdown',
+    md: 'Markdown',
+    go: 'Go',
+    rust: 'Rust',
+    text: 'Code',
+  };
+  return map[lang.toLowerCase()] || lang.toUpperCase();
+}
+
+function resolveLanguage(rawLang?: string): string {
+  const normalized = (rawLang || 'text').toLowerCase().trim();
+  const aliasMap: Record<string, string> = {
+    'c++': 'cpp',
+    'c#': 'csharp',
+    cs: 'csharp',
+    sh: 'bash',
+    shell: 'bash',
+    zsh: 'bash',
+    console: 'bash',
+    py: 'python',
+    js: 'javascript',
+    ts: 'typescript',
+    yml: 'yaml',
+    md: 'markdown',
+    txt: 'text',
+    plaintext: 'text',
+  };
+  const target = aliasMap[normalized] || normalized;
+  if (target in bundledLanguages || isPlainLang(target) || isSpecialLang(target)) {
+    return target;
+  }
+  return 'text';
+}
+
+const lineNumbersTransformer = {
+  name: 'code-line-numbers',
+  line(node: any, line: number) {
+    const lineNumNode = {
+      type: 'element',
+      tagName: 'span',
+      properties: {
+        className: ['line-number'],
+        'aria-hidden': 'true',
+      },
+      children: [{ type: 'text', value: String(line) }],
+    };
+    const lineContentNode = {
+      type: 'element',
+      tagName: 'span',
+      properties: { className: ['line-content'] },
+      children: node.children,
+    };
+    node.children = [lineNumNode, lineContentNode];
+  },
+};
+
 async function highlightCodeBlocks(html: string): Promise<string> {
-  const codeBlockRegex = /<pre><code(?:\s+class="language-([a-zA-Z0-9_-]+)")?>([\s\S]*?)<\/code><\/pre>/g;
+  const codeBlockRegex = /<pre\b[^>]*><code(?:\s+class="language-([^"\s>]+)"[^>]*)?>([\s\S]*?)<\/code><\/pre>/gi;
   const matches = Array.from(html.matchAll(codeBlockRegex));
 
   if (matches.length === 0) {
@@ -484,37 +564,68 @@ async function highlightCodeBlocks(html: string): Promise<string> {
   for (const match of matches) {
     const fullMatch = match[0];
     const rawLang = match[1] || 'text';
-    let lang = rawLang.toLowerCase();
+    const lang = resolveLanguage(rawLang);
+    const langDisplay = getLangDisplayName(rawLang || lang);
 
-    // Map common aliases
-    if (['c++', 'cpp'].includes(lang)) lang = 'cpp';
-    if (['c#', 'csharp'].includes(lang)) lang = 'csharp';
-    if (['sh', 'bash', 'shell', 'console'].includes(lang)) lang = 'bash';
-    if (['yml', 'yaml'].includes(lang)) lang = 'yaml';
-    if (['py', 'python'].includes(lang)) lang = 'python';
-
-    // Thoroughly decode all HTML entities (numeric and named) before sending to Shiki
+    // Thoroughly decode all HTML entities before sending to Shiki
     const rawCode = decodeHtmlEntities(match[2]);
+    const normalizedCode = rawCode.replace(/\r\n/g, '\n').replace(/\n$/, '');
+    const lines = normalizedCode.split('\n');
+    const lineCount = lines.length;
+    const digits = String(lineCount).length;
+    const gutterWidth = `${Math.max(2, digits) * 0.65 + 1.25}rem`;
 
     try {
       const highlighted = await codeToHtml(rawCode, {
         lang: lang as any,
-        theme: 'github-dark',
+        theme: 'one-dark-pro',
+        transformers: [lineNumbersTransformer],
       });
 
-      // Wrap with custom UI container (dots, title, copy button)
+      // Wrap with custom UI container (macOS dots, language, line count, line number & wrap toggles, copy button)
       const enhanced = `
-        <div class="code-block my-6 rounded-lg overflow-hidden border border-slate-700 shadow-md">
-          <div class="code-header flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-slate-800 text-xs font-mono text-slate-400">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block"></span>
-              <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
-              <span class="ml-2">${lang.toUpperCase()}</span>
+        <div class="code-block my-6 rounded-xl overflow-hidden border border-slate-700/60 dark:border-slate-800 shadow-lg shadow-black/10" style="--ln-gutter-width: ${gutterWidth};">
+          <div class="code-header flex items-center justify-between px-3.5 py-2.5 bg-[#21252b] border-b border-[#181a1f] text-xs font-mono select-none">
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5" aria-hidden="true">
+                <span class="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/40 inline-block shadow-sm"></span>
+                <span class="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/40 inline-block shadow-sm"></span>
+                <span class="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/40 inline-block shadow-sm"></span>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-teal-500/10 text-teal-400 border border-teal-500/25">
+                ${langDisplay}
+              </span>
+              <span class="text-[11px] text-slate-400 font-mono">
+                ${lineCount} 行
+              </span>
             </div>
-            <button class="copy-code-btn px-2 py-0.5 rounded border border-slate-700 hover:bg-slate-800 text-slate-300 transition text-xs flex items-center gap-1" data-code="${encodeURIComponent(rawCode)}">
-              📋 复制代码
-            </button>
+            <div class="flex items-center gap-1.5">
+              <button type="button" class="code-action-btn toggle-lines-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="显示/隐藏行号" aria-label="切换行号">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="10" y1="6" x2="21" y2="6"></line>
+                  <line x1="10" y1="12" x2="21" y2="12"></line>
+                  <line x1="10" y1="18" x2="21" y2="18"></line>
+                  <path d="M4 6h1v4"></path>
+                  <path d="M4 10h2"></path>
+                  <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
+                </svg>
+                <span class="btn-text hidden sm:inline">行号</span>
+              </button>
+              <button type="button" class="code-action-btn toggle-wrap-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="自动折行/单行滚动" aria-label="切换自动换行">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 10 4 15 9 20"></polyline>
+                  <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                </svg>
+                <span class="btn-text hidden sm:inline">折行</span>
+              </button>
+              <button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" data-code="${encodeURIComponent(rawCode)}" title="复制代码" aria-label="复制代码">
+                <svg class="copy-icon w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span class="copy-label">复制</span>
+              </button>
+            </div>
           </div>
           ${highlighted}
         </div>

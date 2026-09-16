@@ -168,11 +168,149 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Shiki Code styling */
-.shiki {
-  padding: 1.35rem 1.35rem;
+/* ========================================================
+   Enhanced Code Block & Shiki Syntax Highlighting
+   ======================================================== */
+.code-block {
+  --code-editor-bg: #282c34;
+  --code-header-bg: #21252b;
+  --line-num-color: #5c6370;
+  --line-num-hover: #98a3b7;
+  --line-num-border: rgba(148, 163, 184, 0.12);
+  --line-hover-bg: rgba(255, 255, 255, 0.04);
+  background-color: var(--code-editor-bg);
+  position: relative;
+  margin: 1.75rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.25), 0 2px 6px -2px rgba(0, 0, 0, 0.15);
+}
+
+.code-header {
+  background-color: var(--code-header-bg);
+}
+
+.code-action-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+/* Base Pre & Shiki styles */
+.code-block pre.shiki {
+  margin: 0 !important;
+  padding: 1rem 0 !important;
+  background-color: var(--code-editor-bg) !important;
   overflow-x: auto;
-  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-  font-size: 0.96rem;
-  line-height: 1.75;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.93rem;
+  line-height: 1.7;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  font-feature-settings: 'calt' 1, 'liga' 1;
+}
+
+/* Code element container inside pre */
+.code-block pre.shiki code {
+  display: block;
+  min-width: 100%;
+  width: max-content;
+  box-sizing: border-box;
+}
+
+/* Each Line container */
+.code-block .line {
+  display: flex;
+  align-items: stretch;
+  min-width: 100%;
+  width: max-content;
+  min-height: 1.7rem;
+  box-sizing: border-box;
+  transition: background-color 0.12s ease;
+}
+
+.code-block .line:hover {
+  background-color: var(--line-hover-bg);
+}
+
+.code-block .line:hover .line-number {
+  color: var(--line-num-hover);
+}
+
+/* Line Number Gutter */
+.code-block .line-number {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: var(--ln-gutter-width, 2.75rem);
+  min-width: var(--ln-gutter-width, 2.75rem);
+  padding: 0 0.85rem 0 0.5rem;
+  text-align: right;
+  color: var(--line-num-color);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+  background-color: var(--code-editor-bg);
+  border-right: 1px solid var(--line-num-border);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: color 0.12s ease;
+}
+
+/* Line Code Content */
+.code-block .line-content {
+  padding-left: 1.15rem;
+  padding-right: 1.5rem;
+  flex: 1;
+  white-space: pre;
+  box-sizing: border-box;
+}
+
+/* Line Numbers Toggled Off */
+.code-block.hide-line-numbers .line-number {
+  display: none !important;
+}
+
+.code-block.hide-line-numbers .line-content {
+  padding-left: 1.35rem !important;
+}
+
+/* Word-wrap Toggled On */
+.code-block.code-wrap pre.shiki code {
+  width: 100% !important;
+}
+
+.code-block.code-wrap .line {
+  width: 100% !important;
+  align-items: flex-start;
+}
+
+.code-block.code-wrap .line-number {
+  align-items: flex-start;
+  padding-top: 0.15rem;
+}
+
+.code-block.code-wrap .line-content {
+  white-space: pre-wrap !important;
+  word-break: break-all;
+}
+
+/* Custom Scrollbars for Code Blocks */
+.code-block pre.shiki::-webkit-scrollbar {
+  height: 8px;
+}
+.code-block pre.shiki::-webkit-scrollbar-track {
+  background: var(--code-header-bg);
+}
+.code-block pre.shiki::-webkit-scrollbar-thumb {
+  background: #3e4451;
+  border-radius: 4px;
+}
+.code-block pre.shiki::-webkit-scrollbar-thumb:hover {
+  background: #5c6370;
 }
