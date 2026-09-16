@@ -60,10 +60,17 @@ function getPgPool(): PgPool | null {
           site VARCHAR(255) DEFAULT '',
           content TEXT NOT NULL,
           likes INTEGER NOT NULL DEFAULT 0,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          reply_to_id VARCHAR(64) DEFAULT NULL,
+          reply_to_author VARCHAR(100) DEFAULT NULL,
+          reply_to_content TEXT DEFAULT NULL
         );
+        ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS reply_to_id VARCHAR(64) DEFAULT NULL;
+        ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS reply_to_author VARCHAR(100) DEFAULT NULL;
+        ALTER TABLE post_comments ADD COLUMN IF NOT EXISTS reply_to_content TEXT DEFAULT NULL;
         CREATE INDEX IF NOT EXISTS idx_post_comments_slug ON post_comments(slug);
         CREATE INDEX IF NOT EXISTS idx_post_comments_created_at ON post_comments(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_post_comments_reply_to ON post_comments(reply_to_id);
       `)
       .catch(err => {
         console.warn('[DB] Auto-migration error:', err.message);
@@ -233,6 +240,9 @@ export interface CommentItem {
   content: string;
   createdAt: string;
   likes: number;
+  replyToId?: string;
+  replyToAuthor?: string;
+  replyToContent?: string;
 }
 
 function readLocalComments(): Record<string, CommentItem[]> {
@@ -255,7 +265,11 @@ export async function getPostComments(slug: string): Promise<CommentItem[]> {
   if (pg) {
     try {
       const res = await pg.query(
-        'SELECT id, slug, author, email, site, content, created_at, likes FROM post_comments WHERE slug = $1 ORDER BY created_at DESC',
+        `SELECT id, slug, author, email, site, content, created_at, likes,
+                reply_to_id, reply_to_author, reply_to_content
+         FROM post_comments
+         WHERE slug = $1
+         ORDER BY created_at DESC`,
         [slug]
       );
       return res.rows.map(r => ({
@@ -267,6 +281,9 @@ export async function getPostComments(slug: string): Promise<CommentItem[]> {
         content: r.content,
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
         likes: Number(r.likes || 0),
+        replyToId: r.reply_to_id || undefined,
+        replyToAuthor: r.reply_to_author || undefined,
+        replyToContent: r.reply_to_content || undefined,
       }));
     } catch (err) {
       console.warn('[DB] PostgreSQL getPostComments fallback to local:', (err as Error).message);
@@ -277,7 +294,11 @@ export async function getPostComments(slug: string): Promise<CommentItem[]> {
   if (my) {
     try {
       const [rows] = await my.query<any[]>(
-        'SELECT id, slug, author, email, site, content, created_at, likes FROM post_comments WHERE slug = ? ORDER BY created_at DESC',
+        `SELECT id, slug, author, email, site, content, created_at, likes,
+                reply_to_id, reply_to_author, reply_to_content
+         FROM post_comments
+         WHERE slug = ?
+         ORDER BY created_at DESC`,
         [slug]
       );
       if (Array.isArray(rows)) {
@@ -290,6 +311,9 @@ export async function getPostComments(slug: string): Promise<CommentItem[]> {
           content: r.content,
           createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
           likes: Number(r.likes || 0),
+          replyToId: r.reply_to_id || undefined,
+          replyToAuthor: r.reply_to_author || undefined,
+          replyToContent: r.reply_to_content || undefined,
         }));
       }
     } catch (err) {
@@ -303,7 +327,15 @@ export async function getPostComments(slug: string): Promise<CommentItem[]> {
 
 export async function addPostComment(
   slug: string,
-  comment: { author: string; email: string; site?: string; content: string }
+  comment: {
+    author: string;
+    email: string;
+    site?: string;
+    content: string;
+    replyToId?: string;
+    replyToAuthor?: string;
+    replyToContent?: string;
+  }
 ): Promise<CommentItem> {
   const newItem: CommentItem = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -314,15 +346,33 @@ export async function addPostComment(
     content: comment.content,
     createdAt: new Date().toISOString(),
     likes: 0,
+    replyToId: comment.replyToId,
+    replyToAuthor: comment.replyToAuthor,
+    replyToContent: comment.replyToContent,
   };
 
   const pg = getPgPool();
   if (pg) {
     try {
       await pg.query(
-        `INSERT INTO post_comments (id, slug, author, email, site, content, created_at, likes)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [newItem.id, newItem.slug, newItem.author, newItem.email, newItem.site || '', newItem.content, newItem.createdAt, newItem.likes]
+        `INSERT INTO post_comments (
+           id, slug, author, email, site, content, created_at, likes,
+           reply_to_id, reply_to_author, reply_to_content
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [
+          newItem.id,
+          newItem.slug,
+          newItem.author,
+          newItem.email,
+          newItem.site || '',
+          newItem.content,
+          newItem.createdAt,
+          newItem.likes,
+          newItem.replyToId || null,
+          newItem.replyToAuthor || null,
+          newItem.replyToContent || null,
+        ]
       );
       return newItem;
     } catch (err) {
@@ -334,9 +384,24 @@ export async function addPostComment(
   if (my) {
     try {
       await my.query(
-        `INSERT INTO post_comments (id, slug, author, email, site, content, created_at, likes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [newItem.id, newItem.slug, newItem.author, newItem.email, newItem.site || '', newItem.content, newItem.createdAt, newItem.likes]
+        `INSERT INTO post_comments (
+           id, slug, author, email, site, content, created_at, likes,
+           reply_to_id, reply_to_author, reply_to_content
+         )
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          newItem.id,
+          newItem.slug,
+          newItem.author,
+          newItem.email,
+          newItem.site || '',
+          newItem.content,
+          newItem.createdAt,
+          newItem.likes,
+          newItem.replyToId || null,
+          newItem.replyToAuthor || null,
+          newItem.replyToContent || null,
+        ]
       );
       return newItem;
     } catch (err) {

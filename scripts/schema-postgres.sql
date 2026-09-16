@@ -17,9 +17,13 @@ CREATE TABLE IF NOT EXISTS post_comments (
   site VARCHAR(255) DEFAULT '',
   content TEXT NOT NULL,
   likes INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  reply_to_id VARCHAR(64) DEFAULT NULL,
+  reply_to_author VARCHAR(100) DEFAULT NULL,
+  reply_to_content TEXT DEFAULT NULL
 );
 
 -- 3. 索引优化 (加速单文章留言查询与按时间排序)
 CREATE INDEX IF NOT EXISTS idx_post_comments_slug ON post_comments(slug);
 CREATE INDEX IF NOT EXISTS idx_post_comments_created_at ON post_comments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_post_comments_reply_to ON post_comments(reply_to_id);

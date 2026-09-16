@@ -19,7 +19,11 @@ CREATE TABLE IF NOT EXISTS `post_comments` (
   `content` TEXT NOT NULL,
   `likes` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `reply_to_id` VARCHAR(64) DEFAULT NULL,
+  `reply_to_author` VARCHAR(100) DEFAULT NULL,
+  `reply_to_content` TEXT DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_post_comments_slug` (`slug`),
-  KEY `idx_post_comments_created_at` (`created_at` DESC)
+  KEY `idx_post_comments_created_at` (`created_at` DESC),
+  KEY `idx_post_comments_reply_to` (`reply_to_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

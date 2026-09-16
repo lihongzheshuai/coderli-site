@@ -53,7 +53,16 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
   const { slug } = params;
   try {
     const body = await req.json();
-    const { author, email, site, content, postTitle: customPostTitle } = body;
+    const {
+      author,
+      email,
+      site,
+      content,
+      postTitle: customPostTitle,
+      replyToId,
+      replyToAuthor,
+      replyToContent,
+    } = body;
 
     if (!author?.trim() || !content?.trim()) {
       return NextResponse.json({ error: '请填写称呼与留言内容' }, { status: 400 });
@@ -64,6 +73,9 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       email: email?.trim()?.slice(0, 100) || '',
       site: site?.trim()?.slice(0, 200) || '',
       content: content.trim().slice(0, 2000),
+      replyToId: replyToId ? String(replyToId).slice(0, 64) : undefined,
+      replyToAuthor: replyToAuthor ? String(replyToAuthor).trim().slice(0, 50) : undefined,
+      replyToContent: replyToContent ? String(replyToContent).trim().slice(0, 500) : undefined,
     });
 
     // Resolve post title for email notification with multiple fallbacks for Vercel Serverless
@@ -111,6 +123,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         content: newComment.content,
         createdAt: newComment.createdAt,
         siteUrl,
+        replyToAuthor: newComment.replyToAuthor,
+        replyToContent: newComment.replyToContent,
       });
     } catch (emailErr) {
       console.error('[Comment API] Failed sending email notification:', emailErr);

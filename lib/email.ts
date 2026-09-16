@@ -9,6 +9,8 @@ export interface CommentNotificationData {
   content: string;
   createdAt?: string;
   siteUrl?: string;
+  replyToAuthor?: string;
+  replyToContent?: string;
 }
 
 function escapeHtml(str: string): string {
@@ -46,6 +48,8 @@ function buildHtmlTemplate({
   site,
   content,
   formattedTime,
+  replyToAuthor,
+  replyToContent,
 }: {
   postTitle: string;
   postUrl: string;
@@ -54,12 +58,22 @@ function buildHtmlTemplate({
   site?: string;
   content: string;
   formattedTime: string;
+  replyToAuthor?: string;
+  replyToContent?: string;
 }): string {
   const safeAuthor = escapeHtml(author);
   const safeTitle = escapeHtml(postTitle);
   const safeContent = escapeHtml(content).replace(/\n/g, '<br/>');
   const safeEmail = email ? escapeHtml(email) : '';
   const safeSite = site ? escapeHtml(site) : '';
+  const safeReplyAuthor = replyToAuthor ? escapeHtml(replyToAuthor) : '';
+  const safeReplyContent = replyToContent ? escapeHtml(replyToContent).replace(/\n/g, '<br/>') : '';
+
+  const isReply = !!safeReplyAuthor;
+  const headerTitle = isReply ? '💬 OneCoder 博客 · 读者回复通知' : '💬 OneCoder 博客 · 读者留言通知';
+  const headerSubtitle = isReply
+    ? `读者 <strong>${safeAuthor}</strong> 回复了 <strong>@${safeReplyAuthor}</strong> 的讨论`
+    : `您的博客收到了一条新读者留言，请及时查阅与交流。`;
 
   return `
 <!DOCTYPE html>
@@ -67,7 +81,7 @@ function buildHtmlTemplate({
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新读者留言通知</title>
+  <title>${headerTitle}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; -webkit-font-smoothing: antialiased;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f8; padding: 30px 15px;">
@@ -79,10 +93,10 @@ function buildHtmlTemplate({
           <tr>
             <td style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); padding: 26px 32px; text-align: left;">
               <h1 style="margin: 0; font-size: 20px; color: #ffffff; font-weight: 700; letter-spacing: 0.5px;">
-                💬 OneCoder 博客 · 读者留言通知
+                ${headerTitle}
               </h1>
               <p style="margin: 6px 0 0 0; font-size: 13px; color: #ccfbf1;">
-                您的博客收到了一条新读者留言，请及时查阅与交流。
+                ${headerSubtitle}
               </p>
             </td>
           </tr>
@@ -114,25 +128,37 @@ function buildHtmlTemplate({
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 20px;">
                 <tr>
                   <td style="padding-bottom: 8px;">
-                    <strong style="font-size: 14px; color: #1e293b;">留言者信息：</strong>
+                    <strong style="font-size: 14px; color: #1e293b;">${isReply ? '回复者信息：' : '留言者信息：'}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td style="font-size: 13px; color: #475569; line-height: 1.8;">
-                    • <strong>昵称：</strong> ${safeAuthor}<br/>
+                    • <strong>昵称：</strong> ${safeAuthor} ${isReply ? `<span style="color: #0d9488; font-weight: 600;">(回复 @${safeReplyAuthor})</span>` : ''}<br/>
                     ${safeEmail ? `• <strong>邮箱：</strong> <a href="mailto:${safeEmail}" style="color: #0f766e; text-decoration: none;">${safeEmail}</a><br/>` : '• <strong>邮箱：</strong> <span style="color: #94a3b8;">（未填写）</span><br/>'}
                     ${safeSite ? `• <strong>个人主页：</strong> <a href="${safeSite}" target="_blank" style="color: #0f766e; text-decoration: none;">${safeSite}</a><br/>` : ''}
-                    • <strong>留言时间：</strong> ${formattedTime} (北京时间)
+                    • <strong>提交时间：</strong> ${formattedTime} (北京时间)
                   </td>
                 </tr>
               </table>
 
+              ${isReply ? `
+              <!-- Quoted Parent Comment -->
+              <div style="background-color: #f1f5f9; border-left: 3px solid #0d9488; border-radius: 6px; padding: 12px 14px; margin-bottom: 20px;">
+                <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">
+                  💬 引用的原留言 (@${safeReplyAuthor})：
+                </div>
+                <div style="font-size: 13px; color: #475569; line-height: 1.6; font-style: italic;">
+                  “${safeReplyContent}”
+                </div>
+              </div>
+              ` : ''}
+
               <!-- Comment Body Box -->
               <div style="margin-bottom: 28px;">
                 <div style="font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 8px;">
-                  留言详情内容：
+                  ${isReply ? '回复内容：' : '留言详情内容：'}
                 </div>
-                <div style="background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px; font-size: 14px; color: #1e293b; line-height: 1.7; word-break: break-word;">
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px; font-size: 14px; color: #1e293b; line-height: 1.7; word-break: break-word;">
                   ${safeContent}
                 </div>
               </div>
@@ -142,7 +168,7 @@ function buildHtmlTemplate({
                 <tr>
                   <td align="center">
                     <a href="${postUrl}" target="_blank" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 8px; box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);">
-                      👉 前往文章查看并回复留言
+                      👉 前往文章查看并回复
                     </a>
                   </td>
                 </tr>
@@ -187,6 +213,8 @@ function buildPlainText({
   site,
   content,
   formattedTime,
+  replyToAuthor,
+  replyToContent,
 }: {
   postTitle: string;
   postUrl: string;
@@ -195,20 +223,23 @@ function buildPlainText({
   site?: string;
   content: string;
   formattedTime: string;
+  replyToAuthor?: string;
+  replyToContent?: string;
 }): string {
+  const isReply = !!replyToAuthor;
   return `
-【OneCoder 博客】收到新读者留言！
+【OneCoder 博客】${isReply ? `收到来自 ${author} 的新回复！` : '收到新读者留言！'}
 
 文章标题：《${postTitle}》
 文章地址：${postUrl}
 
 --- 留言者信息 ---
-昵称：${author}
+昵称：${author} ${isReply ? `(回复 @${replyToAuthor})` : ''}
 邮箱：${email || '（未填写）'}
 主页：${site || '（未填写）'}
 时间：${formattedTime} (北京时间)
-
---- 留言内容 ---
+${isReply ? `\n--- 引用原留言 (@${replyToAuthor}) ---\n“${replyToContent}”\n` : ''}
+--- ${isReply ? '回复内容' : '留言内容'} ---
 ${content}
 
 ------------------
@@ -248,7 +279,10 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
   const postTitle = data.postTitle || data.slug;
   const formattedTime = formatCSTDate(data.createdAt);
 
-  const subject = `【OneCoder 博客】新留言提醒：《${postTitle}》 - 来自 ${data.author}`;
+  const subject = data.replyToAuthor
+    ? `【OneCoder 博客】新回复提醒：《${postTitle}》 - ${data.author} 回复了 @${data.replyToAuthor}`
+    : `【OneCoder 博客】新留言提醒：《${postTitle}》 - 来自 ${data.author}`;
+
   const html = buildHtmlTemplate({
     postTitle,
     postUrl,
@@ -257,6 +291,8 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
     site: data.site,
     content: data.content,
     formattedTime,
+    replyToAuthor: data.replyToAuthor,
+    replyToContent: data.replyToContent,
   });
   const text = buildPlainText({
     postTitle,
@@ -266,6 +302,8 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
     site: data.site,
     content: data.content,
     formattedTime,
+    replyToAuthor: data.replyToAuthor,
+    replyToContent: data.replyToContent,
   });
 
   // 1. Resend API (Recommended on Vercel Serverless: HTTP REST, no TCP port blocking, instant delivery)
