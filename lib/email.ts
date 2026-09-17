@@ -265,6 +265,57 @@ ${deleteUrl ? `\n------------------\n站长专属管理操作：\n如需一键�
 }
 
 /**
+ * Validate and auto-heal the `from` field for Resend API.
+ * Resend strictly requires either `email@example.com` or `Name <email@example.com>`.
+ * Auto-corrects missing closing `>`, unverified consumer domains, etc.
+ */
+function normalizeResendFrom(rawFrom?: string): string {
+  const defaultFrom = 'OneCoder Blog <onboarding@resend.dev>';
+  if (!rawFrom) return defaultFrom;
+  let from = rawFrom.trim();
+  if (!from) return defaultFrom;
+
+  // 1. Auto-close angle brackets if missing closing `>`: e.g. "OneCoder Blog <onboarding@resend.dev"
+  if (from.includes('<') && !from.includes('>')) {
+    from = `${from}>`;
+  }
+
+  // 2. Reject unverified consumer domains on Resend (which always cause 403/422)
+  if (
+    from.includes('@gmail.com') ||
+    from.includes('@qq.com') ||
+    from.includes('@163.com') ||
+    from.includes('@126.com') ||
+    from.includes('@hotmail.com') ||
+    from.includes('@outlook.com')
+  ) {
+    return defaultFrom;
+  }
+
+  // 3. Valid standard formats: "Name <email@domain.com>" or "email@domain.com"
+  const standardFullRegex = /^.+<[^\s@]+@[^\s@]+\.[^\s@]+>$/;
+  const standardBareRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (standardFullRegex.test(from) || standardBareRegex.test(from)) {
+    return from;
+  }
+
+  // 4. If only display name provided, append default address
+  if (!from.includes('@')) {
+    return `${from} <onboarding@resend.dev>`;
+  }
+
+  // 5. Extract email address and clean up display name
+  const match = from.match(/([^\s<@]+@[^\s@>]+\.[^\s@>]+)/);
+  if (match) {
+    const email = match[1];
+    const name = from.replace(match[0], '').replace(/[<>\s"']/g, ' ').trim() || 'OneCoder Blog';
+    return `${name} <${email}>`;
+  }
+
+  return defaultFrom;
+}
+
+/**
  * Send comment notification email to admin (default: wushikezuo@gmail.com)
  */
 export async function sendCommentNotification(data: CommentNotificationData): Promise<{
@@ -338,24 +389,7 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
   const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
   if (resendApiKey) {
     try {
-      let resendFrom = (process.env.RESEND_FROM || '').trim();
-
-      // Ensure valid "Name <email@domain.com>" or "email@domain.com" format required by Resend
-      if (!resendFrom) {
-        resendFrom = 'OneCoder Blog <onboarding@resend.dev>';
-      } else if (!resendFrom.includes('@')) {
-        // If user only configured a display name like "OneCoder Blog", append the official Resend test address
-        resendFrom = `${resendFrom} <onboarding@resend.dev>`;
-      } else if (
-        resendFrom.includes('@gmail.com') ||
-        resendFrom.includes('@qq.com') ||
-        resendFrom.includes('@163.com') ||
-        resendFrom.includes('@126.com') ||
-        resendFrom.includes('@hotmail.com') ||
-        resendFrom.includes('@outlook.com')
-      ) {
-        resendFrom = 'OneCoder Blog <onboarding@resend.dev>';
-      }
+      const resendFrom = normalizeResendFrom(process.env.RESEND_FROM);
 
       // Only pass reply_to if it is a syntactically valid email to avoid Resend 422 errors
       const isValidEmail = (em?: string) => !!(em && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.trim()));

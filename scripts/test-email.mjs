@@ -64,12 +64,23 @@ console.log(`测试文章标题: ${testTitle}`);
 console.log(`测试文章地址: ${testPostUrl}`);
 console.log('------------------------------------------------------');
 
+function normalizeResendFrom(rawFrom) {
+  const defaultFrom = 'OneCoder Blog <onboarding@resend.dev>';
+  if (!rawFrom) return defaultFrom;
+  let from = rawFrom.trim();
+  if (!from) return defaultFrom;
+  if (from.includes('<') && !from.includes('>')) {
+    from = `${from}>`;
+  }
+  return from;
+}
+
 async function testResend() {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return null;
 
   console.log('[Mode] 检测到 RESEND_API_KEY，使用 Resend API 发送测试邮件...');
-  const from = process.env.RESEND_FROM || 'OneCoder Blog <onboarding@resend.dev>';
+  const from = normalizeResendFrom(process.env.RESEND_FROM);
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
