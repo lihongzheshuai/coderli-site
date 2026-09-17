@@ -53,7 +53,7 @@ interface ReplyTarget {
 
 export default function Comments({ slug, postTitle }: { slug: string; postTitle?: string }) {
   const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`/api/comments/${slug}/`, fetcher);
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState('匿名');
   const [email, setEmail] = useState('');
   const [site, setSite] = useState('');
   const [content, setContent] = useState('');
@@ -71,7 +71,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       const saved = localStorage.getItem('onecoder_comment_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.author) setAuthor(parsed.author);
+        if (parsed.author && parsed.author.trim()) setAuthor(parsed.author.trim());
         if (parsed.email) setEmail(parsed.email);
         if (parsed.site) setSite(parsed.site);
       }
@@ -129,7 +129,8 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!author.trim() || !content.trim()) return;
+    const finalAuthor = author.trim() || '匿名';
+    if (!content.trim()) return;
 
     setIsSubmitting(true);
     setMessage('');
@@ -139,7 +140,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       try {
         localStorage.setItem(
           'onecoder_comment_user',
-          JSON.stringify({ author: author.trim(), email: email.trim(), site: site.trim() })
+          JSON.stringify({ author: finalAuthor, email: email.trim(), site: site.trim() })
         );
       } catch {
         // ignore
@@ -149,7 +150,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          author: author.trim(),
+          author: finalAuthor,
           email: email.trim(),
           site: site.trim(),
           content: content.trim(),
@@ -330,10 +331,9 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           <input
             type="text"
-            required
             value={author}
             onChange={e => setAuthor(e.target.value)}
-            placeholder="昵称 *"
+            placeholder="昵称 (默认匿名)"
             className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
           />
           <input

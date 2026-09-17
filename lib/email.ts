@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
+import { generateCommentDeleteToken } from '@/lib/admin';
 
 export interface CommentNotificationData {
+  commentId?: string;
   slug: string;
   postTitle?: string;
   author: string;
@@ -50,6 +52,7 @@ function buildHtmlTemplate({
   formattedTime,
   replyToAuthor,
   replyToContent,
+  deleteUrl,
 }: {
   postTitle: string;
   postUrl: string;
@@ -60,6 +63,7 @@ function buildHtmlTemplate({
   formattedTime: string;
   replyToAuthor?: string;
   replyToContent?: string;
+  deleteUrl?: string;
 }): string {
   const safeAuthor = escapeHtml(author);
   const safeTitle = escapeHtml(postTitle);
@@ -182,6 +186,15 @@ function buildHtmlTemplate({
               </div>
               ` : ''}
 
+              ${deleteUrl ? `
+              <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e2e8f0; text-align: center;">
+                <span style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 8px;">站长专属快捷管理通道</span>
+                <a href="${deleteUrl}" target="_blank" style="display: inline-block; background-color: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; text-decoration: none; font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 6px;">
+                  🗑️ 一键删除此留言 (仅管理员可见)
+                </a>
+              </div>
+              ` : ''}
+
             </td>
           </tr>
 
@@ -215,6 +228,7 @@ function buildPlainText({
   formattedTime,
   replyToAuthor,
   replyToContent,
+  deleteUrl,
 }: {
   postTitle: string;
   postUrl: string;
@@ -225,6 +239,7 @@ function buildPlainText({
   formattedTime: string;
   replyToAuthor?: string;
   replyToContent?: string;
+  deleteUrl?: string;
 }): string {
   const isReply = !!replyToAuthor;
   return `
@@ -245,6 +260,7 @@ ${content}
 ------------------
 您可以访问以下链接查看与回复留言：
 ${postUrl}
+${deleteUrl ? `\n------------------\n站长专属管理操作：\n如需一键删除此条留言，请点击以下管理链接：\n${deleteUrl}\n` : ''}
 `.trim();
 }
 
@@ -279,6 +295,12 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
   const postTitle = data.postTitle || data.slug;
   const formattedTime = formatCSTDate(data.createdAt);
 
+  let deleteUrl: string | undefined;
+  if (data.commentId) {
+    const token = generateCommentDeleteToken(data.commentId);
+    deleteUrl = `${siteUrl}/api/comments/delete?id=${encodeURIComponent(data.commentId)}&token=${token}`;
+  }
+
   const subject = data.replyToAuthor
     ? `【OneCoder 博客】新回复提醒：《${postTitle}》 - ${data.author} 回复了 @${data.replyToAuthor}`
     : `【OneCoder 博客】新留言提醒：《${postTitle}》 - 来自 ${data.author}`;
@@ -293,6 +315,7 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
     formattedTime,
     replyToAuthor: data.replyToAuthor,
     replyToContent: data.replyToContent,
+    deleteUrl,
   });
   const text = buildPlainText({
     postTitle,
@@ -304,6 +327,7 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
     formattedTime,
     replyToAuthor: data.replyToAuthor,
     replyToContent: data.replyToContent,
+    deleteUrl,
   });
 
   // 1. Resend API (Recommended on Vercel Serverless: HTTP REST, no TCP port blocking, instant delivery)

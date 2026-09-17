@@ -64,12 +64,14 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       replyToContent,
     } = body;
 
-    if (!author?.trim() || !content?.trim()) {
-      return NextResponse.json({ error: '请填写称呼与留言内容' }, { status: 400 });
+    if (!content?.trim()) {
+      return NextResponse.json({ error: '请填写留言内容' }, { status: 400 });
     }
 
+    const commentAuthor = (author?.trim() || '匿名').slice(0, 50);
+
     const newComment = await addPostComment(slug, {
-      author: author.trim().slice(0, 50),
+      author: commentAuthor,
       email: email?.trim()?.slice(0, 100) || '',
       site: site?.trim()?.slice(0, 200) || '',
       content: content.trim().slice(0, 2000),
@@ -115,6 +117,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     // Send email notification to blog owner (wushikezuo@gmail.com)
     try {
       await sendCommentNotification({
+        commentId: newComment.id,
         slug,
         postTitle: postTitle || slug,
         author: newComment.author,

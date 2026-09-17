@@ -418,6 +418,122 @@ export async function addPostComment(
   return newItem;
 }
 
+export async function getCommentById(id: string): Promise<CommentItem | null> {
+  const pg = getPgPool();
+  if (pg) {
+    try {
+      const res = await pg.query(
+        `SELECT id, slug, author, email, site, content, created_at, likes,
+                reply_to_id, reply_to_author, reply_to_content
+         FROM post_comments
+         WHERE id = $1`,
+        [id]
+      );
+      if (res.rows.length > 0) {
+        const r = res.rows[0];
+        return {
+          id: r.id,
+          slug: r.slug,
+          author: r.author,
+          email: r.email,
+          site: r.site || undefined,
+          content: r.content,
+          createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+          likes: Number(r.likes || 0),
+          replyToId: r.reply_to_id || undefined,
+          replyToAuthor: r.reply_to_author || undefined,
+          replyToContent: r.reply_to_content || undefined,
+        };
+      }
+      return null;
+    } catch (err) {
+      console.warn('[DB] PostgreSQL getCommentById fallback to local:', (err as Error).message);
+    }
+  }
+
+  const my = getMySqlPool();
+  if (my) {
+    try {
+      const [rows] = await my.query<any[]>(
+        `SELECT id, slug, author, email, site, content, created_at, likes,
+                reply_to_id, reply_to_author, reply_to_content
+         FROM post_comments
+         WHERE id = ?`,
+        [id]
+      );
+      if (Array.isArray(rows) && rows.length > 0) {
+        const r = rows[0];
+        return {
+          id: r.id,
+          slug: r.slug,
+          author: r.author,
+          email: r.email,
+          site: r.site || undefined,
+          content: r.content,
+          createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+          likes: Number(r.likes || 0),
+          replyToId: r.reply_to_id || undefined,
+          replyToAuthor: r.reply_to_author || undefined,
+          replyToContent: r.reply_to_content || undefined,
+        };
+      }
+      return null;
+    } catch (err) {
+      console.warn('[DB] MySQL getCommentById fallback to local:', (err as Error).message);
+    }
+  }
+
+  const all = readLocalComments();
+  for (const slug of Object.keys(all)) {
+    const found = all[slug]?.find(c => c.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+export async function deletePostComment(id: string): Promise<{ success: boolean; comment?: CommentItem }> {
+  const existing = await getCommentById(id);
+
+  const pg = getPgPool();
+  if (pg) {
+    try {
+      const res = await pg.query('DELETE FROM post_comments WHERE id = $1', [id]);
+      if (res.rowCount && res.rowCount > 0) {
+        return { success: true, comment: existing || undefined };
+      }
+      return { success: false };
+    } catch (err) {
+      console.warn('[DB] PostgreSQL deletePostComment fallback to local:', (err as Error).message);
+    }
+  }
+
+  const my = getMySqlPool();
+  if (my) {
+    try {
+      const [delRes] = await my.query<any>('DELETE FROM post_comments WHERE id = ?', [id]);
+      if (delRes && delRes.affectedRows > 0) {
+        return { success: true, comment: existing || undefined };
+      }
+      return { success: false };
+    } catch (err) {
+      console.warn('[DB] MySQL deletePostComment fallback to local:', (err as Error).message);
+    }
+  }
+
+  const all = readLocalComments();
+  for (const slug of Object.keys(all)) {
+    const list = all[slug];
+    const idx = list.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      const removed = list.splice(idx, 1)[0];
+      all[slug] = list;
+      writeLocalComments(all);
+      return { success: true, comment: removed };
+    }
+  }
+  return { success: false };
+}
+
 export async function checkDbStatus(): Promise<{
   connected: boolean;
   type: string;
