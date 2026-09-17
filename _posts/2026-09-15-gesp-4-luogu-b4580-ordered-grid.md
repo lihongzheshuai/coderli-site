@@ -27,8 +27,6 @@ $$
 \begin{array}{|c|c|c|c|}\hline 1&3&2&5\\\hline 6&2&4&4\\\hline 5&4&1&3\\\hline\end{array}\xrightarrow{\text{每行升序排序}}\begin{array}{|c|c|c|c|}\hline 1&2&3&5\\\hline 2&4&4&6\\\hline 1&3&4&5\\\hline\end{array}\xrightarrow{\text{每列升序排序}}\begin{array}{|c|c|c|c|}\hline 1&2&3&5\\\hline 1&3&4&5\\\hline 2&4&4&6\\\hline\end{array}
 $$
 
-![有序网格排序过程示意图](/images/post/gesp/202609-b4580-grid.png)
-
 小 A 想知道二维网格经过以上排序后的结果。你能编写程序帮助他吗？
 
 ### 输入格式
