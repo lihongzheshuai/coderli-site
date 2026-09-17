@@ -16,7 +16,6 @@ categories: [GESP, 一级]
 > （5）掌握常量与变量的命名、定义、作用、初始化与赋值以及变量的自加与自减运算。  
 > （6）掌握基础算术表达式：加、减、乘、除、整除、求余。  
 > （9）掌握基础的数据类型的定义和使用（整型、实数型、字符型、布尔型）。
-> {: .prompt-info}
 
 **_一级考点系列：_**
 
@@ -25,7 +24,6 @@ categories: [GESP, 一级]
 > - [【GESP】C++一级考试大纲知识点梳理(考点3,5,6,9), (3) 变量、数据类型与输入输出](https://www.coderli.com/gesp-1-exam-syllabus-3-data-io/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点7,8,11), (4) 逻辑运算与分支结构](https://www.coderli.com/gesp-1-exam-syllabus-4-branching/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点12), (5) 循环结构](https://www.coderli.com/gesp-1-exam-syllabus-5-loops/)
->   {: .prompt-tip}
 
 <!--more-->
 

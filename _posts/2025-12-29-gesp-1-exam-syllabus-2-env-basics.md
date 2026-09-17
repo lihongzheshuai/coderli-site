@@ -16,7 +16,6 @@ GESP C++一级考试大纲的第`2`、`4`、`10`、`13`条考点主要涉及开�
 > （4）掌握标识符、关键字、常量、变量、表达式的概念。  
 > （10）掌握顺序结构程序的编写。  
 > （13）理解程序的注释和调试的概念。
-> {: .prompt-info}
 
 **_一级考点系列：_**
 
@@ -25,7 +24,6 @@ GESP C++一级考试大纲的第`2`、`4`、`10`、`13`条考点主要涉及开�
 > - [【GESP】C++一级考试大纲知识点梳理(考点3,5,6,9), (3) 变量、数据类型与输入输出](https://www.coderli.com/gesp-1-exam-syllabus-3-data-io/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点7,8,11), (4) 逻辑运算与分支结构](https://www.coderli.com/gesp-1-exam-syllabus-4-branching/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点12), (5) 循环结构](https://www.coderli.com/gesp-1-exam-syllabus-5-loops/)
->   {: .prompt-tip}
 
 <!--more-->
 

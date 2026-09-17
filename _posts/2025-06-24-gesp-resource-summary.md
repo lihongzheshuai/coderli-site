@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 【置顶】【GESP】C++ 认证学习资源汇总(26年1月8日更新)
-date: 2025-06-24 22:00 +0800
+title: 【置顶】【GESP】C++ 认证学习资源汇总(26年9月17日更新)
+date: 2026-09-17 10:00 +0800
 author: OneCoder
 comments: true
 math: true
@@ -14,10 +14,8 @@ categories: [GESP, 汇总]
 本置顶将汇总本站发布的GESP认证考试相关资源，并进行了分类整理，不定期更新。
 
 > GESP资源专项站，Wiki式阅读，专项学习更友好: [**_GESP资源专项站_**](https://wiki.coderli.com/)
-> {: .prompt-info}
 
 > 所有源代码详见C++ 学习项目:[**_yummy-code(https://github.com/lihongzheshuai/yummy-code)_**](https://github.com/lihongzheshuai/yummy-code)
-> {: .prompt-info}
 
 ---
 
@@ -111,14 +109,37 @@ categories: [GESP, 汇总]
 | 考点                                                                                                                                                                                                                           | 知识讲解                                                                                                            | 考试级别                                                       |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | （1）掌握数学库常用函数（三角、对数、指数），三角函数包括 sin(x)，cos(x)等；对数函数包括 log10(x)：返回 x 以 10 为底的对数，log2(x)：返回 x 以 2 为底的对数；指数函数包括 exp(x)：计算指数函数，返回 x 的以 e 为底的指数函数。 | [【GESP】C++七级考试大纲知识点梳理, (1) 数学库常用函数](https://www.coderli.com/gesp-7-exam-syllabus-math-library/) | [七级](https://www.coderli.com/categories/%E4%B8%83%E7%BA%A7/) |
+| （2）掌握复杂动态规划（二维动态规划、动态规划最值优化）。包括区间动态规划、最长上升子序列（LIS）、最长公共子序列（LCS）等内容，理解基于滚动数组等降低动态规划空间复杂度的方法。                                             | [【GESP】C++七级考试大纲知识点梳理, (2) 复杂动态规划](https://www.coderli.com/gesp-7-exam-syllabus-complex-dp/)     | [七级](https://www.coderli.com/categories/%E4%B8%83%E7%BA%A7/) |
+| （3）图的定义及基本图论算法。包括图的定义、图的种类（有向图、无向图），图节点的度的概念。掌握编程时图的数据结构表示，以及基于深度优先搜索（DFS）和广度优先搜索（BFS）的图搜索与遍历方法，图的泛洪（flood fill）算法。     | [【GESP】C++七级考试大纲知识点梳理 (3) 图论基础与遍历算法](https://www.coderli.com/gesp-7-exam-syllabus-graph-theory/) | [七级](https://www.coderli.com/categories/%E4%B8%83%E7%BA%A7/) |
+| （4）掌握哈希表的概念与知识及其应用。                                                                                                                                                                                          | [【GESP】C++七级考试大纲知识点梳理 (4) 哈希表：概念、实现与应用](https://www.coderli.com/gesp-7-exam-syllabus-hash-table/)  | [七级](https://www.coderli.com/categories/%E4%B8%83%E7%BA%A7/) |
+
+### 八级（考纲）
+
+| 考点                                                                                                                                                                                                                | 知识讲解                                                                                                                   | 考试级别                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| （1）掌握计数原理。包括加法原理和乘法原理。                                                                                                                                                                         | [【GESP】C++八级考试大纲知识点梳理 (1) 计数原理：加法与乘法](https://www.coderli.com/gesp-8-exam-syllabus-counting-principles/) | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （2）掌握排列与组合基础知识。包括排列、组合的基本概念，及能实现基础排列和组合编程问题的一般方法。                                                                                                                   | [【GESP】C++八级考试大纲知识点梳理 (2) 排列与组合](https://www.coderli.com/gesp-8-exam-syllabus-permutations-combinations/)  | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （3）掌握杨辉三角形（又称帕斯卡三角形）的概念。                                                                                                                                                                     | [【GESP】C++八级考试大纲知识点梳理 (3) 杨辉三角与组合数](https://www.coderli.com/gesp-8-exam-syllabus-yanghui-triangle/)     | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （4）掌握倍增法概念。了解倍增法的时间复杂度。                                                                                                                                                                       | [【GESP】C++八级考试大纲知识点梳理 (4) 倍增法](https://www.coderli.com/gesp-8-exam-syllabus-binary-lifting/)                 | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （5）掌握代数与平面几何基础知识（初中数学部分）。包括方程的概念及一元一次方程、二元一次方程的基本求解技巧，求基础平面几何概念、求基本图形（如长方形、三角形、圆形等）的面积等。                                   | [【GESP】C++八级考试大纲知识点梳理 (5) 代数与平面几何](https://www.coderli.com/gesp-8-exam-syllabus-algebra-geometry/)         | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （6）掌握图论算法及综合应用技巧。包括最小生成树的概念、Kruskal 算法、Prim 算法，掌握最短路径的概念、单源最短路径的 Dijkstra 算法、Floyd 算法等。理解实现同一功能的不同算法的比较，并可以灵活解决相关问题。           | [【GESP】C++八级考试大纲知识点梳理 (6) 图论算法：最小生成树与最短路](https://www.coderli.com/gesp-8-exam-syllabus-graph-theory/)    | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （7）算法的时间和空间效率分析。能够掌握较复杂算法的时间和空间复杂度分析方法，能够分析各类算法（包括排序、查找、树和图遍历、搜索、分治及动态规划等）的时间和空间复杂度。                                           | [【GESP】C++八级考试大纲知识点梳理 (7) 算法的时间和空间效率分析](https://www.coderli.com/gesp-8-exam-syllabus-complexity-analysis/)    | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
+| （8）算法优化。理解不同方法求解一个问题在时间复杂度和空间复杂度上的差异，理解使用数学知识辅助求解问题的技巧，掌握一般的算法优化技巧。                                                                               | [【GESP】C++八级考试大纲知识点梳理 (8) 算法优化技巧](https://www.coderli.com/gesp-8-exam-syllabus-algorithm-optimization/)    | [八级](https://www.coderli.com/categories/%E5%85%AB%E7%BA%A7/) |
 
 ---
 
-## 考纲解密
+## 考纲解密与备考攻略
 
-| 标题                                                                                                                    | 考试级别 |
-| ----------------------------------------------------------------------------------------------------------------------- | -------- |
-| [GESP一级C++考纲考点揭秘：深度分析12套真题，揭秘4大核心考点与通关秘籍](https://www.coderli.com/gesp-secrets-1-level-1/) | 一级     |
+| 标题                                                                                                                    | 类别 / 级别 |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [GESP一级C++考纲考点揭秘：深度分析12套真题，揭秘4大核心考点与通关秘籍](https://www.coderli.com/gesp-secrets-1-level-1/) | 一级        |
+| [GESP二级C++考纲考点揭秘：揭秘高频考点与通关逻辑](https://www.coderli.com/gesp-secrets-2-level-2/)                     | 二级        |
+| [GESP三级C++考纲考点揭秘：揭秘你必须知道的4大核心考点](https://www.coderli.com/gesp-secrets-3-level-3/)                 | 三级        |
+| [GESP四级C++考纲考点揭秘：揭秘5个四级核心考点](https://www.coderli.com/gesp-secrets-4-level-4/)                         | 四级        |
+| [GESP五级通关秘籍：从真题逻辑看透算法进阶的5个“深水区”](https://www.coderli.com/gesp-secrets-5-level-5/)                 | 五级        |
+| [【GESP最新考纲解读】C++考生必读，考纲改了什么？C++11标准需要注意什么？](https://www.coderli.com/gesp-secrets-6-new-syllabus/) | 考纲解读    |
+| [GESP 1-5级编程题核心考点与备考攻略及真题分类](https://www.coderli.com/gesp-common-levels-1-5-guide/)                 | 备考攻略    |
+| [【亲子编程GESP CSP】亲子学、教之路的回顾交流](https://www.coderli.com/gesp-common-dad-struggle/)                     | 经验分享    |
 
 ---
 
@@ -262,6 +283,12 @@ categories: [GESP, 汇总]
 | 2025年9月  | 金字塔         | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [luogu-B4410-金字塔](https://www.coderli.com/gesp-1-luogu-b4410/)         |
 | 2025年12月 | 小杨的爱心快递 | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [小杨的爱心快递](https://www.coderli.com/gesp-1-202512-1/)                |
 | 2025年12月 | 手机电量显示   | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [手机电量显示](https://www.coderli.com/gesp-1-202512-2/)                  |
+| 2026年3月  | 交朋友         | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [luogu-B4495-交朋友](https://www.coderli.com/gesp-1-luogu-b4495/)         |
+| 2026年3月  | 数字替换       | [数位分离](https://www.coderli.com/tags/%E6%95%B0%E4%BD%8D%E5%88%86%E7%A6%BB/)、[循环结构](https://www.coderli.com/tags/%E5%BE%AA%E7%8E%AF%E7%BB%93%E6%9E%84/) | [luogu-B4496-数字替换](https://www.coderli.com/gesp-1-luogu-b4496/)       |
+| 2026年6月  | 去旅行         | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [luogu-B4551-去旅行](https://www.coderli.com/gesp-1-luogu-b4551/)         |
+| 2026年6月  | 交税           | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/) | [luogu-B4552-交税](https://www.coderli.com/gesp-1-luogu-b4552/)           |
+| 2026年9月  | 新龟兔赛跑     | [分支结构](https://www.coderli.com/tags/%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84/) | [luogu-B4573-新龟兔赛跑](https://www.coderli.com/gesp-1-luogu-b4573-turtle-rabbit/) |
+| 2026年9月  | 棋盘上的奖赏   | [循环结构](https://www.coderli.com/tags/%E5%BE%AA%E7%8E%AF%E7%BB%93%E6%9E%84/) | [luogu-B4574-棋盘上的奖赏](https://www.coderli.com/gesp-1-luogu-b4574-chessboard-wheat/) |
 
 ### 二级(编程题)
 
@@ -291,6 +318,12 @@ categories: [GESP, 汇总]
 | 2025年9月  | 菱形            | [多重循环/分支](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/)                                                                                 | [luogu-B4412-菱形](https://www.coderli.com/gesp-2-luogu-b4412/)            |
 | 2025年12月 | 环保能量球      | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/)                                                                                      | [环保能量球](https://www.coderli.com/gesp-2-202512-1/)                     |
 | 2025年12月 | 黄金格          | [多重循环](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/)                                                                                      | [黄金格](https://www.coderli.com/gesp-2-202512-2/)                         |
+| 2026年3月  | 数数           | [数位分离](https://www.coderli.com/tags/%E6%95%B0%E4%BD%8D%E5%88%86%E7%A6%BB/)、[循环结构](https://www.coderli.com/tags/%E5%BE%AA%E7%8E%AF%E7%BB%93%E6%9E%84/) | [luogu-B4497-数数](https://www.coderli.com/gesp-2-luogu-b4497/)           |
+| 2026年3月  | 画画           | [图形打印](https://www.coderli.com/tags/%E5%9B%BE%E5%BD%A2%E6%89%93%E5%8D%B0/)、[多重循环](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/) | [luogu-B4498-画画](https://www.coderli.com/gesp-2-luogu-b4498/)           |
+| 2026年6月  | 完全平方数计数 | [多重循环](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/)、[数学函数](https://www.coderli.com/tags/%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0/) | [luogu-B4553-完全平方数计数](https://www.coderli.com/gesp-2-luogu-b4553/) |
+| 2026年6月  | 菱形           | [多重循环](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/)                                                                                 | [luogu-B4554-菱形](https://www.coderli.com/gesp-2-luogu-b4554/)           |
+| 2026年9月  | 直角三角形     | [多重循环](https://www.coderli.com/tags/%E5%A4%9A%E9%87%8D%E5%BE%AA%E7%8E%AF/)、[数学函数](https://www.coderli.com/tags/%E6%95%B0%E5%AD%A6%E5%87%BD%E6%95%B0/) | [luogu-B4575-直角三角形](https://www.coderli.com/gesp-2-luogu-b4575-right-triangle/) |
+| 2026年9月  | 字符变换       | [多维数组](https://www.coderli.com/tags/%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84/)                                                                                 | [luogu-B4576-字符变换](https://www.coderli.com/gesp-2-luogu-b4576-char-transform/) |
 
 ### 三级(编程题)
 
@@ -318,6 +351,12 @@ categories: [GESP, 汇总]
 | 2025年9月  | 日历制作       | [一维数组](https://www.coderli.com/tags/%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84/)                                                                                 | [luogu-B4414-日历制作](https://www.coderli.com/gesp-3-luogu-b4414/)   |
 | 2025年12月 | 密码强度       | [字符串](https://www.coderli.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/)                                                                                            | [密码强度](https://www.coderli.com/gesp-3-202512-1/)                  |
 | 2025年12月 | 小杨的智慧购物 | [一维数组](https://www.coderli.com/tags/%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84/)                                                                                 | [小杨的智慧购物](https://www.coderli.com/gesp-3-202512-2/)            |
+| 2026年3月  | 二进制回文串   | [进制转换](https://www.coderli.com/tags/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/)、[模拟算法](https://www.coderli.com/tags/%E6%A8%A1%E6%8B%9F%E7%AE%97%E6%B3%95/) | [luogu-B4499-二进制回文串](https://www.coderli.com/gesp-3-luogu-b4499/)   |
+| 2026年3月  | 凯撒密码       | [字符串](https://www.coderli.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/)                                                                                            | [luogu-B4500-凯撒密码](https://www.coderli.com/gesp-3-luogu-b4500/)       |
+| 2026年6月  | 加密           | [一维数组](https://www.coderli.com/tags/%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84/)                                                                                 | [luogu-B4555-加密](https://www.coderli.com/gesp-3-luogu-b4555/)           |
+| 2026年6月  | 字符转换       | [字符串](https://www.coderli.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/)                                                                                            | [luogu-B4556-字符转换](https://www.coderli.com/gesp-3-luogu-b4556/)       |
+| 2026年9月  | 公共二进制位   | [位运算](https://www.coderli.com/tags/%E4%BD%8D%E8%BF%90%E7%AE%97/)                                                                                            | [luogu-B4577-公共二进制位](https://www.coderli.com/gesp-3-luogu-b4577-common-binary-bits/) |
+| 2026年9月  | 分割字符串     | [字符串](https://www.coderli.com/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/)、[模拟算法](https://www.coderli.com/tags/%E6%A8%A1%E6%8B%9F%E7%AE%97%E6%B3%95/)          | [luogu-B4578-分割字符串](https://www.coderli.com/gesp-3-luogu-b4578-split-string/) |
 
 ### 四级(编程题)
 
@@ -345,6 +384,12 @@ categories: [GESP, 汇总]
 | 2025年9月  | 最长连续段 | [排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)                                                                                                                                                                                                                | [luogu-B4416-最长连续段](https://www.coderli.com/gesp-4-luogu-b4416/)    |
 | 2025年12月 | 建造       | [基础语句](https://www.coderli.com/tags/%E5%9F%BA%E7%A1%80%E8%AF%AD%E5%8F%A5/)                                                                                                                                                                                          | [luogu-B4451-建造](https://www.coderli.com/gesp-4-202512-1-luogu-b4451/) |
 | 2025年12月 | 优先购买   | [排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)                                                                                                                                                                                                                | [优先购买](https://www.coderli.com/gesp-4-202512-2/)                     |
+| 2026年3月  | 山之谷     | [多维数组](https://www.coderli.com/tags/%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84/)                                                                                                                                                                                          | [luogu-B4501-山之谷](https://www.coderli.com/gesp-4-luogu-b4501/)         |
+| 2026年3月  | 礼盒排序   | [结构体](https://www.coderli.com/tags/%E7%BB%93%E6%9E%84%E4%BD%93/)、[排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)                                                                                                                                          | [luogu-B4502-礼盒排序](https://www.coderli.com/gesp-4-luogu-b4502/)       |
+| 2026年6月  | 扫雷       | [多维数组](https://www.coderli.com/tags/%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84/)、[模拟算法](https://www.coderli.com/tags/%E6%A8%A1%E6%8B%9F%E7%AE%97%E6%B3%95/)                                                                                                     | [luogu-B4557-扫雷](https://www.coderli.com/gesp-4-luogu-b4557/)           |
+| 2026年6月  | 身高体重指数 | [结构体](https://www.coderli.com/tags/%E7%BB%93%E6%9E%84%E4%BD%93/)、[排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)                                                                                                                                          | [luogu-B4558-身高体重指数](https://www.coderli.com/gesp-4-luogu-b4558/)   |
+| 2026年9月  | 新汉诺塔   | [递推](https://www.coderli.com/tags/%E9%80%92%E6%8E%A8/)                                                                                                                                                                                                                | [luogu-B4579-新汉诺塔](https://www.coderli.com/gesp-4-luogu-b4579-new-hanoi/) |
+| 2026年9月  | 有序网格   | [多维数组](https://www.coderli.com/tags/%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84/)、[排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)                                                                                                                                | [luogu-B4580-有序网格](https://www.coderli.com/gesp-4-luogu-b4580-ordered-grid/) |
 
 ### 五级(编程题)
 
@@ -370,6 +415,37 @@ categories: [GESP, 汇总]
 | 2025年9月  | 有趣的数字和   | [前缀和](https://www.coderli.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/)                                                           | [luogu-P14074-有趣的数字和](https://www.coderli.com/gesp-5-luogu-p14074/)      |
 | 2025年12月 | 数字移动       | [二分答案](https://www.coderli.com/tags/%E4%BA%8C%E5%88%86%E7%AD%94%E6%A1%88/)                                                | [luogu-P14917-数字移动](https://www.coderli.com/gesp-5-202512-1-luogu-p14917/) |
 | 2025年12月 | 相等序列       | [数论](https://www.coderli.com/tags/%E6%95%B0%E8%AE%BA/)                                                                      | [luogu-P14918-相等序列](https://www.coderli.com/gesp-5-202512-2-luogu-p14918/) |
+| 2026年3月  | 有限不循环小数 | [数论](https://www.coderli.com/tags/%E6%95%B0%E8%AE%BA/)                                                                      | [luogu-P15798-有限不循环小数](https://www.coderli.com/gesp-5-luogu-p15798/) |
+| 2026年3月  | 找数           | [二分查找](https://www.coderli.com/tags/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE/)                                                | [luogu-P15799-找数](https://www.coderli.com/gesp-5-luogu-p15799/)         |
+| 2026年6月  | 排排坐         | [排序](https://www.coderli.com/tags/%E6%8E%92%E5%BA%8F/)、[贪心](https://www.coderli.com/tags/%E8%B4%AA%E5%BF%83/)            | [luogu-P17010-排排坐](https://www.coderli.com/gesp-5-luogu-p17010/)       |
+| 2026年6月  | 晚宴           | [数论](https://www.coderli.com/tags/%E6%95%B0%E8%AE%BA/)                                                                      | [luogu-P17011-晚宴](https://www.coderli.com/gesp-5-luogu-p17011/)         |
+| 2026年9月  | 哥德巴赫猜想   | [数论](https://www.coderli.com/tags/%E6%95%B0%E8%AE%BA/)                                                                      | [luogu-P17455-哥德巴赫猜想](https://www.coderli.com/gesp-5-luogu-p17455-goldbach/) |
+| 2026年9月  | 饮品调制       | [贪心](https://www.coderli.com/tags/%E8%B4%AA%E5%BF%83/)                                                                      | [luogu-P17456-饮品调制](https://www.coderli.com/gesp-5-luogu-p17456-beverage-mix/) |
+
+### 六级(编程题)
+
+| 考试时间   | 题目名称   | 题目类型                                                                                                                      | 题目讲解                                                                     |
+| ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 2026年3月  | 选数       | [动态规划](https://www.coderli.com/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/)                                               | [luogu-P15800-选数](https://www.coderli.com/gesp-6-luogu-p15800/)           |
+| 2026年3月  | 完全二叉树 | [二叉树](https://www.coderli.com/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/)                                                           | [luogu-P15801-完全二叉树](https://www.coderli.com/gesp-6-luogu-p15801/)     |
+| 2026年6月  | 条形蛋糕   | [动态规划](https://www.coderli.com/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/)                                               | [luogu-P17012-条形蛋糕](https://www.coderli.com/gesp-6-luogu-p17012/)       |
+| 2026年6月  | 满二叉树   | [二叉树](https://www.coderli.com/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/)                                                           | [luogu-P17013-满二叉树](https://www.coderli.com/gesp-6-luogu-p17013/)       |
+| 2026年9月  | 数组划分   | [动态规划](https://www.coderli.com/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/)、[前缀和](https://www.coderli.com/tags/%E5%89%8D%E7%BC%80%E5%92%8C/) | [luogu-P17457-数组划分](https://www.coderli.com/gesp-6-luogu-p17457-array-partition/) |
+| 2026年9月  | 分树规划   | [树](https://www.coderli.com/tags/%E6%A0%91/)、[贪心](https://www.coderli.com/tags/%E8%B4%AA%E5%BF%83/)                     | [luogu-P17458-分树规划](https://www.coderli.com/gesp-6-luogu-p17458-tree-partition/) |
+
+### 七级(编程题)
+
+| 考试时间   | 题目名称 | 题目类型                                                                                                                                                   | 题目讲解                                                                     |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 2026年9月  | 必经之路 | [图论](https://www.coderli.com/tags/%E5%9B%BE%E8%AE%BA/)、[广度优先搜索](https://www.coderli.com/tags/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2/) | [luogu-P17459-必经之路](https://www.coderli.com/gesp-7-luogu-p17459-must-pass-node/) |
+| 2026年9月  | 括号序列 | [动态规划](https://www.coderli.com/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/)                                                                             | [luogu-P17460-括号序列](https://www.coderli.com/gesp-7-luogu-p17460-bracket-sequence/) |
+
+### 八级(编程题)
+
+| 考试时间   | 题目名称   | 题目类型                                                                                           | 题目讲解                                                                                     |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 2026年9月  | 生成树计数 | [图论](https://www.coderli.com/tags/%E5%9B%BE%E8%AE%BA/)                                           | [luogu-P17461-生成树计数](https://www.coderli.com/gesp-8-luogu-p17461-cactus-spanning-tree/) |
+| 2026年9月  | 末班车     | [图论](https://www.coderli.com/tags/%E5%9B%BE%E8%AE%BA/)、[最短路](https://www.coderli.com/tags/%E6%9C%80%E7%9F%AD%E8%B7%AF/) | [luogu-P17462-末班车](https://www.coderli.com/gesp-8-luogu-p17462-last-subway/)             |
 
 ---
 
@@ -382,6 +458,7 @@ categories: [GESP, 汇总]
 | bool型变量                                                                     | [一级](https://www.coderli.com/categories/%E4%B8%80%E7%BA%A7/) | [【GESP】C++一级知识点研究，布尔(bool)型变量](https://www.coderli.com/gesp-knowledge-bool/)                                            | [本站](https://www.coderli.com/)         |
 | cout/prinf                                                                     | [一级](https://www.coderli.com/categories/%E4%B8%80%E7%BA%A7/) | [【GESP】C++一级知识点研究，cout和printf性能差异分析](https://www.coderli.com/gesp-knowledge-cout-printf/)                             | [本站](https://www.coderli.com/)         |
 | [一维数组](https://www.coderli.com/tags/%E4%B8%80%E7%BB%B4%E6%95%B0%E7%BB%84/) | [三级](https://www.coderli.com/categories/%E4%B8%89%E7%BA%A7/) | [【GESP】C++三级知识点研究，一维数组声明合法性](https://www.coderli.com/gesp-3-knowledge-one-dimensional-array-declaration/)           | [本站](https://www.coderli.com/)         |
+| cout输出进制转换                                                               | [三级](https://www.coderli.com/categories/%E4%B8%89%E7%BA%A7/) | [【GESP】C++三级知识点研究，cout输出进制转换](https://www.coderli.com/gesp-3-knowledge-base-output-for-cout/)                          | [本站](https://www.coderli.com/)         |
 | 位运算                                                                         | [三级](https://www.coderli.com/categories/%E4%B8%89%E7%BA%A7/) | [GESP知识充电站\|位运算的应用](https://mp.weixin.qq.com/s/S-rszHFlwGq5b9JJXHSHFg)                                                      | [CCF GESP官方](https://gesp.ccf.org.cn/) |
 | 位运算                                                                         | [三级](https://www.coderli.com/categories/%E4%B8%89%E7%BA%A7/) | [位运算规则与技巧](https://mp.weixin.qq.com/s/rEYtVhkKO2HCX4EdtWr5fQ)                                                                  | [CCF GESP官方](https://gesp.ccf.org.cn/) |
 | 枚举法                                                                         | [三级](https://www.coderli.com/categories/%E4%B8%89%E7%BA%A7/) | [枚举法\|GESP知识充电站](https://mp.weixin.qq.com/s/qrGI23y1m11lo_dkqAFs5Q)                                                            | [CCF GESP官方](https://gesp.ccf.org.cn/) |
@@ -405,6 +482,10 @@ categories: [GESP, 汇总]
 | [进制转换](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/) | 十进制和十六进制转换    | [【GESP/CSP】编程武器库-2, 十进制转十六进制](https://www.coderli.com/gesp-arsenal-2-dec-hex-conversion)  |
 | [进制转换](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/) | 十进制和十六进制转换    | [【GESP/CSP】编程武器库-3, 十六进制转十进制](https://www.coderli.com/gesp-arsenal-3-hex-dec-conversion/) |
 | [数论](https://www.coderli.com/tags/%E6%95%B0%E8%AE%BA/)                                                   | 最大公约数和最小公倍数  | [【GESP/CSP】编程武器库-4, 最大公约数和最小公倍数](https://www.coderli.com/gesp-arsenal-4-gcd-lcm/)      |
+| [标准库STL](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-STL/)                                | 二分查找标准库(lower_bound/upper_bound) | [【GESP/CSP】编程武器库-5, 二分查找标准库(lower_bound/upper_bound)](https://www.coderli.com/gesp-arsenal-5-lower-upper-bound/) |
+| [标准库STL](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-STL/)                                | 去重算法(unique)        | [【GESP/CSP】编程武器库-6, 去重算法(unique)](https://www.coderli.com/gesp-arsenal-6-unique/)              |
+
+---
 
 ## 练习清单（若打不开，请直接访问项目主页查看）
 
@@ -413,5 +494,8 @@ categories: [GESP, 汇总]
 - [GESP三级练习题清单](https://wiki.coderli.com/gesp/3/practice/)
 - [GESP四级练习题清单](https://wiki.coderli.com/gesp/4/practice/)
 - [GESP五级练习题清单](https://wiki.coderli.com/gesp/5/practice/)
+- [GESP六级练习题清单](https://wiki.coderli.com/gesp/6/practice/)
+- [GESP七级练习题清单](https://wiki.coderli.com/gesp/7/practice/)
+- [GESP八级练习题清单](https://wiki.coderli.com/gesp/8/practice/)
 
 ---

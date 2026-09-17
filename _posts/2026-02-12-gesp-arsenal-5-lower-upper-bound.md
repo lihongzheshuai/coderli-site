@@ -10,7 +10,6 @@ categories: [GESP, 必备技能]
 ---
 
 > 在编程竞赛（如GESP、CSP-J/S）中，查找是一个非常高频的操作。对于无序数组，我们通常只能使用线性查找（$O(n)$）；但对于**有序数组**，利用**二分查找**可以将复杂度降低到 $O(\log n)$。C++ 标准库 `<algorithm>` 提供了两个非常强大的二分查找函数：`lower_bound` 和 `upper_bound`。熟练掌握它们，是通往高分的必备技能。
-> {: .prompt-info}
 
 当前武器库清单
 
@@ -26,7 +25,6 @@ categories: [GESP, 必备技能]
 | [STL](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-STL/)                                       | 二分查找(lower_bound/upper_bound) | [【GESP/CSP】编程武器库-5, 二分查找(lower_bound/upper_bound)](https://www.coderli.com/gesp-arsenal-5-lower-bound) |
 
 > 本人也是边学、边实验、边总结。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 <!--more-->
 
@@ -117,7 +115,6 @@ std::lower_bound(a, a + n, 5, std::greater<int>());
 - **Vector**：返回 `v.end()`。
 
 > **注意**：返回的结束位置是**越界**的，**不能**直接解引用，否则会报错。使用前务必判断返回值是否等于结束位置。
-> {: .prompt-warning}
 
 #### 3. 代码演示
 

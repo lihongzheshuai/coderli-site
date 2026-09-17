@@ -13,7 +13,6 @@ categories: [GESP, 二级]
 如果说单层循环是“跑圈”，那么多层循环就是“时钟”。掌握多层循环，就能解决著名的“打印图形”和“穷举求解”类问题，这是二级考试中最核心的难点之一。本篇详细剖析大纲第 8 条考点。
 
 > （8）掌握多层循环结构，掌握 for 语句、while 语句、do...while 语句，及相互嵌套的方法。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -26,7 +25,6 @@ categories: [GESP, 二级]
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -165,7 +163,6 @@ for (int x = 0; x <= 20; x++) {
 
 > **`break` 和 `continue` 只对它所在的“那一层”循环有效！**
 > 它**不能**直接跳出多层循环。
-> {: .prompt-warning}
 
 ```cpp
 for (int i = 1; i <= 3; i++) {

@@ -10,7 +10,6 @@ categories: [GESP, 必备技能]
 ---
 
 > 前文（[**_【GESP/CSP】编程武器库-2, 十进制转换十六进制_**](https://www.coderli.com/gesp-arsenal-2-dec-hex-conversion/)），我们介绍了从十进制到十六进制的处理手段，很显然这只做到了一半。在之前做过的[**_【GESP】C++四级真题 luogu-B3869 [GESP202309 四级] 进制转换_**](https://www.coderli.com/gesp-4-luogu-b3869/)题目中，需要将不同进制的数字转换成十进制表示出来，其中十六进制由于涉及字母，相对特殊，其他进制类比即可，今天就专门总结下这个知识点，希望下次遇到可以"信手拈来"。
-> {: .prompt-info}
 
 当前武器库清单
 
@@ -23,7 +22,6 @@ categories: [GESP, 必备技能]
 | [进制转换](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/) | 十进制和十六进制转换    | [【GESP/CSP】编程武器库-2, 十进制转换十六进制](https://www.coderli.com/gesp-arsenal-2-dec-hex-conversion) |
 
 > 本人也是边学、边实验、边总结。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 <!--more-->
 

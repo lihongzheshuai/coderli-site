@@ -12,7 +12,6 @@ categories: [GESP, 二级]
 GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（2）号知识点进行总结梳理。
 
 > （2）了解计算机网络的概念，了解计算机网络的分类（广域网（WAN）、城域网（MAN）、局域网（LAN）），了解计算机网络的层级结构及作用（TCP/IP 四层模型与 OSI七层模型），了解不同层级的重要协议，了解 IP 地址及子网划分。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -25,7 +24,6 @@ GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（2）�
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 

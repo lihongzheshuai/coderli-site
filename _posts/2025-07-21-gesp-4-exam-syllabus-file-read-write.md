@@ -15,7 +15,6 @@ categories: [GESP, 四级]
 GESP C++四级官方考试大纲中，共有11条考点，本文针对第10条考点进行分析介绍。
 
 > （10）掌握文件操作中的重定向，实现文件读写操作，了解文本文件的分类，掌握写操作、读操作、读写操作。
-> {: .prompt-info}
 
 其实，由于本人也是边学、边实验、边总结，且对考纲深度和广度的把握属于个人理解。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
 
@@ -30,7 +29,6 @@ GESP C++四级官方考试大纲中，共有11条考点，本文针对第10条�
 > - [【GESP】C++四级考试大纲知识点梳理, (7) 排序算法基本概念](https://www.coderli.com/gesp-4-exam-syllabus-sorting-algo-conception/)
 > - [【GESP】C++四级考试大纲知识点梳理, (8) 冒泡、插入、选择排序](https://www.coderli.com/gesp-4-exam-syllabus-three-sorting-methods/)
 > - [【GESP】C++四级考试大纲知识点梳理, (9) 简单算法复杂度的估算](https://www.coderli.com/gesp-4-exam-syllabus-estimation-of-algorithm-time-complexity/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -152,7 +150,6 @@ cout << x; // 输出到屏幕
 >
 > - `cin`依然是输入流（`istream`类型），`cout`依然是输出流（`ostream`类型）
 > - 重定向不会改变它们的本质功能和使用方式，只是改变了数据来源和去向
->   {: .prompt-tip}
 
 #### 1.2.1 重定向常用场景
 

@@ -15,7 +15,6 @@ categories: [GESP, 一级]
 > （7）掌握逻辑运算与（&&）、或（||）、非（！）。
 > （8）掌握关系运算：大于、大于等于、小于、小于等于、等于、不等于。
 > （11）掌握分支结构程序的编写，掌握 if 语句、if-else 语句、switch 语句，了解三目运算。
-> {: .prompt-info}
 
 **_一级考点系列：_**
 
@@ -24,7 +23,6 @@ categories: [GESP, 一级]
 > - [【GESP】C++一级考试大纲知识点梳理(考点3,5,6,9), (3) 变量、数据类型与输入输出](https://www.coderli.com/gesp-1-exam-syllabus-3-data-io/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点7,8,11), (4) 逻辑运算与分支结构](https://www.coderli.com/gesp-1-exam-syllabus-4-branching/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点12), (5) 循环结构](https://www.coderli.com/gesp-1-exam-syllabus-5-loops/)
->   {: .prompt-tip}
 
 <!--more-->
 

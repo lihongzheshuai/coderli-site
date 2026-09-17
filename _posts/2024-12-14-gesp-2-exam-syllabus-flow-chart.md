@@ -13,7 +13,6 @@ categories: [GESP, 二级]
 GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（4）号知识点进行总结梳理。
 
 > （4）了解流程图的概念及基本表示符号，掌握绘制流程图的方法，能正确使用流程图描述程序设计的三种基本结构。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -26,7 +25,6 @@ GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（4）�
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 

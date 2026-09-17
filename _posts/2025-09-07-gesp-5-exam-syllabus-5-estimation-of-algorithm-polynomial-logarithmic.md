@@ -13,10 +13,8 @@ categories: [GESP, 五级]
 GESP C++五级官方考试大纲中，共有`9`条考点，本文针对第`5`条考点进行分析介绍。
 
 > （5）掌握算法复杂度估算方法（含多项式、对数）。
-> {: .prompt-info}
 
 > 本人也是边学、边实验、边总结，且对考纲深度和广度的把握属于个人理解。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 **_五级其他考点回顾：_**
 
@@ -27,7 +25,6 @@ GESP C++五级官方考试大纲中，共有`9`条考点，本文针对第`5`条
 > - [【GESP】C++五级考试大纲知识点梳理, (3-3) 链表-单向循环链表](https://www.coderli.com/gesp-5-exam-syllabus-3-linked-list-3-singly-circle/)
 > - [【GESP】C++五级考试大纲知识点梳理, (3-4) 链表-双向循环链表](https://www.coderli.com/gesp-5-exam-syllabus-3-linked-list-4-double-circle/)
 > - [【GESP】C++五级考试大纲知识点梳理, (4) 辗转相除法、素数表和唯一性定理](https://www.coderli.com/gesp-5-exam-syllabus-4-three-theorem-and-algorithm/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -208,6 +205,5 @@ void heapSort(int a[], int n) {
 
 > - **多项式复杂度** → “简单循环 + 嵌套循环”，典型是低效排序（冒泡、插入、选择）。
 > - **对数复杂度** → “规模减半 + 分治递归”，典型是高效排序（快排、归并、堆排序）。
->   {: .prompt-tip}
 
 ---

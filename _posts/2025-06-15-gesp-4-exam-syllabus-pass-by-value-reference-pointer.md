@@ -13,7 +13,6 @@ categories: [GESP, 四级]
 GESP C++四级官方考试大纲中，共有11条考点，本文针对第5条考点进行分析介绍。
 
 > （5）掌握函数参数的传递方式：C++值传递、引用传递、指针传递；Python 值传递、引用传递。
-> {: .prompt-info}
 
 **_四级其他考点回顾：_**
 
@@ -21,7 +20,6 @@ GESP C++四级官方考试大纲中，共有11条考点，本文针对第5条考
 > - [【GESP】C++四级考试大纲知识点梳理, (2) 结构体和二维数组](https://www.coderli.com/gesp-4-exam-syllabus-struct-two-dimensional-array/)
 > - [【GESP】C++四级考试大纲知识点梳理, (3) 模块化和函数](https://www.coderli.com/gesp-4-exam-syllabus-module-function/)
 > - [【GESP】C++四级考试大纲知识点梳理, (4) 变量和作用域](https://www.coderli.com/gesp-4-exam-syllabus-variable-scope/)
->   {: .prompt-tip}
 
 <!--more-->
 

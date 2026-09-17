@@ -12,7 +12,6 @@ categories: [GESP, 二级]
 GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（3）号知识点进行总结梳理。
 
 > （3）了解程序设计语言的几大分类及特点（机器语言、汇编语言、高级语言），了解常见的高级语言（C++、Python 等）。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -25,7 +24,6 @@ GESP C++二级官方考试大纲中，共有9条考点，本文针对C++（3）�
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 

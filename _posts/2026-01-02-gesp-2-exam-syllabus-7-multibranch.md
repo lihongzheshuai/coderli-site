@@ -13,7 +13,6 @@ categories: [GESP, 二级]
 程序并不总是一条直线走到底，经常需要根据情况“拐弯”。一级考试要求掌握简单的 `if`，而二级考试的难度立刻升级到了**多层嵌套**。这就是逻辑思维能力的体现。本篇详细剖析大纲第 7 条考点。
 
 > （7）掌握多层分支结构，掌握 if 语句、if...else 语句、switch 语句，及相互嵌套的方法。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -26,7 +25,6 @@ categories: [GESP, 二级]
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 

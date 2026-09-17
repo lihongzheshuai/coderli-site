@@ -35,9 +35,10 @@ function cleanExcerpt(content: string): string {
     text = text.split('<!-- more -->')[0];
   }
 
-  // Remove Jekyll Liquid tags like {% include ... %}
+  // Remove Jekyll Liquid tags like {% include ... %} and Kramdown prompt IAL
   text = text.replace(/{%.*?%}/g, '');
   text = text.replace(/{{.*?}}/g, '');
+  text = text.replace(/\{:.*?prompt-.*?\}|\{:\s*\..*?\}/g, '');
 
   // Remove markdown code blocks, images, links, headers
   text = text.replace(/```[\s\S]*?```/g, '');
@@ -377,9 +378,10 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   let { content } = safeMatter(fileContents);
 
-  // Clean Jekyll liquid tags before rendering markdown
+  // Clean Jekyll liquid tags and Kramdown prompt syntax before rendering markdown
   content = content.replace(/{%\s*include\s+.*?%}/g, '');
   content = content.replace(/{{.*?}}/g, '');
+  content = content.replace(/^\s*(?:>\s*)?\{:\s*\.prompt-[^}]+\}\s*$/gm, '');
 
   // Extract TOC headings (h2 and h3)
   const toc: { id: string; title: string; depth: number }[] = [];

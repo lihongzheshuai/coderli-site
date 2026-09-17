@@ -13,7 +13,6 @@ categories: [GESP, 四级]
 GESP C++四级官方考试大纲中，共有11条考点，本文针对第9条考点进行分析介绍。
 
 > （9）简单算法复杂度的估算，含多项式、指数复杂度。
-> {: .prompt-info}
 
 **_四级其他考点回顾：_**
 
@@ -25,7 +24,6 @@ GESP C++四级官方考试大纲中，共有11条考点，本文针对第9条考
 > - [【GESP】C++四级考试大纲知识点梳理, (6) 递推算法](https://www.coderli.com/gesp-4-exam-syllabus-iteration-algo/)
 > - [【GESP】C++四级考试大纲知识点梳理, (7) 排序算法基本概念](https://www.coderli.com/gesp-4-exam-syllabus-sorting-algo-conception/)
 > - [【GESP】C++四级考试大纲知识点梳理, (8) 冒泡、插入、选择排序](https://www.coderli.com/gesp-4-exam-syllabus-three-sorting-methods/)
->   {: .prompt-tip}
 
 <!--more-->
 

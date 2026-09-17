@@ -15,7 +15,6 @@ GESP C++三级考试大纲中，涉及进制转换的内容，之前在考纲介
 **_相关考纲：_**
 
 > - [【GESP】C++三级考试大纲知识点梳理, （2）数据的进制转换](https://www.coderli.com/gesp-3-exam-syllabus-data-conversion/)
->   {: .prompt-info}
 
 <!--more-->
 

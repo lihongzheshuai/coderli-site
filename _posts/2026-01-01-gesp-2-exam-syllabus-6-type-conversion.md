@@ -13,7 +13,6 @@ categories: [GESP, 二级]
 在编程中，我们经常需要把一种数据类型变成另一种数据类型（比如把小数变成整数，或者把字符变成数字）。这就是**数据类型转换**。掌握好它，可以避免很多隐蔽的 Bug。本篇深度解析大纲第 6 条考点。
 
 > （6）掌握数据类型的转换：强制类型转换和隐式类型转换。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -26,7 +25,6 @@ categories: [GESP, 二级]
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -55,7 +53,6 @@ C++ 是**强类型语言**，这意味着每个变量都有固定的类型，不
 `char` / `short` $\rightarrow$ `int` $\rightarrow$ `long long` $\rightarrow$ `float` $\rightarrow$ `double`
 
 > 只要表达式中有一个 **`double`**，整个表达式的运算结果通常就会变成 **`double`**。
-> {: .prompt-tip}
 
 ### 2.2 常见触发场景
 

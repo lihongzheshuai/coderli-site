@@ -15,7 +15,6 @@ categories: [GESP, 二级]
 GESP 二级考试中，关于编码和字符处理是必考内容。这也是程序与人类交互的基础——计算机如何“理解”我们输入的文字？本篇将深入剖析大纲第 5 条考点。
 
 > （5）了解编码的基本概念，了解 ASCII 编码原理，能识别常用字符的 ASCII 码（空格：32、“0”：48、“A”：65、“a”：97），并掌握 ASCII 码和字符之间相互转换的方法。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -28,7 +27,6 @@ GESP 二级考试中，关于编码和字符处理是必考内容。这也是程
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -54,7 +52,6 @@ GESP 二级考试中，关于编码和字符处理是必考内容。这也是程
   - **删除字符** (127)：DEL。
 
 > 虽然现在的计算机使用更复杂的 Unicode (如 UTF-8) 来支持中文等多种语言，但 ASCII 码仍然是所有编码系统的**基石**。英文字符和数字在 UTF-8 中的编码与 ASCII 码完全一致。
-> {: .prompt-tip}
 
 {% include custom/custom-post-content-inner.html %}
 

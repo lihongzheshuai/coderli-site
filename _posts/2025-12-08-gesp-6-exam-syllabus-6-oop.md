@@ -13,13 +13,10 @@ categories: [GESP, 六级]
 GESP C++六级官方考试大纲中，第`6`条考点标志着我们编程思维的一次重要跃迁——从“面向过程”转向“面向对象”。
 
 > （6）掌握面向对象的思想，了解封装、继承、多态的基本概念，并掌握类的创建和基本的使用方法。
-> {: .prompt-info}
 
 > 本人也是边学、边实验、边总结，且对考纲深度和广度的把握属于个人理解。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 > 面向对象编程（Object-Oriented Programming，简称 OOP）听起来很高大上，其实它最贴近我们的真实世界。如果说“面向过程”是像做菜一样一步步按照食谱执行，那么“面向对象”就是组装一台精密的机器，每个零件（对象）都有自己的功能，组合起来完成复杂的任务。对于初学者来说，理解“类”与“对象”的关系是关键。
-> {: .prompt-info}
 
 **_六级考点系列：_**
 
@@ -28,7 +25,6 @@ GESP C++六级官方考试大纲中，第`6`条考点标志着我们编程思维
 > - [【GESP】C++六级考试大纲知识点梳理, (3) 哈夫曼编码与格雷码](https://www.coderli.com/gesp-6-exam-syllabus-3-huffman-gray/)
 > - [【GESP】C++六级考试大纲知识点梳理, (4) 搜索算法](https://www.coderli.com/gesp-6-exam-syllabus-4-search/)
 > - [【GESP】C++六级考试大纲知识点梳理, (5) 动态规划与背包问题](https://www.coderli.com/gesp-6-exam-syllabus-5-dp-knapsack/)
->   {: .prompt-tip}
 
 <!--more-->
 

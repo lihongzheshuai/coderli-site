@@ -13,13 +13,10 @@ categories: [GESP, 六级]
 GESP C++六级官方考试大纲中，第`5`条考点标志着我们正式跨入了“算法设计”的深水区——动态规划。
 
 > （5）掌握简单动态规划的算法思想，能够使用代码解决相应的一维动态规划问题和简单背包问题。
-> {: .prompt-info}
 
 > 本人也是边学、边实验、边总结，且对考纲深度和广度的把握属于个人理解。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 > 动态规划（Dynamic Programming，简称 DP）往往是初学者最头疼的拦路虎。很多同学觉得它玄之又玄，状态转移方程像天书一样。其实，DP 的核心思想非常朴素，就是“拒绝重复劳动”。本文将带你拆解 DP 的套路，并攻克一维 DP 和经典的背包问题。
-> {: .prompt-info}
 
 **_六级考点系列：_**
 
@@ -27,7 +24,6 @@ GESP C++六级官方考试大纲中，第`5`条考点标志着我们正式跨入
 > - [【GESP】C++六级考试大纲知识点梳理, (2) 哈夫曼树、完全二叉树与二叉排序树](https://www.coderli.com/gesp-6-exam-syllabus-2-huffman-bst/)
 > - [【GESP】C++六级考试大纲知识点梳理, (3) 哈夫曼编码与格雷码](https://www.coderli.com/gesp-6-exam-syllabus-3-huffman-gray/)
 > - [【GESP】C++六级考试大纲知识点梳理, (4) 搜索算法](https://www.coderli.com/gesp-6-exam-syllabus-4-search/)
->   {: .prompt-tip}
 
 <!--more-->
 

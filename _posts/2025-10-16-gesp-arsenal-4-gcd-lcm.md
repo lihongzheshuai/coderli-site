@@ -10,7 +10,6 @@ categories: [GESP, 必备技能]
 ---
 
 > 在五级题目（[**_【GESP】C++五级练习（初等数论考点） luogu-B3941 [GESP样题 五级] 小杨的锻炼_**](https://www.coderli.com/gesp-5-luogu-b3941/)）中，涉及到最大公约数和最小公倍数的计算，需要用到数论中的基本概念和算法。这部分既是五级考试大纲中明确要求的内容([**_【GESP】C++五级考试大纲知识点梳理, (1) 初等数论_**](https://www.coderli.com/gesp-5-exam-syllabus-elementary-number-theory/))，又是编程考试中常见的、可复用的功能函数。因此，在我和孩子的学习过程中，已要求将这部分知识，纳入“武器库”中。
-> {: .prompt-info}
 
 当前武器库清单
 
@@ -24,7 +23,6 @@ categories: [GESP, 必备技能]
 | [进制转换](https://www.coderli.com/tags/%E6%AD%A6%E5%99%A8%E5%BA%93-%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/) | 十进制和十六进制转换    | [【GESP/CSP】编程武器库-3, 十六进制转换十进制](https://www.coderli.com/gesp-arsenal-3-hex-dec-conversion/) |
 
 > 本人也是边学、边实验、边总结。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 <!--more-->
 

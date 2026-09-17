@@ -19,7 +19,6 @@ categories: [GESP, 八级]
 > 5. [代数与平面几何](https://www.coderli.com/gesp-8-exam-syllabus-algebra-geometry/)
 > 6. [图论算法：最小生成树与最短路](https://www.coderli.com/gesp-8-exam-syllabus-graph-theory/)
 > 7. [算法的时间和空间效率分析](https://www.coderli.com/gesp-8-exam-syllabus-complexity-analysis/)
->    {: .prompt-tip}
 
 作为一名优秀的 C++ 程序员，仅仅会写代码让程序跑起来是不够的。如果你的程序在处理大量数据时慢如蜗牛（TLE），或者直接内存溢出（MLE），那么这依然是一个不及格的程序。
 
@@ -27,10 +26,8 @@ categories: [GESP, 八级]
 
 > **考纲要求：**
 > (7) 算法的时间和空间效率分析。能够掌握 **较为复杂算法** 的时间和空间复杂度分析方法，能够分析各类算法（包括排序算法、查找算法、**树和图的遍历算法**、**搜索算法**、分治及 **动态规划算法** 等）的时间和空间复杂度。
-> {: .prompt-info}
 
 > 本人也是边学、边实验、边总结，且对考纲深度和广度的把握属于个人理解。因此本文更多的不是一个教程，而是个人知识梳理，如有遗漏、疏忽，欢迎指正、交流。
-> {: .prompt-warning}
 
 ---
 

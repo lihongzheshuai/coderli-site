@@ -13,7 +13,6 @@ categories: [GESP, 二级]
 编程不仅是逻辑，也是计算。C++ 标准库为我们准备了丰富的数学工具，让我们不用自己去造轮子（比如求平方根）。掌握这些函数，是解决数学计算类题目的捷径。本篇详细剖析大纲第 9 条考点。
 
 > （9）掌握常用的数学函数：绝对值函数、平方根函数、最大值函数、最小值函数、随机数函数理解相应的算法原理。
-> {: .prompt-info}
 
 **_二级考点系列：_**
 
@@ -26,7 +25,6 @@ categories: [GESP, 二级]
 > - [【GESP】C++二级考试大纲知识点梳理, （7）多层分支结构](https://www.coderli.com/gesp-2-exam-syllabus-7-multibranch/)
 > - [【GESP】C++二级考试大纲知识点梳理, （8）多层循环结构](https://www.coderli.com/gesp-2-exam-syllabus-8-multiloop/)
 > - [【GESP】C++二级考试大纲知识点梳理, （9）常用数学函数](https://www.coderli.com/gesp-2-exam-syllabus-9-math-functions/)
->   {: .prompt-tip}
 
 <!--more-->
 
@@ -42,7 +40,6 @@ categories: [GESP, 二级]
 4. **`<ctime>`** (或 `<time.h>`): 用于获取时间种子（time）。
 
 > 考试时如果不确定，可以直接使用万能头文件 `#include <bits/stdc++.h>`，但了解每个函数的归属是专业素养的体现。
-> {: .prompt-tip}
 
 ---
 

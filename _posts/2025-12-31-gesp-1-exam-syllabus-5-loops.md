@@ -13,7 +13,6 @@ categories: [GESP, 一级]
 如果不使用循环，计算机的强大计算能力就无法体现。**循环** (Loop) 是编程中最常用的结构之一，它让我们可以用几行代码完成成千上万次的重复计算。本篇对应大纲第 `12` 条考点。
 
 > （12）掌握循环结构程序的编写，掌握 for、while、do-while 循环语句的使用以及 continue 语句和 break 语句在循环中的应用。
-> {: .prompt-info}
 
 **_一级考点系列：_**
 
@@ -22,7 +21,6 @@ categories: [GESP, 一级]
 > - [【GESP】C++一级考试大纲知识点梳理(考点3,5,6,9), (3) 变量、数据类型与输入输出](https://www.coderli.com/gesp-1-exam-syllabus-3-data-io/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点7,8,11), (4) 逻辑运算与分支结构](https://www.coderli.com/gesp-1-exam-syllabus-4-branching/)
 > - [【GESP】C++一级考试大纲知识点梳理(考点12), (5) 循环结构](https://www.coderli.com/gesp-1-exam-syllabus-5-loops/)
->   {: .prompt-tip}
 
 <!--more-->
 
