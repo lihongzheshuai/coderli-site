@@ -18,7 +18,7 @@ GESP C++六级官方考试大纲中，包含了对更高级数据结构（如树
 
 **_六级考点系列：_**
 
-> - [【GESP】C++五级考试大纲知识点梳理](https://www.coderli.com/categories/%E4%BA%94%E7%BA%A7/) （回顾五级内容）
+> - [【GESP】C++五级考试大纲知识点梳理](https://www.coderli.com/categories/GESP/%E4%BA%94%E7%BA%A7/) （回顾五级内容）
 
 树（Tree）是计算机科学中非常重要的一种非线性数据结构，它模拟了具有层次关系的数据集合。在六级考试中，重点是二叉树（Binary Tree）的理解与操作，但对一般树的概念也需掌握。
 

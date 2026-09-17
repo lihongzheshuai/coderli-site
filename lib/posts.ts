@@ -365,7 +365,7 @@ export function getPostsByCategory(parentCategory: string, subCategory?: string)
     if (targetSub) {
       return parent === targetParent && child === targetSub;
     }
-    return parent === targetParent;
+    return parent === targetParent || child === targetParent;
   });
 }
 
