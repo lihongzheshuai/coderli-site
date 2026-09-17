@@ -116,7 +116,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     // Send email notification to blog owner (wushikezuo@gmail.com)
     try {
-      await sendCommentNotification({
+      const emailRes = await sendCommentNotification({
         commentId: newComment.id,
         slug,
         postTitle: postTitle || slug,
@@ -129,6 +129,11 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         replyToAuthor: newComment.replyToAuthor,
         replyToContent: newComment.replyToContent,
       });
+      if (!emailRes.success) {
+        console.warn('[Comment API] Email notification was not sent:', emailRes.error);
+      } else {
+        console.log('[Comment API] Email notification sent successfully:', emailRes.messageId);
+      }
     } catch (emailErr) {
       console.error('[Comment API] Failed sending email notification:', emailErr);
     }

@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { generateCommentDeleteToken } from '@/lib/admin';
+import { generateCommentDeleteToken } from './admin';
 
 export interface CommentNotificationData {
   commentId?: string;
@@ -297,8 +297,12 @@ export async function sendCommentNotification(data: CommentNotificationData): Pr
 
   let deleteUrl: string | undefined;
   if (data.commentId) {
-    const token = generateCommentDeleteToken(data.commentId);
-    deleteUrl = `${siteUrl}/api/comments/delete?id=${encodeURIComponent(data.commentId)}&token=${token}`;
+    try {
+      const token = generateCommentDeleteToken(data.commentId);
+      deleteUrl = `${siteUrl}/api/comments/delete?id=${encodeURIComponent(data.commentId)}&token=${token}`;
+    } catch (tokenErr) {
+      console.warn('[Email Notification] Failed generating comment delete token:', tokenErr);
+    }
   }
 
   const subject = data.replyToAuthor
