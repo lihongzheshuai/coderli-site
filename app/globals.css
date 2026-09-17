@@ -145,9 +145,178 @@ body {
   background: var(--bg-subtle);
   font-weight: 600;
 }
-.prose strong {
+
+/* ========================================================
+   Content Links Styling
+   ======================================================== */
+.prose a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(13, 148, 136, 0.45);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  transition: color 0.15s ease-in-out, text-decoration-color 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.prose a:hover {
+  color: #0f766e;
+  text-decoration-color: #0f766e;
+  text-decoration-thickness: 2px;
+}
+
+html.dark .prose a {
+  color: #2dd4bf;
+  text-decoration-color: rgba(45, 212, 191, 0.5);
+}
+
+html.dark .prose a:hover {
+  color: #5eead4;
+  text-decoration-color: #5eead4;
+  text-decoration-thickness: 2px;
+}
+
+/* Links inside tables - crisp, prominent, and wrapping correctly */
+.prose table a {
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* Links inside blockquotes */
+.prose blockquote a {
+  color: var(--primary);
+  text-decoration-color: rgba(13, 148, 136, 0.5);
+}
+
+html.dark .prose blockquote a {
+  color: #2dd4bf;
+  text-decoration-color: rgba(45, 212, 191, 0.55);
+}
+
+/* Exclude image links from text underline */
+.prose a:has(> img) {
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Code inside links */
+.prose a code {
+  color: inherit;
+  border-color: rgba(13, 148, 136, 0.35);
+  text-decoration: underline;
+  text-decoration-color: inherit;
+  text-underline-offset: 2px;
+  transition: all 0.15s ease;
+}
+
+.prose a:hover code {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+/* ========================================================
+   Bold Typography (strong, b)
+   ======================================================== */
+.prose strong,
+.prose b {
   font-weight: 700;
+  color: #020617; /* High-contrast deep black in light mode */
+}
+
+html.dark .prose strong,
+html.dark .prose b {
+  font-weight: 700;
+  color: #FFFFFF; /* High-contrast white in dark mode */
+}
+
+/* Inherit link color when bold is inside an anchor link */
+.prose a strong,
+.prose a b {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Bold inside blockquotes */
+.prose blockquote strong,
+.prose blockquote b {
   color: var(--text-main);
+  font-weight: 700;
+}
+
+html.dark .prose blockquote strong,
+html.dark .prose blockquote b {
+  color: #FFFFFF;
+}
+
+/* ========================================================
+   Italic Typography (em, i)
+   ======================================================== */
+.prose em,
+.prose i {
+  font-style: italic;
+  /* Graceful typographic fallback for authentic Chinese & Latin italics */
+  font-family: Georgia, Cambria, 'Times New Roman', 'Noto Serif SC', 'Source Han Serif SC', 'KaiTi', 'STKaiti', 'SimSun', serif;
+}
+
+/* Keep sans/mono fonts for code or math inside italics */
+.prose em code,
+.prose i code,
+.prose code em,
+.prose code i {
+  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+  font-style: italic;
+}
+
+/* Combined Bold + Italic (***text*** or **_text_**) */
+.prose strong em,
+.prose em strong,
+.prose b i,
+.prose i b,
+.prose strong i,
+.prose b em {
+  font-weight: 700;
+  font-style: italic;
+  color: #020617;
+}
+
+html.dark .prose strong em,
+html.dark .prose em strong,
+html.dark .prose b i,
+html.dark .prose i b,
+html.dark .prose strong i,
+html.dark .prose b em {
+  color: #FFFFFF;
+}
+
+/* When combined in link, inherit link color */
+.prose a em,
+.prose a i,
+.prose a strong em,
+.prose a em strong {
+  color: inherit;
+}
+
+/* ========================================================
+   Strikethrough and Mark (del, s, mark)
+   ======================================================== */
+.prose del,
+.prose s {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+.prose mark {
+  background-color: #fef08a;
+  color: #854d0e;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+html.dark .prose mark {
+  background-color: rgba(234, 179, 8, 0.25);
+  color: #fef08a;
 }
 .prose code:not(pre code) {
   font-family: 'JetBrains Mono', Consolas, Monaco, monospace;

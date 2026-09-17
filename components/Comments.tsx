@@ -177,6 +177,80 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     }
   }
 
+  // Helper to parse markdown links, bold, italic, code, and raw URLs in comments
+  function formatCommentLine(line: string) {
+    const regex = /(\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\))|(https?:\/\/[^\s\)\],。，！？]+)|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)/g;
+    let lastIndex = 0;
+    const elements: React.ReactNode[] = [];
+    let match;
+
+    while ((match = regex.exec(line)) !== null) {
+      if (match.index > lastIndex) {
+        elements.push(line.slice(lastIndex, match.index));
+      }
+
+      if (match[1]) {
+        // [text](url)
+        elements.push(
+          <a
+            key={match.index}
+            href={match[3]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 transition"
+          >
+            {match[2]}
+          </a>
+        );
+      } else if (match[4]) {
+        // raw URL
+        elements.push(
+          <a
+            key={match.index}
+            href={match[4]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 break-all transition"
+          >
+            {match[4]}
+          </a>
+        );
+      } else if (match[5]) {
+        // **bold**
+        elements.push(
+          <strong key={match.index} className="font-bold text-slate-900 dark:text-white">
+            {match[6]}
+          </strong>
+        );
+      } else if (match[7]) {
+        // *italic*
+        elements.push(
+          <em key={match.index} className="italic">
+            {match[8]}
+          </em>
+        );
+      } else if (match[9]) {
+        // `code`
+        elements.push(
+          <code
+            key={match.index}
+            className="font-mono text-xs bg-slate-100 dark:bg-slate-800 text-teal-600 dark:text-teal-400 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700"
+          >
+            {match[10]}
+          </code>
+        );
+      }
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < line.length) {
+      elements.push(line.slice(lastIndex));
+    }
+
+    return elements.length > 0 ? elements : line;
+  }
+
   // Render markdown quotes in comment content nicely
   function renderCommentBody(text: string) {
     const lines = text.split('\n');
@@ -189,7 +263,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
                 key={idx}
                 className="border-l-2 border-teal-500/70 pl-2.5 my-1 text-slate-500 dark:text-slate-400 italic text-xs md:text-sm bg-slate-50/60 dark:bg-slate-800/40 py-0.5 rounded-r"
               >
-                {line.replace(/^>\s*/, '')}
+                {formatCommentLine(line.replace(/^>\s*/, ''))}
               </blockquote>
             );
           }
@@ -198,7 +272,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
           }
           return (
             <p key={idx} className="whitespace-pre-wrap">
-              {line}
+              {formatCommentLine(line)}
             </p>
           );
         })}
