@@ -12,52 +12,40 @@ export async function GET(req: NextRequest) {
   const now = Date.now();
   if (now - lastCallTimestamp < 5000) {
     return NextResponse.json(
-      { error: 'Rate limit: please wait 5 seconds before running another test.' },
+      { ok: false, message: 'Too many requests' },
       { status: 429 }
     );
   }
   lastCallTimestamp = now;
 
-  const rawKey = (process.env.RESEND_API_KEY || '').trim();
-  const hasResend = !!rawKey;
-  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  try {
+    const result = await sendCommentNotification({
+      slug: 'connectivity-test',
+      postTitle: '邮件服务连通性验证',
+      author: '服务连通性检测',
+      email: 'test@coderli.com',
+      content: '这是一条用于验证邮件服务连通性的测试消息。',
+    });
 
-  let recipient = (
-    process.env.COMMENT_NOTIFICATION_EMAIL ||
-    process.env.ADMIN_EMAIL ||
-    'wushikezuo@gmail.com'
-  ).trim();
-  if (recipient.toLowerCase() === 'shikezuo@gmail.com') {
-    recipient = 'wushikezuo@gmail.com';
+    if (result.success) {
+      return NextResponse.json({
+        ok: true,
+        status: 'connected',
+      });
+    }
+
+    // 详细错误仅在服务端记录日志，避免向外泄露系统和第三方凭证细节
+    console.error('[test-email] Mail delivery failed:', result.error);
+    return NextResponse.json(
+      { ok: false, status: 'unavailable' },
+      { status: 502 }
+    );
+  } catch (err) {
+    console.error('[test-email] Unexpected error during connectivity test:', err);
+    return NextResponse.json(
+      { ok: false, status: 'error' },
+      { status: 500 }
+    );
   }
-
-  const activeProvider = hasResend ? 'resend' : hasSmtp ? 'smtp' : 'none';
-
-  const testSlug = '2024-12-10-gesp-2-exam-syllabus-network';
-  const testTitle = '【在线测试】读者留言邮件通知连通性验证';
-
-  const result = await sendCommentNotification({
-    slug: testSlug,
-    postTitle: testTitle,
-    author: 'Vercel 连通性测试员',
-    email: 'test-bot@coderli.com',
-    site: 'https://www.coderli.com',
-    content: '这是一条用于排查 Vercel 与 Resend 发信连通性的线上测试留言。如果您在 Gmail 收到此邮件，说明系统已全线打通！',
-  });
-
-  return NextResponse.json({
-    ...result,
-    diagnostics: {
-      activeProvider,
-      recipient,
-      hasResendApiKey: hasResend,
-      resendKeyLength: rawKey.length,
-      resendKeyPrefix: hasResend ? `${rawKey.slice(0, 6)}***` : null,
-      resendFromConfigured: process.env.RESEND_FROM || '(未配置，系统默认使用 OneCoder <onboarding@resend.dev>)',
-      hasSmtpConfig: hasSmtp,
-      smtpHost: process.env.SMTP_HOST || null,
-      smtpUser: process.env.SMTP_USER || null,
-      vercelEnv: process.env.VERCEL_ENV || 'production',
-    },
-  });
 }
+
