@@ -578,7 +578,7 @@ async function highlightCodeBlocks(html: string): Promise<string> {
     const gutterWidth = `${Math.max(2, digits) * 0.65 + 1.25}rem`;
 
     try {
-      const highlighted = await codeToHtml(rawCode, {
+      const highlighted = await codeToHtml(normalizedCode, {
         lang: lang as any,
         theme: 'one-dark-pro',
         transformers: [lineNumbersTransformer],
@@ -613,7 +613,7 @@ async function highlightCodeBlocks(html: string): Promise<string> {
                 </svg>
                 <span class="btn-text hidden sm:inline">行号</span>
               </button>
-              <button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" data-code="${encodeURIComponent(rawCode)}" title="复制代码" aria-label="复制代码">
+              <button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" data-code="${encodeURIComponent(normalizedCode)}" title="复制代码" aria-label="复制代码">
                 <svg class="copy-icon w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
