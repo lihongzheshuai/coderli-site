@@ -27,6 +27,7 @@ export function parseLatexInText(text: string): string {
     try {
       return katex.renderToString(formula, {
         throwOnError: false,
+        strict: false,
         displayMode: !!blockFormula,
       });
     } catch {

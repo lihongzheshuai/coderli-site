@@ -24,6 +24,7 @@ import { codeToHtml, bundledLanguages, isPlainLang, isSpecialLang } from 'shiki'
 import type { PostMeta, PostDetail } from '../types/post';
 
 const postsDirectory = path.join(process.cwd(), '_posts');
+const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache');
 
 // Helper to strip markdown symbols for excerpts
 function cleanExcerpt(content: string): string {
@@ -164,8 +165,18 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
 // In-memory cache for all post metadata
 let cachedPosts: PostMeta[] | null = null;
 
-export function clearPostCache() {
+export function clearPostCache(slug?: string) {
   cachedPosts = null;
+  try {
+    if (slug) {
+      const cacheFilePath = path.join(postCacheDir, `${slug}.json`);
+      if (fs.existsSync(cacheFilePath)) {
+        fs.unlinkSync(cacheFilePath);
+      }
+    } else if (fs.existsSync(postCacheDir)) {
+      fs.rmSync(postCacheDir, { recursive: true, force: true });
+    }
+  } catch {}
 }
 
 export function getAllPosts(): PostMeta[] {
@@ -375,43 +386,84 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   if (!meta) return null;
 
   const fullPath = path.join(postsDirectory, meta.filename);
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
-  let { content } = safeMatter(fileContents);
+  let fileMtime = 0;
+  try {
+    fileMtime = fs.statSync(fullPath).mtimeMs;
+  } catch {}
 
-  // Clean Jekyll liquid tags and Kramdown prompt syntax before rendering markdown
-  content = content.replace(/{%\s*include\s+.*?%}/g, '');
-  content = content.replace(/{{.*?}}/g, '');
-  content = content.replace(/^\s*(?:>\s*)?\{:\s*\.prompt-[^}]+\}\s*$/gm, '');
+  const cacheFilePath = path.join(postCacheDir, `${slug}.json`);
+  let html: string | null = null;
+  let toc: { id: string; title: string; depth: number }[] | null = null;
 
-  // Extract TOC headings (h2 and h3)
-  const toc: { id: string; title: string; depth: number }[] = [];
-  const headingRegex = /^(#{2,3})\s+(.+)$/gm;
-  let match;
-  while ((match = headingRegex.exec(content)) !== null) {
-    const depth = match[1].length;
-    const titleText = match[2].trim().replace(/[*_`]/g, '');
-    const id = titleText
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\u4e00-\u9fa5\-]/g, '');
-    toc.push({ id, title: titleText, depth });
+  // 1. Check incremental build cache: if file has not changed, reuse cached HTML & TOC
+  if (fileMtime > 0) {
+    try {
+      if (fs.existsSync(cacheFilePath)) {
+        const cached = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
+        if (cached.mtime === fileMtime && cached.contentHtml && Array.isArray(cached.toc)) {
+          html = cached.contentHtml;
+          toc = cached.toc;
+        }
+      }
+    } catch {}
   }
 
-  // Process Markdown to HTML with Unified, KaTeX & Shiki
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkMath)
-    .use(remarkRehype, { allowDangerousHtml: true })
-    .use(rehypeKatex)
-    .use(rehypeSlug)
-    .use(rehypeStringify, { allowDangerousHtml: true });
+  // 2. If not in cache or file was modified, parse Markdown, KaTeX and run Shiki highlighting
+  if (!html || !toc) {
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    let { content } = safeMatter(fileContents);
 
-  const file = await processor.process(content);
-  let html = String(file);
+    // Clean Jekyll liquid tags and Kramdown prompt syntax before rendering markdown
+    content = content.replace(/{%\s*include\s+.*?%}/g, '');
+    content = content.replace(/{{.*?}}/g, '');
+    content = content.replace(/^\s*(?:>\s*)?\{:\s*\.prompt-[^}]+\}\s*$/gm, '');
 
-  // Apply Shiki Code Highlighting to <pre><code class="language-xyz"> blocks
-  html = await highlightCodeBlocks(html);
+    // Extract TOC headings (h2 and h3)
+    toc = [];
+    const headingRegex = /^(#{2,3})\s+(.+)$/gm;
+    let match;
+    while ((match = headingRegex.exec(content)) !== null) {
+      const depth = match[1].length;
+      const titleText = match[2].trim().replace(/[*_`]/g, '');
+      const id = titleText
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\u4e00-\u9fa5\-]/g, '');
+      toc.push({ id, title: titleText, depth });
+    }
+
+    // Process Markdown to HTML with Unified, KaTeX & Shiki
+    const processor = unified()
+      .use(remarkParse)
+      .use(remarkGfm)
+      .use(remarkMath)
+      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(rehypeKatex, { strict: false, throwOnError: false })
+      .use(rehypeSlug)
+      .use(rehypeStringify, { allowDangerousHtml: true });
+
+    const file = await processor.process(content);
+    html = String(file);
+
+    // Apply Shiki Code Highlighting to <pre><code class="language-xyz"> blocks
+    html = await highlightCodeBlocks(html);
+
+    // Write to persistent incremental cache
+    try {
+      if (!fs.existsSync(postCacheDir)) {
+        fs.mkdirSync(postCacheDir, { recursive: true });
+      }
+      fs.writeFileSync(
+        cacheFilePath,
+        JSON.stringify({
+          mtime: fileMtime,
+          contentHtml: html,
+          toc,
+        }),
+        'utf8'
+      );
+    } catch {}
+  }
 
   // Calculate Previous and Next Posts chronologically
   const currentIndex = allPosts.findIndex(p => p.slug === slug);
