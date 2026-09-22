@@ -195,7 +195,7 @@ export default async function PostPage({ params }: PageProps) {
               className="w-16 h-16 rounded-full border-2 border-teal-500 object-cover flex-shrink-0"
             />
             <div>
-              <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-1">OneCoder (lihongzheshuai)</h4>
+              <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-1">OneCoder</h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
                 一个中年人的自留地，记录学习 C++、GESP/NOI、Java、Python 与算法架构的心得体会。本站唯一网址：coderli.com
               </p>

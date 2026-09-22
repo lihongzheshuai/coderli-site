@@ -1,4 +1,4 @@
-﻿# OneCoder 博客重构项目上下文与接续指南 (Project Context)
+# OneCoder 博客重构项目上下文与接续指南 (Project Context)
 
 > 本文件用于在新建或切换会话时，让 AI 能够 100% 无缝继承所有前期讨论、技术决策与已完成的架构成果。
 
@@ -7,7 +7,7 @@
 ## 一、 项目背景与关键决策
 
 - **博客名称**：OneCoder（网址：`coderli.com`）
-- **博主**：OneCoder (`lihongzheshuai`)
+- **博主**：OneCoder
 - **历史沉淀**：936 篇博文（从 2012 年开始沉淀），411 张插图，已放置在 `_posts/` 和 `public/images/`
 - **原技术栈**：Jekyll (Chirpy 主题)，部署在 Vercel
 - **新技术栈**：**Next.js 14 (App Router) + TypeScript + Tailwind CSS**，托管于 **Vercel**
