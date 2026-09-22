@@ -13,13 +13,17 @@ interface CategoryPageProps {
 }
 
 export const dynamicParams = true;
+export const revalidate = false;
 
 export async function generateStaticParams() {
   const tree = getCategoryTree();
   const paths: { category: string[] }[] = [];
-  // Pre-generate top parent categories at build time; subcategories are generated on-demand (ISR)
-  for (const parent of tree.slice(0, 10)) {
+  // Pre-generate all parent and subcategories at build time (SSG)
+  for (const parent of tree) {
     paths.push({ category: [parent.name] });
+    for (const child of parent.children) {
+      paths.push({ category: [parent.name, child.name] });
+    }
   }
   return paths;
 }

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllPosts, getAllTags, getCategoryTree } from '@/lib/posts';
 
-export const revalidate = 3600; // Revalidate at most every hour, or on-demand via /api/revalidate
+export const revalidate = false; // Permanent edge cache, revalidated on-demand via /api/revalidate
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.coderli.com';

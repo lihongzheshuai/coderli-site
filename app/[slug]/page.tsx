@@ -21,8 +21,8 @@ export const revalidate = false; // Permanent edge cache until revalidatePath
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
-  // Pre-generate newest 10 posts at build time, remainder generated on-demand (ISR)
-  return posts.slice(0, 10).map(p => ({ slug: p.slug }));
+  // Pre-generate all posts at build time (SSG) to eliminate runtime ISR writes and CPU usage
+  return posts.map(p => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
