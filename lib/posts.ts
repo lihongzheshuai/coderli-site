@@ -165,9 +165,20 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
 
 // In-memory cache for all post metadata
 let cachedPosts: PostMeta[] | null = null;
+let cachedTags: { tag: string; count: number }[] | null = null;
+const postDetailCache = new Map<string, PostDetail>();
+const relatedPostsCache = new Map<string, PostMeta[]>();
 
 export function clearPostCache(slug?: string) {
   cachedPosts = null;
+  cachedTags = null;
+  if (slug) {
+    postDetailCache.delete(slug);
+    relatedPostsCache.delete(slug);
+  } else {
+    postDetailCache.clear();
+    relatedPostsCache.clear();
+  }
   try {
     if (slug) {
       const cacheFilePath = path.join(postCacheDir, `${slug}.json`);
@@ -300,6 +311,7 @@ export function getFeaturedPost(): PostMeta | null {
 }
 
 export function getAllTags(): { tag: string; count: number }[] {
+  if (cachedTags) return cachedTags;
   const posts = getAllPosts();
   const counts: Record<string, number> = {};
   for (const post of posts) {
@@ -310,9 +322,10 @@ export function getAllTags(): { tag: string; count: number }[] {
       }
     }
   }
-  return Object.entries(counts)
+  cachedTags = Object.entries(counts)
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count);
+  return cachedTags;
 }
 
 export function getPostsByTag(tag: string): PostMeta[] {
@@ -382,6 +395,10 @@ export function getPostsByCategory(parentCategory: string, subCategory?: string)
 }
 
 export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
+  if (postDetailCache.has(slug)) {
+    return postDetailCache.get(slug)!;
+  }
+
   const allPosts = getAllPosts();
   const meta = allPosts.find(p => p.slug === slug);
   if (!meta) return null;
@@ -471,7 +488,7 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   // Calculate intelligent Related Posts based on topic, subtopic and tags
   const relatedPosts = getRelatedPosts(meta, allPosts, 3);
 
-  return {
+  const detail: PostDetail = {
     ...meta,
     contentHtml: html,
     toc,
@@ -479,9 +496,15 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
     nextPost,
     relatedPosts,
   };
+  postDetailCache.set(slug, detail);
+  return detail;
 }
 
 function getRelatedPosts(current: PostMeta, allPosts: PostMeta[], limit = 3): PostMeta[] {
+  if (relatedPostsCache.has(current.slug)) {
+    return relatedPostsCache.get(current.slug)!;
+  }
+
   const candidates = allPosts.filter(p => p.slug !== current.slug);
 
   const scored = candidates.map(p => {
@@ -509,7 +532,9 @@ function getRelatedPosts(current: PostMeta, allPosts: PostMeta[], limit = 3): Po
     return b.post.date < a.post.date ? 1 : -1;
   });
 
-  return scored.slice(0, limit).map(s => s.post);
+  const result = scored.slice(0, limit).map(s => s.post);
+  relatedPostsCache.set(current.slug, result);
+  return result;
 }
 
 function decodeHtmlEntities(text: string): string {
