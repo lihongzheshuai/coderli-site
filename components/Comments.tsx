@@ -68,7 +68,7 @@ interface ReplyTarget {
 }
 
 export default function Comments({ slug, postTitle }: { slug: string; postTitle?: string }) {
-  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`${API_BASE}/api/comments/${slug}/`, fetcher);
+  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`${API_BASE}/api/comments/${slug}`, fetcher);
   const [author, setAuthor] = useState('匿名');
   const [email, setEmail] = useState('');
   const [site, setSite] = useState('');
@@ -162,7 +162,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         // ignore
       }
 
-      const res = await fetch(`${API_BASE}/api/comments/${slug}/`, {
+      const res = await fetch(`${API_BASE}/api/comments/${slug}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

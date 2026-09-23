@@ -21,7 +21,7 @@ const incrementFetcher = (url: string) => {
 
 export default function ViewCounter({ slug }: { slug: string }) {
   // Opening the page automatically triggers POST to increment view count by 1 in DB
-  const apiUrl = `${API_BASE}/api/views/${slug}/`;
+  const apiUrl = `${API_BASE}/api/views/${slug}`;
   const { data } = useSWR(apiUrl, incrementFetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
