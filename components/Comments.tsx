@@ -3,9 +3,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import { Reply, Quote, CornerDownRight, X, ExternalLink, MessageSquare } from 'lucide-react';
-import { CommentItem } from '@/lib/db';
+import { CommentItem } from '@/types/comment';
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const API_BASE = (
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://api.coderli.com'
+).replace(/\/$/, '');
+
+const getApiHeaders = () => {
+  const token = (process.env.API_TOKEN || process.env.NEXT_PUBLIC_API_TOKEN || '').trim();
+  const headers: Record<string, string> = {};
+  if (token) headers['x-api-token'] = token;
+  return headers;
+};
+
+const fetcher = (url: string) =>
+  fetch(url, { headers: getApiHeaders() })
+    .then(r => r.json())
+    .catch(() => ({ comments: [] }));
 
 const AVATAR_GRADIENTS = [
   'from-teal-500 to-emerald-600',
@@ -52,7 +68,7 @@ interface ReplyTarget {
 }
 
 export default function Comments({ slug, postTitle }: { slug: string; postTitle?: string }) {
-  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`/api/comments/${slug}/`, fetcher);
+  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`${API_BASE}/api/comments/${slug}/`, fetcher);
   const [author, setAuthor] = useState('匿名');
   const [email, setEmail] = useState('');
   const [site, setSite] = useState('');
@@ -146,9 +162,12 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         // ignore
       }
 
-      const res = await fetch(`/api/comments/${slug}/`, {
+      const res = await fetch(`${API_BASE}/api/comments/${slug}/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...getApiHeaders(),
+        },
         body: JSON.stringify({
           author: finalAuthor,
           email: email.trim(),

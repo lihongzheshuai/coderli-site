@@ -3,12 +3,26 @@
 import React from 'react';
 import useSWR from 'swr';
 
-const incrementFetcher = (url: string) =>
-  fetch(url, { method: 'POST' }).then(r => r.json());
+const API_BASE = (
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://api.coderli.com'
+).replace(/\/$/, '');
+
+const incrementFetcher = (url: string) => {
+  const token = (process.env.API_TOKEN || process.env.NEXT_PUBLIC_API_TOKEN || '').trim();
+  const headers: Record<string, string> = {};
+  if (token) headers['x-api-token'] = token;
+
+  return fetch(url, { method: 'POST', headers })
+    .then(r => r.json())
+    .catch(() => ({ views: undefined }));
+};
 
 export default function ViewCounter({ slug }: { slug: string }) {
   // Opening the page automatically triggers POST to increment view count by 1 in DB
-  const { data } = useSWR(`/api/views/${slug}/`, incrementFetcher, {
+  const apiUrl = `${API_BASE}/api/views/${slug}/`;
+  const { data } = useSWR(apiUrl, incrementFetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 10000,

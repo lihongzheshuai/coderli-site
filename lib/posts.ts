@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import matter from 'gray-matter';
 import yaml from 'js-yaml';
 
@@ -386,31 +387,28 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
   if (!meta) return null;
 
   const fullPath = path.join(postsDirectory, meta.filename);
-  let fileMtime = 0;
-  try {
-    fileMtime = fs.statSync(fullPath).mtimeMs;
-  } catch {}
+  if (!fs.existsSync(fullPath)) return null;
+
+  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  const fileHash = crypto.createHash('md5').update(fileContents).digest('hex');
 
   const cacheFilePath = path.join(postCacheDir, `${slug}.json`);
   let html: string | null = null;
   let toc: { id: string; title: string; depth: number }[] | null = null;
 
-  // 1. Check incremental build cache: if file has not changed, reuse cached HTML & TOC
-  if (fileMtime > 0) {
-    try {
-      if (fs.existsSync(cacheFilePath)) {
-        const cached = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
-        if (cached.mtime === fileMtime && cached.contentHtml && Array.isArray(cached.toc)) {
-          html = cached.contentHtml;
-          toc = cached.toc;
-        }
+  // 1. Check incremental build cache: if file content hash has not changed, reuse cached HTML & TOC
+  try {
+    if (fs.existsSync(cacheFilePath)) {
+      const cached = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
+      if (cached.hash === fileHash && cached.contentHtml && Array.isArray(cached.toc)) {
+        html = cached.contentHtml;
+        toc = cached.toc;
       }
-    } catch {}
-  }
+    }
+  } catch {}
 
   // 2. If not in cache or file was modified, parse Markdown, KaTeX and run Shiki highlighting
   if (!html || !toc) {
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
     let { content } = safeMatter(fileContents);
 
     // Clean Jekyll liquid tags and Kramdown prompt syntax before rendering markdown
@@ -456,7 +454,7 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
       fs.writeFileSync(
         cacheFilePath,
         JSON.stringify({
-          mtime: fileMtime,
+          hash: fileHash,
           contentHtml: html,
           toc,
         }),
