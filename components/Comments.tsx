@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
-import { Reply, Quote, CornerDownRight, X, ExternalLink, MessageSquare } from 'lucide-react';
+import { Reply, Quote, CornerDownRight, X, ExternalLink, MessageSquare, ShieldCheck } from 'lucide-react';
 import { CommentItem } from '@/types/comment';
 
 const API_BASE = (
@@ -78,6 +78,9 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+  // Spam protection state (honeypot field)
+  const [honeypot, setHoneypot] = useState<string>('');
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const comments = data?.comments || [];
 
@@ -146,6 +149,19 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const finalAuthor = author.trim() || '匿名';
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setMessage('请填写您的邮箱地址');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setMessage('请填写合法的邮箱格式 (例如: yourname@example.com)');
+      return;
+    }
+
     if (!content.trim()) return;
 
     setIsSubmitting(true);
@@ -156,7 +172,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       try {
         localStorage.setItem(
           'onecoder_comment_user',
-          JSON.stringify({ author: finalAuthor, email: email.trim(), site: site.trim() })
+          JSON.stringify({ author: finalAuthor, email: trimmedEmail, site: site.trim() })
         );
       } catch {
         // ignore
@@ -170,13 +186,14 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         },
         body: JSON.stringify({
           author: finalAuthor,
-          email: email.trim(),
+          email: trimmedEmail,
           site: site.trim(),
           content: content.trim(),
           postTitle,
           replyToId: replyTarget?.id,
           replyToAuthor: replyTarget?.author,
           replyToContent: replyTarget ? replyTarget.content.slice(0, 200) : undefined,
+          b_extra_token: honeypot || undefined,
         }),
       });
 
@@ -185,6 +202,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         mutate({ comments: [result.comment, ...comments] }, false);
         setContent('');
         setReplyTarget(null);
+        setHoneypot('');
         setMessage(replyTarget ? '🎉 回复成功！已通知站长与作者。' : '🎉 留言成功！感谢你的交流与支持。');
         setTimeout(() => setMessage(''), 4000);
       } else {
@@ -216,7 +234,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
             key={match.index}
             href={match[3]}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="nofollow noopener noreferrer"
             className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 transition"
           >
             {match[2]}
@@ -229,7 +247,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
             key={match.index}
             href={match[4]}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="nofollow noopener noreferrer"
             className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 break-all transition"
           >
             {match[4]}
@@ -357,9 +375,10 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
           />
           <input
             type="email"
+            required
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="邮箱 (选填，支持收到博主回复)"
+            placeholder="邮箱 (必填，用于接收回复与反垃圾验证)"
             className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
           />
           <input
@@ -385,18 +404,33 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
           className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
         />
 
+        {/* Honeypot field (hidden from real users, lures spam bots) */}
+        <div style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }} aria-hidden="true">
+          <input
+            type="text"
+            name="b_extra_token"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={e => setHoneypot(e.target.value)}
+          />
+        </div>
+
         <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
-          <span className="text-xs text-slate-400 dark:text-slate-500">
+          <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
             {message ? (
               <span className="text-teal-600 dark:text-teal-400 font-semibold">{message}</span>
             ) : (
-              '✨ 支持点击留言直接回复 · Markdown 引用格式'
+              <>
+                <ShieldCheck className="w-3.5 h-3.5 text-teal-600/70 dark:text-teal-400/70" />
+                <span>邮箱必填 · 支持 Markdown 格式与直接回复</span>
+              </>
             )}
           </span>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold text-sm transition shadow-sm"
+            className="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold text-sm transition shadow-sm cursor-pointer disabled:cursor-not-allowed"
           >
             {isSubmitting ? '提交中...' : replyTarget ? `发表回复 (@${replyTarget.author})` : '发表评论'}
           </button>
@@ -440,7 +474,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
                         <a
                           href={c.site}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="nofollow noopener noreferrer"
                           className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition inline-flex items-center gap-1"
                         >
                           <span>{c.author}</span>
