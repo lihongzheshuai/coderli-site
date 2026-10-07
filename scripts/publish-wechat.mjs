@@ -9,14 +9,16 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-import matter from 'gray-matter';
-import yaml from 'js-yaml';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const matter = require('gray-matter');
+const yaml = require('js-yaml');
+const hljs = require('highlight.js');
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-import hljs from 'highlight.js';
 
 // MathJax SVG components (AllPackages for full LaTeX compatibility)
 import { mathjax } from 'mathjax-full/js/mathjax.js';
@@ -47,6 +49,17 @@ function renderLatexToSvg(rawLatex, display = false) {
     let svg = adaptor.innerHTML(node);
     svg = convertExToPx(svg);
 
+    // WeChat HTML purifier compatibility: inline MathJax CSS properties directly onto SVG elements.
+    // In particular, <rect data-frame="true"> and <line data-line> in tables/arrays require fill="none"
+    // and stroke-width="70px", otherwise they inherit fill="currentColor" (black) and render as solid black blocks.
+    svg = svg
+      .replace(/<rect([^>]*data-frame[^>]*)>/g, '<rect$1 fill="none" stroke="currentColor" stroke-width="70px">')
+      .replace(/<rect([^>]*class="[^"]*mjx-solid[^"]*"[^>]*)>/g, (m) => m.includes('fill=') ? m : m.replace('<rect', '<rect fill="none" stroke="currentColor" stroke-width="70px"'))
+      .replace(/<line([^>]*data-line[^>]*)>/g, '<line$1 fill="none" stroke="currentColor" stroke-width="70px">')
+      .replace(/<line([^>]*class="[^"]*mjx-solid[^"]*"[^>]*)>/g, (m) => m.includes('stroke-width') ? m : m.replace('<line', '<line fill="none" stroke="currentColor" stroke-width="70px"'))
+      .replace(/class="mjx-dashed"/g, 'class="mjx-dashed" stroke-dasharray="140"')
+      .replace(/class="mjx-dotted"/g, 'class="mjx-dotted" stroke-linecap="round" stroke-dasharray="0,140"');
+
     if (!display) {
       if (!svg.includes('display:')) {
         svg = svg.replace('<svg style="', '<svg style="display: inline-block; margin: 0 1.5px; max-width: 100%; ');
@@ -58,6 +71,21 @@ function renderLatexToSvg(rawLatex, display = false) {
   } catch (err) {
     console.warn(`[MathJax Error for: ${rawLatex}]:`, err.message);
     return `<code>${rawLatex}</code>`;
+  }
+}
+
+const envFile = '/home/ubuntu/.wechat_env';
+if (fs.existsSync(envFile)) {
+  const envContent = fs.readFileSync(envFile, 'utf8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const [k, ...vs] = trimmed.split('=');
+      const v = vs.join('=').replace(/^["']|["']$/g, '');
+      if (!process.env[k]) {
+        process.env[k] = v;
+      }
+    }
   }
 }
 
@@ -143,7 +171,23 @@ async function requestWechatApi(endpoint, options = {}) {
 // 2. Upload Material / Image to WeChat CDN & Material Library
 // ---------------------------------------------------------------------------
 
+function getCachedMediaId(filePath) {
+  const key = `COVER_MEDIA_ID:${path.basename(filePath)}`;
+  return getCachedImageUrl(key);
+}
+
+function setCachedMediaId(filePath, mediaId) {
+  const key = `COVER_MEDIA_ID:${path.basename(filePath)}`;
+  setCachedImageUrl(key, mediaId);
+}
+
 async function uploadPermanentImage(token, filePath) {
+  const cached = getCachedMediaId(filePath);
+  if (cached) {
+    console.log(`[WeChat] Reusing existing permanent material: ${path.basename(filePath)} (MediaId: ${cached})`);
+    return { mediaId: cached };
+  }
+
   console.log(`[WeChat] Uploading permanent image to WeChat: ${filePath}`);
   const fileBuffer = fs.readFileSync(filePath);
   const fileName = path.basename(filePath);
@@ -165,7 +209,8 @@ async function uploadPermanentImage(token, filePath) {
   return { mediaId: data.media_id, url: data.url };
 }
 
-const IMAGE_CACHE_FILE = path.join(process.cwd(), '.wechat_img_cache.json');
+const SITE_DIR = process.env.CODERLI_SITE_DIR || '/home/ubuntu/coderli-site';
+const IMAGE_CACHE_FILE = path.join(SITE_DIR, '.wechat_img_cache.json');
 
 function getCachedImageUrl(src) {
   if (fs.existsSync(IMAGE_CACHE_FILE)) {
@@ -221,9 +266,11 @@ async function resolveAndUploadImage(token, src) {
       if (!fileName.includes('.')) fileName += '.png';
     } else {
       let localFilePath = src;
-      if (!path.isAbsolute(localFilePath)) {
+      if (src.startsWith('/') && !src.startsWith('/home') && !src.startsWith('/tmp')) {
+        localFilePath = path.join(SITE_DIR, 'public', src.replace(/^\//, ''));
+      } else if (!path.isAbsolute(localFilePath)) {
         const cleanPath = src.replace(/^\.?\/?/, '');
-        localFilePath = path.join(process.cwd(), 'public', cleanPath);
+        localFilePath = path.join(SITE_DIR, 'public', cleanPath);
       }
       if (!fs.existsSync(localFilePath)) {
         console.warn(`[WeChat] Local image not found: ${localFilePath}`);
@@ -277,10 +324,13 @@ async function resolveAndUploadImage(token, src) {
 async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   let content = rawContent;
 
-  // 1. Clean Liquid tags & comments
+  // 1. Clean Liquid tags & comments & ending boilerplate
   content = content.replace(/{%.*?%}/g, '');
   content = content.replace(/{{.*?}}/g, '');
   content = content.replace(/<!--\s*more\s*-->/g, '');
+  // Remove "考点归纳与备考建议" ending section
+  content = content.replace(/\n*---\s*\n+###?\s*考点归纳与备考建议[\s\S]*$/g, '');
+  content = content.replace(/###?\s*考点归纳与备考建议[\s\S]*$/g, '');
 
   // 2. Pre-process LaTeX Math with MathJax SVG
   content = content.replace(/\$\$([\s\S]*?)\$\$/g, (_, math) => {
@@ -376,6 +426,12 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
       codeBody = codeBody.replaceAll(`class="${cls}"`, `style="${sty}"`);
     }
 
+    // Convert all spaces in code (outside HTML tags) to &nbsp; so WeChat HTML purifier cannot strip spaces between tokens (e.g. using namespace, long long, int main, return 0)
+    codeBody = codeBody.replace(/([^<]+)|(<[^>]*>)/g, (match, text, tag) => {
+      if (tag) return tag;
+      return text.replace(/ /g, '&nbsp;');
+    });
+
     const macCodeCard = `
       <section style="margin: 18px 0; border-radius: 6px; overflow: hidden; background-color: #24292e; border: 1px solid #1b1f23; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background-color: #1f2428; border-bottom: 1px solid #2f363d;">
@@ -434,8 +490,8 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/[\s\r\n]*<\/ul>/gi, '</ul>');
   html = html.replace(/<ol([^>]*)>[\s\r\n]*/gi, '<ol$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
   html = html.replace(/[\s\r\n]*<\/ol>/gi, '</ol>');
-  html = html.replace(/<\/li>[\s\r\n]*<li/gi, '</li><li');
-  html = html.replace(/<li([^>]*)>[\s\r\n]*/gi, '<li$1 style="margin: 4px 0;">');
+  html = html.replace(/<\/li>[\s\r\n]*<li\b/gi, '</li><li');
+  html = html.replace(/<li(\b[^>]*)>[\s\r\n]*/gi, '<li$1 style="margin: 4px 0;">');
   html = html.replace(/[\s\r\n]*<\/li>/gi, '</li>');
 
   // Tables
@@ -514,16 +570,36 @@ async function main() {
 
   const token = await getAccessToken();
 
-  // 1. Resolve Fixed Universal GESP/CSP Cover Image (or Dedicated Cover)
+  // 1. Resolve Cover Image (Exam Solution vs Practice vs Dedicated)
   let thumbMediaId = null;
-  const fixedUniversalCover = path.join(process.cwd(), 'public', 'images', 'gesp_csp_default_cover.png');
-  const dedicatedCover = path.join(process.cwd(), 'public', 'images', 'covers', `${slug}.png`);
+  const title = data.title || '';
+  const rawTags = data.tags || [];
+  const tagsStr = Array.isArray(rawTags) ? rawTags.join(' ') : String(rawTags);
 
-  const coverCandidates = [
+  const isNOIP = title.includes('NOIP') || tagsStr.includes('NOIP');
+  const isGESPExam = !isNOIP && (title.includes('【GESP真题】') || (!title.includes('练习') && (tagsStr.includes('真题') || title.includes('真题'))));
+
+  const cspExamCover = path.join(SITE_DIR, 'public', 'images', 'csp_exam_default_cover.png');
+  const examCover = path.join(SITE_DIR, 'public', 'images', 'gesp_exam_default_cover.png');
+  const fixedUniversalCover = path.join(SITE_DIR, 'public', 'images', 'gesp_csp_default_cover.png');
+  const dedicatedCover = path.join(SITE_DIR, 'public', 'images', 'covers', `${slug}.png`);
+
+  const coverCandidates = isNOIP ? [
+    cspExamCover,
+    examCover,
     fixedUniversalCover,
     dedicatedCover,
-    path.join(process.cwd(), 'public', 'images', 'wechat_qrcode.jpg'),
-  ];
+  ] : (isGESPExam ? [
+    examCover,
+    fixedUniversalCover,
+    cspExamCover,
+    dedicatedCover,
+  ] : [
+    fixedUniversalCover,
+    examCover,
+    cspExamCover,
+    dedicatedCover,
+  ]);
 
   for (const candidate of coverCandidates) {
     if (fs.existsSync(candidate)) {
@@ -543,7 +619,7 @@ async function main() {
 
   // 2. Upload QR Code
   let qrcodeUrl = '';
-  const qrcodeLocal = path.join(process.cwd(), 'public', 'images', 'wechat_qrcode.jpg');
+  const qrcodeLocal = path.join(SITE_DIR, 'public', 'images', 'wechat_qrcode.jpg');
   if (fs.existsSync(qrcodeLocal)) {
     try {
       qrcodeUrl = await resolveAndUploadImage(token, qrcodeLocal);
