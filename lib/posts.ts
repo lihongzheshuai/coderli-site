@@ -90,20 +90,23 @@ export { getCategoryLink } from './categories';
 
 // 5 Core Topic Classifier
 export function resolveTopic(categories: string[] = [], tags: string[] = [], title: string = '') {
-  const combined = [...categories, ...tags, title].map(s => String(s).toLowerCase());
-  const combinedStr = combined.join(' ');
+  const cat0 = categories[0] || '';
+  const cat1 = categories[1] || '';
+  const titleLower = title.toLowerCase();
+  const tagsLower = tags.map(t => String(t).toLowerCase());
 
-  // 1. CSP / NOIP (Check first so NOIP & CSP problems aren't misclassified into GESP if they mention GESP level)
-  const isCspNoip = categories[0] === 'CSP/NOIP' || categories[0] === 'NOIP' || categories[0] === 'CSP' ||
-    combinedStr.includes('noip') || combinedStr.includes('noi-p') || title.includes('NOIP') || title.includes('【NOIP');
+  // 1. CSP / NOIP
+  const isCspNoipCategory = cat0 === 'CSP/NOIP' || cat0 === 'NOIP' || cat0 === 'CSP';
+  const hasNoip = titleLower.includes('noip') || titleLower.includes('noi-p') || tagsLower.some(t => t.includes('noip'));
+  const hasCsp = titleLower.includes('csp') || tagsLower.some(t => t.includes('csp'));
 
-  if (isCspNoip || (!combinedStr.includes('gesp') && (combinedStr.includes('csp') || combinedStr.includes('noi') || combinedStr.includes('信奥')))) {
+  if (isCspNoipCategory || (!titleLower.includes('gesp') && (hasNoip || hasCsp || tagsLower.some(t => t.includes('信奥'))))) {
     let sub = 'CSP-J';
-    if (categories[1] === 'NOIP' || combinedStr.includes('noip') || combinedStr.includes('noi-p') || title.includes('NOIP') || title.includes('【NOIP')) {
+    if (cat1 === 'NOIP' || (hasNoip && !hasCsp)) {
       sub = 'NOIP';
-    } else if (categories[1] === 'CSP-S' || combinedStr.includes('csp-s') || combinedStr.includes('提高组')) {
+    } else if (cat1 === 'CSP-S' || titleLower.includes('csp-s') || tagsLower.some(t => t.includes('csp-s')) || titleLower.includes('提高组')) {
       sub = 'CSP-S';
-    } else if (categories[1] === 'CSP-J' || combinedStr.includes('csp-j') || combinedStr.includes('普及组')) {
+    } else if (cat1 === 'CSP-J' || titleLower.includes('csp-j') || tagsLower.some(t => t.includes('csp-j')) || titleLower.includes('普及组')) {
       sub = 'CSP-J';
     }
 
@@ -118,6 +121,9 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
       },
     };
   }
+
+  const combined = [...categories, ...tags, title].map(s => String(s).toLowerCase());
+  const combinedStr = combined.join(' ');
 
   // 2. GESP
   if (combinedStr.includes('gesp')) {

@@ -65,7 +65,18 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
   const topicPosts = allPosts.filter(p => p.topic === params.topic);
 
   // Extract unique subtopics for filtering
-  const subtopics = Array.from(new Set(topicPosts.map(p => p.subtopic))).filter(Boolean);
+  let subtopics = Array.from(new Set(topicPosts.map(p => p.subtopic))).filter(Boolean);
+  if (params.topic === 'csp') {
+    const desiredOrder = ['CSP-J', 'CSP-S', 'NOIP'];
+    subtopics.sort((a, b) => {
+      const ia = desiredOrder.indexOf(a);
+      const ib = desiredOrder.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b);
+    });
+  }
 
   return (
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">

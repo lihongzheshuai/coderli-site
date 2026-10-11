@@ -65,6 +65,38 @@ function extractFirstImage(content) {
 }
 
 function resolveTopic(categories = [], tags = [], title = '') {
+  const cat0 = categories[0] || '';
+  const cat1 = categories[1] || '';
+  const titleLower = title.toLowerCase();
+  const tagsLower = tags.map(t => String(t).toLowerCase());
+
+  // 1. CSP / NOIP
+  const isCspNoipCategory = cat0 === 'CSP/NOIP' || cat0 === 'NOIP' || cat0 === 'CSP';
+  const hasNoip = titleLower.includes('noip') || titleLower.includes('noi-p') || tagsLower.some(t => t.includes('noip'));
+  const hasCsp = titleLower.includes('csp') || tagsLower.some(t => t.includes('csp'));
+
+  if (isCspNoipCategory || (!titleLower.includes('gesp') && (hasNoip || hasCsp || tagsLower.some(t => t.includes('信奥'))))) {
+    let sub = 'CSP-J';
+    if (cat1 === 'NOIP' || (hasNoip && !hasCsp)) {
+      sub = 'NOIP';
+    } else if (cat1 === 'CSP-S' || titleLower.includes('csp-s') || tagsLower.some(t => t.includes('csp-s')) || titleLower.includes('提高组')) {
+      sub = 'CSP-S';
+    } else if (cat1 === 'CSP-J' || titleLower.includes('csp-j') || tagsLower.some(t => t.includes('csp-j')) || titleLower.includes('普及组')) {
+      sub = 'CSP-J';
+    }
+
+    return {
+      topic: 'csp',
+      topicName: 'CSP / NOIP 信奥竞赛',
+      subtopic: sub,
+      previewGraphic: {
+        symbol: sub === 'NOIP' ? '⌘ NOIP' : sub === 'CSP-S' ? '⌘ CSP-S' : '⌘ CSP-J',
+        title: sub === 'NOIP' ? 'NOIP 全国联赛真题' : sub === 'CSP-S' ? 'CSP-S 提高级题解' : 'CSP-J 入门级题解',
+        desc: '历年 CSP-J/S 与 NOIP 经典真题推导与专项强化',
+      },
+    };
+  }
+
   const combinedStr = [...categories, ...tags, title].map(s => String(s).toLowerCase()).join(' ');
 
   if (combinedStr.includes('gesp')) {
