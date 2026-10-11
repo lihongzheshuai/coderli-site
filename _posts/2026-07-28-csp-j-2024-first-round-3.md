@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [CSP, C++, 第一轮, 初赛, 完善程序]
-categories: [CSP, J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 2024 年 CSP-J（入门级）第一轮认证于 2024 年 9 月 21 日举行。在前两篇文章中，我们分别解析了[单项选择题](https://www.coderli.com/csp-j-2024-first-round-1/)和[阅读程序题](https://www.coderli.com/csp-j-2024-first-round-2/)。

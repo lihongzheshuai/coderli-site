@@ -86,12 +86,40 @@ function extractFirstImage(content: string): string | null {
   return url;
 }
 
+export { getCategoryLink } from './categories';
+
 // 5 Core Topic Classifier
 export function resolveTopic(categories: string[] = [], tags: string[] = [], title: string = '') {
   const combined = [...categories, ...tags, title].map(s => String(s).toLowerCase());
   const combinedStr = combined.join(' ');
 
-  // 1. GESP
+  // 1. CSP / NOIP (Check first so NOIP & CSP problems aren't misclassified into GESP if they mention GESP level)
+  const isCspNoip = categories[0] === 'CSP/NOIP' || categories[0] === 'NOIP' || categories[0] === 'CSP' ||
+    combinedStr.includes('noip') || combinedStr.includes('noi-p') || title.includes('NOIP') || title.includes('【NOIP');
+
+  if (isCspNoip || (!combinedStr.includes('gesp') && (combinedStr.includes('csp') || combinedStr.includes('noi') || combinedStr.includes('信奥')))) {
+    let sub = 'CSP-J';
+    if (categories[1] === 'NOIP' || combinedStr.includes('noip') || combinedStr.includes('noi-p') || title.includes('NOIP') || title.includes('【NOIP')) {
+      sub = 'NOIP';
+    } else if (categories[1] === 'CSP-S' || combinedStr.includes('csp-s') || combinedStr.includes('提高组')) {
+      sub = 'CSP-S';
+    } else if (categories[1] === 'CSP-J' || combinedStr.includes('csp-j') || combinedStr.includes('普及组')) {
+      sub = 'CSP-J';
+    }
+
+    return {
+      topic: 'csp' as const,
+      topicName: 'CSP / NOIP 信奥竞赛',
+      subtopic: sub,
+      previewGraphic: {
+        symbol: sub === 'NOIP' ? '⌘ NOIP' : sub === 'CSP-S' ? '⌘ CSP-S' : '⌘ CSP-J',
+        title: sub === 'NOIP' ? 'NOIP 全国联赛真题' : sub === 'CSP-S' ? 'CSP-S 提高级题解' : 'CSP-J 入门级题解',
+        desc: '历年 CSP-J/S 与 NOIP 经典真题推导与专项强化',
+      },
+    };
+  }
+
+  // 2. GESP
   if (combinedStr.includes('gesp')) {
     const levelMatch = categories.find(c => ['一级', '二级', '三级', '四级', '五级', '六级', '七级', '八级'].includes(c)) ||
       (title.includes('一级') ? '一级' : title.includes('二级') ? '二级' : title.includes('三级') ? '三级' : title.includes('四级') ? '四级' : title.includes('五级') ? '五级' : '考级精选题解');
@@ -103,20 +131,6 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
         symbol: levelMatch.includes('级') ? levelMatch : 'GESP',
         title: 'C++ 算法考级专栏',
         desc: '真题分析、矩阵探测、递归回溯与基础语法',
-      },
-    };
-  }
-
-  // 2. CSP / NOIP
-  if (combinedStr.includes('csp') || combinedStr.includes('noip') || combinedStr.includes('noi') || combinedStr.includes('信奥')) {
-    return {
-      topic: 'csp' as const,
-      topicName: 'CSP / NOIP 信奥竞赛',
-      subtopic: '真题解析',
-      previewGraphic: {
-        symbol: '⌘ CSP',
-        title: '信息学奥赛题解',
-        desc: '历年 CSP-J/S 与 NOIP 经典真题推导',
       },
     };
   }

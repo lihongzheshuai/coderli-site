@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getCategoryTree, getPostsByCategory } from '@/lib/posts';
+import { getCategoryLink } from '@/lib/categories';
 import HomePostStream from '@/components/HomePostStream';
 import CategoryNavTree from '@/components/CategoryNavTree';
 import GoogleAd from '@/components/GoogleAd';
@@ -15,29 +16,45 @@ interface CategoryPageProps {
 export const dynamicParams = true;
 export const revalidate = false;
 
+function parseCategoryParams(categorySegments: string[]): { parent: string; child?: string } {
+  if (
+    categorySegments.length >= 2 &&
+    categorySegments[0].toUpperCase() === 'CSP' &&
+    categorySegments[1].toUpperCase() === 'NOIP'
+  ) {
+    return {
+      parent: 'CSP/NOIP',
+      child: categorySegments[2] ? decodeURIComponent(categorySegments[2]) : undefined,
+    };
+  }
+  return {
+    parent: decodeURIComponent(categorySegments[0] || ''),
+    child: categorySegments[1] ? decodeURIComponent(categorySegments[1]) : undefined,
+  };
+}
+
 export async function generateStaticParams() {
   const tree = getCategoryTree();
   const paths: { category: string[] }[] = [];
   // Pre-generate all parent and subcategories at build time (SSG)
   for (const parent of tree) {
-    paths.push({ category: [parent.name] });
-    for (const child of parent.children) {
-      paths.push({ category: [parent.name, child.name] });
+    if (parent.name === 'CSP/NOIP') {
+      paths.push({ category: ['CSP', 'NOIP'] });
+      for (const child of parent.children) {
+        paths.push({ category: ['CSP', 'NOIP', child.name] });
+      }
+    } else {
+      paths.push({ category: [parent.name] });
+      for (const child of parent.children) {
+        paths.push({ category: [parent.name, child.name] });
+      }
     }
   }
   return paths;
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const rawParent = params.category[0] || '';
-  const rawChild = params.category[1] || '';
-  let parent = rawParent;
-  let child = rawChild;
-  try {
-    parent = decodeURIComponent(rawParent);
-    child = rawChild ? decodeURIComponent(rawChild) : '';
-  } catch {}
-
+  const { parent, child } = parseCategoryParams(params.category || []);
   const title = child ? `${parent} · ${child} 专题` : `${parent} 专题`;
 
   return {
@@ -47,16 +64,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  const rawParent = params.category?.[0] || '';
-  const rawChild = params.category?.[1] || '';
-  let parent: string = rawParent;
-  let child: string | undefined = rawChild || undefined;
-  try {
-    parent = decodeURIComponent(rawParent);
-    child = rawChild ? decodeURIComponent(rawChild) : undefined;
-  } catch {
-    child = rawChild || undefined;
-  }
+  const { parent, child } = parseCategoryParams(params.category || []);
 
   const posts = getPostsByCategory(parent, child);
   if (!posts || posts.length === 0) {
@@ -75,7 +83,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         <span>/</span>
         {child ? (
           <>
-            <Link href={`/categories/${encodeURIComponent(parent)}/`} className="hover:text-teal-500">
+            <Link href={getCategoryLink(parent)} className="hover:text-teal-500">
               {parent}
             </Link>
             <span>/</span>

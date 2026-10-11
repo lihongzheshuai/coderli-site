@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getCategoryTree, getAllPosts } from '@/lib/posts';
+import { getCategoryLink } from '@/lib/categories';
 import CategoryNavTree from '@/components/CategoryNavTree';
 import GoogleAd from '@/components/GoogleAd';
 import PopularTagsCard from '@/components/PopularTagsCard';
@@ -52,14 +53,14 @@ export default function AllCategoriesPage() {
               {/* Parent Category Header */}
               <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-slate-800">
                 <Link
-                  href={`/categories/${encodeURIComponent(parent.name)}/`}
+                  href={getCategoryLink(parent.name)}
                   className="flex items-center gap-2.5 text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition"
                 >
                   <span className="text-teal-600 dark:text-teal-400 font-mono text-base">📁</span>
                   <span>{parent.name}</span>
                 </Link>
                 <Link
-                  href={`/categories/${encodeURIComponent(parent.name)}/`}
+                  href={getCategoryLink(parent.name)}
                   className="font-mono text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-full border border-teal-500/20 hover:bg-teal-100 transition"
                 >
                   查看全部 {parent.count} 篇 →
@@ -74,7 +75,7 @@ export default function AllCategoriesPage() {
                     {parent.children.map(child => (
                       <Link
                         key={child.name}
-                        href={`/categories/${encodeURIComponent(parent.name)}/${encodeURIComponent(child.name)}/`}
+                        href={getCategoryLink(parent.name, child.name)}
                         className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/60 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 text-xs md:text-sm border border-transparent hover:border-teal-500/30 transition flex items-center gap-1.5 group cursor-pointer"
                       >
                         <span className="text-slate-400 text-xs">└</span>

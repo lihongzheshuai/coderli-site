@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [CSP, C++, 第一轮, 初赛, 完善程序]
-categories: [CSP, J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 2022 年 CCF 非专业级软件能力认证（CSP-J/S 2022）第一轮认证于 2022 年 9 月 18 日举行。继前两篇单项选择题与阅读程序题解析后，本文为您带来 **第三部分：完善程序题（共 2 大题，10 小题，每小题 3 分，共计 30 分）** 的全题型深度解析。

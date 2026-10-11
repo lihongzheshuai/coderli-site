@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [CSP, 真题, CSP-J, 第一轮, 参考答案]
-categories: [CSP, J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 2026 年全国青少年信息学奥林匹克联赛 **CSP-J（入门级 C++ 语言）第一轮认证**于今日正式开考。

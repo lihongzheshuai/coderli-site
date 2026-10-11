@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [洛谷, C++, BFS, 广度优先搜索, 队列, 最短路, GESP六级, CSP-J]
-categories: [GESP, 六级, 搜索, CSP-J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 洛谷经典算法题 P1443「马的遍历」，是算法竞赛与等级考试中**广度优先搜索（Breadth-First Search, BFS）**求解**无权图单源最短路**的奠基经典题。本题标准收录于 CCF GESP 六级考纲（搜索算法核心考点）以及 CSP-J 普及组核心训练题单。题目考查如何将中国象棋中“马走日”的规则抽象为二维网格图上的状态跃迁，结合先进先出（FIFO）的队列（`std::queue`）实现逐层水波纹扩展，在 $\mathcal{O}(nm)$ 时间复杂度内计算出从起点出发到达棋盘所有位置的最少步数。题目难度⭐⭐★☆☆，洛谷官方难度评级为`普及-`。

@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [CSP, C++, 第一轮, 初赛, 阅读程序]
-categories: [CSP, J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 继上一篇单项选择题的全面解析后，本文我们将进入 CSP 初赛试卷中拉开分差的核心板块——**阅读程序题**。

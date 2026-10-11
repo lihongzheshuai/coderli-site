@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [CSP, C++, 第一轮, 初赛]
-categories: [CSP, J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 2022 年 CCF 非专业级软件能力认证（CSP-J/S 2022）第一轮认证于 2022 年 9 月 18 日举行。

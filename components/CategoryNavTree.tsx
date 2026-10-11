@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { CategoryNode } from '@/lib/posts';
+import type { CategoryNode } from '@/lib/posts';
+import { getCategoryLink } from '@/lib/categories';
 
 interface CategoryNavTreeProps {
   categories: CategoryNode[];
@@ -99,7 +100,7 @@ export default function CategoryNavTree({
 
                   {/* Category Name link */}
                   <Link
-                    href={`/categories/${encodeURIComponent(node.name)}/`}
+                    href={getCategoryLink(node.name)}
                     className="truncate hover:text-teal-600 dark:hover:text-teal-400 transition"
                     title={`查看「${node.name}」专栏下的全部博文`}
                   >
@@ -126,7 +127,7 @@ export default function CategoryNavTree({
                     return (
                       <Link
                         key={child.name}
-                        href={`/categories/${encodeURIComponent(node.name)}/${encodeURIComponent(child.name)}/`}
+                        href={getCategoryLink(node.name, child.name)}
                         className={`flex items-center justify-between py-1.5 px-2 rounded-lg text-sm transition ${
                           isChildActive
                             ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-semibold'

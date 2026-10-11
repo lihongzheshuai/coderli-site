@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [洛谷, C++, 排序, 计数排序, 桶排序, GESP四级, CSP-J]
-categories: [GESP, 四级, 排序, CSP-J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 洛谷 P1271【深基9.例1】选举学生会。本题出自《深入浅出程序设计竞赛 - 基础篇》，是学习**计数排序（Counting Sort / 桶排序思想）**与**非比较排序算法**的标志性入门经典试题，被标准收录于 CCF GESP 四级认证考纲（初级排序考点）及 CSP-J 普及组核心必做题单。题目核心考点在于突破传统基于比较的 $\mathcal{O}(m \log m)$ 排序思维瓶颈，利用“候选人编号值域小（$n \le 999$）而选票样本总量极大（$m \le 2 \times 10^6$）”这一关键数据特征，采用频数统计数组实现 $\mathcal{O}(m + n)$ 线性时间与 $\mathcal{O}(n)$ 极小内存的优化解法。题目难度⭐☆☆☆☆，洛谷难度等级评定为`入门`。

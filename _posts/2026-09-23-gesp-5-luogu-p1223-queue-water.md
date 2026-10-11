@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [洛谷, C++, 贪心, 排序不等式, 微扰法, GESP五级, CSP-J]
-categories: [GESP, 五级, 贪心, CSP-J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 洛谷经典算法题 P1223「排队接水」，是算法竞赛与等级考试中**贪心算法（Greedy Algorithm）**与**微扰交换论证（Exchange Argument）**的入门与奠基典范。本题标准收录于 CCF GESP 五级考纲（基础贪心算法核心考点）以及 CSP-J 普及组基础题单。题目核心考查如何将“使得所有人的平均等待时间最小”这一最优化目标，转化为“单人耗时对后续群体产生累积等待代价”的数学模型，通过高等数学中的**排序不等式（Rearrangement Inequality）**与微扰交换法严格证明其贪心选择性质，并结合结构体双关键字排序在 $\mathcal{O}(n \log n)$ 时间内完成求解。题目难度⭐⭐★☆☆，洛谷官方难度评级为`普及-`。

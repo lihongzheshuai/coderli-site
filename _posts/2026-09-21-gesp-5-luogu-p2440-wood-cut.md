@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [洛谷, C++, 二分答案, 单调性, 贪心, GESP五级, CSP-J]
-categories: [GESP, 五级, 二分答案, CSP-J]
+categories: [CSP/NOIP, CSP-J]
 ---
 
 洛谷经典算法题 P2440「木材加工」，是算法竞赛与等级考试中**二分答案（Binary Search on Answer）**思想的极具代表性的入门与进阶典例。本题标准收录于 CCF GESP 五级考纲（二分查找与二分答案核心考点）以及 CSP-J 普及组算法题单。题目核心考查如何将“求满足条件的最大值”这一最优化目标，转化为“给定长度检验是否可行”的判定性问题（Decision Problem），利用切分段数随单段长度递增而严格单调不增的数学性质，在 $\mathcal{O}(n \log (\max L_i))$ 的高效时间复杂度内锁定最优解。题目难度⭐⭐⭐☆☆，洛谷难度评级为`普及/提高-`。
