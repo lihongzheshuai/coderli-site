@@ -6,7 +6,7 @@ author: OneCoder
 comments: true
 math: true
 tags: [NOIP, 洛谷, C++, 动态规划, 递推, 路径计数, CSP-J, GESP六级]
-categories: [CSP/NOIP, NOIP]
+categories: [GESP, 六级]
 ---
 
 NOIP 2002 普及组第四题，洛谷 P1002。本题是算法竞赛与考级中学习**网格动态规划（Grid DP）**与**基础递推模型**不可跨越的教科书级经典题目，被广泛收录于 GESP 六级考级（动态规划考点）及 CSP-J 普及组核心必做题单。题目核心考察障碍物标记、网格走步递推方程构造以及 64 位整型溢出防范。题目难度⭐⭐☆☆☆，洛谷难度等级`普及-`。
