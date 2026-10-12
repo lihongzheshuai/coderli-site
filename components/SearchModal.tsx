@@ -49,7 +49,7 @@ export default function SearchModal() {
 
       if (indexData.length === 0 && !isLoading) {
         setIsLoading(true);
-        fetch('/search-index.json')
+        fetch('/search-index.json', { cache: 'force-cache' })
           .then(r => r.json())
           .then(data => {
             setIndexData(data);
@@ -150,6 +150,7 @@ export default function SearchModal() {
               <Link
                 key={item.slug}
                 href={`/${item.slug}/`}
+                prefetch={false}
                 onClick={() => setIsOpen(false)}
                 className="block p-3.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/70 transition border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 group"
               >

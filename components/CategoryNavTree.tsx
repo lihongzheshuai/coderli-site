@@ -52,6 +52,7 @@ export default function CategoryNavTree({
         </span>
         <Link
           href="/categories/"
+          prefetch={false}
           className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
         >
           全集 ({totalCount}) →
@@ -101,6 +102,7 @@ export default function CategoryNavTree({
                   {/* Category Name link */}
                   <Link
                     href={getCategoryLink(node.name)}
+                    prefetch={false}
                     className="truncate hover:text-teal-600 dark:hover:text-teal-400 transition"
                     title={`查看「${node.name}」专栏下的全部博文`}
                   >
@@ -128,6 +130,7 @@ export default function CategoryNavTree({
                       <Link
                         key={child.name}
                         href={getCategoryLink(node.name, child.name)}
+                        prefetch={false}
                         className={`flex items-center justify-between py-1.5 px-2 rounded-lg text-sm transition ${
                           isChildActive
                             ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-semibold'
@@ -157,6 +160,7 @@ export default function CategoryNavTree({
         <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-center">
           <Link
             href="/categories/"
+            prefetch={false}
             className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 inline-flex items-center gap-1 transition"
           >
             <span>显示全部 {totalCount} 大专题与分类大厅</span>

@@ -86,7 +86,7 @@ export default function HomePage() {
                     {featured.pinned ? '📌 核心置顶' : '🔥 最新推荐'} · {featured.topicName}
                   </span>
                   <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition mb-3 leading-snug">
-                    <Link href={`/${featured.slug}/`}>
+                    <Link href={`/${featured.slug}/`} prefetch={false}>
                       <LatexText text={featured.title} />
                     </Link>
                   </h2>

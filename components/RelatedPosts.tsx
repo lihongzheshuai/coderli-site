@@ -31,6 +31,7 @@ export default function RelatedPosts({ posts }: RelatedPostsProps) {
           <Link
             key={item.slug}
             href={`/${item.slug}/`}
+            prefetch={false}
             className="group flex flex-col justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 hover:border-teal-500/60 hover:shadow-md transition-all duration-200"
           >
             <div>

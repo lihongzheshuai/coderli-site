@@ -20,6 +20,7 @@ export default function PopularTagsCard({ currentTag, limit = 24 }: PopularTagsC
         </span>
         <Link
           href="/tags/"
+          prefetch={false}
           className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
         >
           全部 ({allTags.length}) →
@@ -34,6 +35,7 @@ export default function PopularTagsCard({ currentTag, limit = 24 }: PopularTagsC
             <Link
               key={item.tag}
               href={`/tags/${encodeURIComponent(item.tag)}/`}
+              prefetch={false}
               className={`px-2.5 py-1 rounded-lg transition font-mono flex items-center gap-1 ${
                 isCurrent
                   ? 'bg-teal-600 text-white font-bold shadow-sm'

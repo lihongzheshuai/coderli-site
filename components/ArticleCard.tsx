@@ -20,7 +20,7 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
         </div>
 
         <h3 className="text-xl md:text-[22px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-snug mb-2.5">
-          <Link href={`/${post.slug}/`} className="block">
+          <Link href={`/${post.slug}/`} className="block" prefetch={false}>
             <LatexText text={post.title} />
           </Link>
         </h3>
@@ -34,6 +34,7 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
             <Link
               key={t}
               href={`/tags/${encodeURIComponent(t)}/`}
+              prefetch={false}
               className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono text-xs hover:bg-teal-50 dark:hover:bg-teal-950/60 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-500/30 border border-transparent transition cursor-pointer"
               title={`按标签「#${t}」筛选博文`}
             >

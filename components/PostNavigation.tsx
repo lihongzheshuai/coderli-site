@@ -20,6 +20,7 @@ export default function PostNavigation({ prevPost, nextPost }: PostNavigationPro
         {prevPost ? (
           <Link
             href={`/${prevPost.slug}/`}
+            prefetch={false}
             className="group flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 hover:border-teal-500/50 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <div>
@@ -50,6 +51,7 @@ export default function PostNavigation({ prevPost, nextPost }: PostNavigationPro
         {nextPost ? (
           <Link
             href={`/${nextPost.slug}/`}
+            prefetch={false}
             className="group flex flex-col justify-between p-4 md:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 hover:border-teal-500/50 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200 shadow-sm hover:shadow-md text-left md:text-right"
           >
             <div>
