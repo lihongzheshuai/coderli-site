@@ -366,7 +366,9 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
     'hljs-string': 'color: #9ecbff;',
     'hljs-comment': 'color: #6a737d; font-style: italic;',
     'hljs-title': 'color: #b392f0; font-weight: bold;',
-    'hljs-meta': 'color: #f97583;',
+    'hljs-meta': 'color: #f97583; font-weight: bold;',
+    'hljs-meta-keyword': 'color: #f97583; font-weight: bold;',
+    'hljs-meta-string': 'color: #9ecbff;',
     'hljs-params': 'color: #e1e4e8;',
     'hljs-function': 'color: #e1e4e8;',
     'hljs-variable': 'color: #79b8ff;',
@@ -401,52 +403,85 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
       html = html.replace(fullMatch, sampleBox);
       continue;
     }
+
+    const defaultCodeStyle = 'color: #e1e4e8;';
     const highlightedLines = lines.map((line) => {
       if (!line || line.trim() === '') {
-        return '&nbsp;';
+        return `<span style="${defaultCodeStyle}">&nbsp;</span>`;
       }
-      const matchSpaces = line.match(/^(\s+)/);
-      const leadingSpaces = matchSpaces ? matchSpaces[1].length : 0;
-      const trimmed = line.slice(leadingSpaces);
 
       let hl = '';
       try {
-        hl = hljs.highlight(trimmed, { language: lang }).value;
+        hl = hljs.highlight(line, { language: lang }).value;
       } catch {
-        hl = trimmed.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        hl = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
 
-      return '&nbsp;'.repeat(leadingSpaces) + hl;
+      // Flatten nested <span> tags into flat (style, text) tokens
+      const stack = [defaultCodeStyle];
+      const rawTokens = [];
+      const tokenRegex = /(<span\s+class="([^"]+)">)|(<\/span>)|([^<]+)/g;
+      let tokMatch;
+      while ((tokMatch = tokenRegex.exec(hl)) !== null) {
+        if (tokMatch[1]) {
+          const cls = tokMatch[2];
+          const sty = hljsThemeMap[cls] || stack[stack.length - 1] || defaultCodeStyle;
+          stack.push(sty);
+        } else if (tokMatch[3]) {
+          if (stack.length > 1) stack.pop();
+        } else if (tokMatch[4]) {
+          rawTokens.push({ style: stack[stack.length - 1], text: tokMatch[4] });
+        }
+      }
+
+      // Absorb pure-space tokens into adjacent tokens so WeChat ProseMirror editor
+      // never sees a standalone whitespace-only <span> between two tokens (e.g. return 0, using namespace)
+      const nonEmptyTokens = [];
+      let pendingLeadingSpaces = '';
+      for (const tok of rawTokens) {
+        if (/^[ ]+$/.test(tok.text)) {
+          if (nonEmptyTokens.length > 0) {
+            nonEmptyTokens[nonEmptyTokens.length - 1].text += tok.text;
+          } else {
+            pendingLeadingSpaces += tok.text;
+          }
+        } else {
+          if (pendingLeadingSpaces) {
+            tok.text = pendingLeadingSpaces + tok.text;
+            pendingLeadingSpaces = '';
+          }
+          nonEmptyTokens.push({ style: tok.style, text: tok.text });
+        }
+      }
+      if (pendingLeadingSpaces) {
+        nonEmptyTokens.push({ style: defaultCodeStyle, text: pendingLeadingSpaces });
+      }
+
+      // Merge adjacent tokens that share the exact same style
+      const mergedTokens = [];
+      for (const tok of nonEmptyTokens) {
+        if (mergedTokens.length > 0 && mergedTokens[mergedTokens.length - 1].style === tok.style) {
+          mergedTokens[mergedTokens.length - 1].text += tok.text;
+        } else {
+          mergedTokens.push(tok);
+        }
+      }
+
+      return mergedTokens
+        .map((tok) => `<span style="${tok.style}">${tok.text.replace(/ /g, '&nbsp;')}</span>`)
+        .join('');
     });
 
-    let codeBody = highlightedLines.join('<br/>');
-
-    // Inline syntax highlight styles
-    for (const [cls, sty] of Object.entries(hljsThemeMap)) {
-      codeBody = codeBody.replaceAll(`class="${cls}"`, `style="${sty}"`);
-    }
-
-    // Convert all spaces in code (outside HTML tags) to &nbsp; so WeChat HTML purifier cannot strip spaces between tokens (e.g. using namespace, long long, int main, return 0)
-    codeBody = codeBody.replace(/([^<]+)|(<[^>]*>)/g, (match, text, tag) => {
-      if (tag) return tag;
-      return text.replace(/ /g, '&nbsp;');
-    });
+    const codeBody = highlightedLines.join('<br/>');
 
     const macCodeCard = `
       <section style="margin: 18px 0; border-radius: 6px; overflow: hidden; background-color: #24292e; border: 1px solid #1b1f23; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background-color: #1f2428; border-bottom: 1px solid #2f363d;">
-          <div style="display: inline-block;">
-            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #ff5f56; margin-right: 4px;"></span>
-            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #ffbd2e; margin-right: 4px;"></span>
-            <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #27c93f;"></span>
-          </div>
-          <span style="color: #8b949e; font-size: 11px; font-family: Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span>
-        </div>
-        <div style="padding: 12px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-          <section style="margin: 0; padding: 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.65; color: #e1e4e8; background: transparent; border: none; white-space: pre-wrap; word-break: break-all;">
-            ${codeBody}
-          </section>
-        </div>
+        <section style="padding: 8px 14px; background-color: #1f2428; border-bottom: 1px solid #2f363d; text-align: left; line-height: 1.2;">
+          <p style="margin: 0; padding: 0; line-height: 1.2; text-align: left;"><span style="color: #ff5f56; font-size: 12px; margin-right: 6px;">●</span><span style="color: #ffbd2e; font-size: 12px; margin-right: 6px;">●</span><span style="color: #27c93f; font-size: 12px; margin-right: 10px;">●</span><span style="color: #8b949e; font-size: 11px; font-family: Consolas, Monaco, monospace; text-transform: uppercase; font-weight: 600;">${lang}</span></p>
+        </section>
+        <section style="margin: 0; padding: 14px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; background-color: #24292e; text-align: left;">
+          <p style="margin: 0; padding: 0; font-family: Consolas, Monaco, 'Courier New', Courier, monospace; font-size: 12.5px; line-height: 1.65; color: #e1e4e8; background: transparent; border: none; text-align: left; white-space: pre-wrap; word-break: break-all;">${codeBody}</p>
+        </section>
       </section>
     `;
 
@@ -505,17 +540,9 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   // 8. Minimal, High-Value Header Card
   const headerCard = `
     <section style="margin-bottom: 22px; padding: 14px 18px; background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%); border-radius: 6px; border: 1px solid #ccfbf1;">
-      <div style="font-size: 12px; color: #0d9488; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px;">
-        💡 GESP 考级与信奥算法精选
-      </div>
-      <div style="font-size: 18px; font-weight: bold; color: #0f172a; line-height: 1.4; margin-bottom: 8px;">
-        ${metadata.title || ''}
-      </div>
-      <div style="font-size: 12px; color: #64748b;">
-        <span>✍️ 作者：${metadata.author || 'OneCoder'}</span>
-        <span style="margin: 0 6px;">•</span>
-        <span>🏷️ 分类：${(metadata.categories || []).join(' / ')}</span>
-      </div>
+      <p style="font-size: 12px; color: #0d9488; font-weight: 600; letter-spacing: 0.5px; margin: 0 0 4px 0; line-height: 1.4;">💡 GESP 考级与信奥算法精选</p>
+      <p style="font-size: 18px; font-weight: bold; color: #0f172a; line-height: 1.4; margin: 0 0 8px 0;">${metadata.title || ''}</p>
+      <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;"><span>✍️ 作者：${metadata.author || 'OneCoder'}</span><span style="margin: 0 6px;">•</span><span>🏷️ 分类：${(metadata.categories || []).join(' / ')}</span></p>
     </section>
   `;
 
@@ -523,10 +550,8 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   const footerCard = `
     <section style="margin-top: 32px; padding-top: 20px; border-top: 1px dashed #cbd5e1; text-align: center;">
       <section style="margin-bottom: 18px; padding: 14px; background-color: #f8fafc; border-radius: 6px; border-left: 4px solid #0d9488; text-align: left;">
-        <div style="font-size: 13.5px; font-weight: bold; color: #0f766e; margin-bottom: 5px;">📚 往期关联真题与系统化备考：</div>
-        <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">
-          本站已收录超 900+ 篇计算机与算法专题。由于微信公众号不支持外部链接直接跳转，建议点击左下角<strong>「阅读原文」</strong>直达个人网站，即可使用全局检索（<code>Ctrl+K</code>）、在线复制代码与浏览完整知识库！
-        </p>
+        <p style="font-size: 13.5px; font-weight: bold; color: #0f766e; margin: 0 0 5px 0; line-height: 1.5;">📚 往期关联真题与系统化备考：</p>
+        <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.6;">本站已收录超 900+ 篇计算机与算法专题。由于微信公众号不支持外部链接直接跳转，建议点击左下角<strong>「阅读原文」</strong>直达个人网站，即可使用全局检索（<code>Ctrl+K</code>）、在线复制代码与浏览完整知识库！</p>
       </section>
       ${metadata.qrcodeUrl ? `<p style="margin: 14px 0;"><img src="${metadata.qrcodeUrl}" style="width: 130px; height: 130px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);" /><br><span style="font-size: 12px; color: #94a3b8;">长按关注「OneCoder」公众号</span></p>` : ''}
     </section>
