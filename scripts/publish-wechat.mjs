@@ -601,16 +601,23 @@ async function main() {
   const rawTags = data.tags || [];
   const tagsStr = Array.isArray(rawTags) ? rawTags.join(' ') : String(rawTags);
 
-  const isNOIP = title.includes('NOIP') || tagsStr.includes('NOIP');
-  const isGESPExam = !isNOIP && (title.includes('【GESP真题】') || (!title.includes('练习') && (tagsStr.includes('真题') || title.includes('真题'))));
+  const isKnowledge = title.includes('考点精讲') || title.includes('考点讲解') || tagsStr.includes('考点精讲') || tagsStr.includes('考点讲解') || slug.includes('-knowledge-');
+  const isNOIP = !isKnowledge && (title.includes('NOIP') || tagsStr.includes('NOIP'));
+  const isGESPExam = !isKnowledge && !isNOIP && (title.includes('【GESP真题】') || (!title.includes('练习') && (tagsStr.includes('真题') || title.includes('真题'))));
 
+  const knowledgeCover = path.join(SITE_DIR, 'public', 'images', 'gesp_csp_knowledge_default_cover.png');
   const noipExamCover = path.join(SITE_DIR, 'public', 'images', 'noip_exam_default_cover.png');
   const cspExamCover = path.join(SITE_DIR, 'public', 'images', 'csp_exam_default_cover.png');
   const examCover = path.join(SITE_DIR, 'public', 'images', 'gesp_exam_default_cover.png');
   const fixedUniversalCover = path.join(SITE_DIR, 'public', 'images', 'gesp_csp_default_cover.png');
   const dedicatedCover = path.join(SITE_DIR, 'public', 'images', 'covers', `${slug}.png`);
 
-  const coverCandidates = isNOIP ? [
+  const coverCandidates = isKnowledge ? [
+    knowledgeCover,
+    fixedUniversalCover,
+    examCover,
+    dedicatedCover,
+  ] : (isNOIP ? [
     noipExamCover,
     cspExamCover,
     examCover,
@@ -626,7 +633,7 @@ async function main() {
     examCover,
     cspExamCover,
     dedicatedCover,
-  ]);
+  ]));
 
   for (const candidate of coverCandidates) {
     if (fs.existsSync(candidate)) {
