@@ -206,6 +206,7 @@ async function uploadPermanentImage(token, filePath) {
   }
 
   console.log(`[WeChat] Image uploaded to Material Library. MediaId: ${data.media_id}, URL: ${data.url}`);
+  setCachedMediaId(filePath, data.media_id);
   return { mediaId: data.media_id, url: data.url };
 }
 
@@ -603,7 +604,8 @@ async function main() {
 
   const isKnowledge = title.includes('考点精讲') || title.includes('考点讲解') || tagsStr.includes('考点精讲') || tagsStr.includes('考点讲解') || slug.includes('-knowledge-');
   const isNOIP = !isKnowledge && (title.includes('NOIP') || tagsStr.includes('NOIP'));
-  const isGESPExam = !isKnowledge && !isNOIP && (title.includes('【GESP真题】') || (!title.includes('练习') && (tagsStr.includes('真题') || title.includes('真题'))));
+  const isCSPExam = !isKnowledge && !isNOIP && (title.includes('【CSP真题】') || title.includes('【CSP-J真题】') || title.includes('【CSP-S真题】') || ((title.includes('CSP') || slug.startsWith('csp-')) && title.includes('真题')));
+  const isGESPExam = !isKnowledge && !isNOIP && !isCSPExam && (title.includes('【GESP真题】') || (!title.includes('【GESP/CSP练习】') && (tagsStr.includes('真题') || title.includes('真题'))));
 
   const knowledgeCover = path.join(SITE_DIR, 'public', 'images', 'gesp_csp_knowledge_default_cover.png');
   const noipExamCover = path.join(SITE_DIR, 'public', 'images', 'noip_exam_default_cover.png');
@@ -623,6 +625,11 @@ async function main() {
     examCover,
     fixedUniversalCover,
     dedicatedCover,
+  ] : (isCSPExam ? [
+    cspExamCover,
+    examCover,
+    fixedUniversalCover,
+    dedicatedCover,
   ] : (isGESPExam ? [
     examCover,
     fixedUniversalCover,
@@ -633,7 +640,7 @@ async function main() {
     examCover,
     cspExamCover,
     dedicatedCover,
-  ]));
+  ])));
 
   for (const candidate of coverCandidates) {
     if (fs.existsSync(candidate)) {
