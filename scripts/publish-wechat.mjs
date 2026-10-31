@@ -246,22 +246,11 @@ async function resolveAndUploadImage(token, src) {
     let fileName = 'image.png';
 
     if (src.startsWith('http://') || src.startsWith('https://')) {
-      console.log(`[WeChat] Downloading external image: ${src}`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-      const resp = await fetch(src, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Referer': 'https://www.luogu.com.cn/'
-        }
-      });
-      clearTimeout(timeoutId);
-      if (!resp.ok) {
-        throw new Error(`Download failed with status: ${resp.status}`);
-      }
-      const ab = await resp.arrayBuffer();
-      fileBuffer = Buffer.from(ab);
+      console.log(`[WeChat] Downloading external image (IPv4): ${src}`);
+      const tmpDownload = `/tmp/wx_dl_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      execSync(`curl -4 -sS -L --max-time 15 -H "Referer: https://www.luogu.com.cn/" -H "User-Agent: Mozilla/5.0" ${JSON.stringify(src)} -o ${JSON.stringify(tmpDownload)}`);
+      fileBuffer = fs.readFileSync(tmpDownload);
+      try { fs.unlinkSync(tmpDownload); } catch {}
       const urlPath = new URL(src).pathname;
       fileName = path.basename(urlPath) || 'diagram.png';
       if (!fileName.includes('.')) fileName += '.png';
@@ -281,7 +270,18 @@ async function resolveAndUploadImage(token, src) {
       fileName = path.basename(localFilePath);
     }
 
-    const ext = path.extname(fileName).toLowerCase().replace('.', '') || 'png';
+    let ext = path.extname(fileName).toLowerCase().replace('.', '') || 'png';
+    // WeChat uploadimg only accepts JPG/PNG; convert WEBP to PNG automatically
+    if (ext === 'webp') {
+      const tmpWebp = `/tmp/wx_in_${Date.now()}.webp`;
+      const tmpPng = `/tmp/wx_out_${Date.now()}.png`;
+      fs.writeFileSync(tmpWebp, fileBuffer);
+      execSync(`python3 -c "from PIL import Image; Image.open('${tmpWebp}').convert('RGBA').save('${tmpPng}', 'PNG')"`);
+      fileBuffer = fs.readFileSync(tmpPng);
+      try { fs.unlinkSync(tmpWebp); fs.unlinkSync(tmpPng); } catch {}
+      fileName = fileName.replace(/\.webp$/i, '.png');
+      ext = 'png';
+    }
     const mime = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : (ext === 'gif' ? 'image/gif' : 'image/png');
 
     console.log(`[WeChat] Uploading article image (${fileName}) to WeChat CDN...`);
@@ -519,7 +519,8 @@ async function formatMarkdownForWechat(rawContent, token, metadata = {}) {
   html = html.replace(/<h5>(.*?)<\/h5>/g, '<p style="font-size: 14px; font-weight: bold; color: #334155; margin: 14px 0 4px 0; text-align: left;">$1</p>');
 
   html = html.replace(/<p>(.*?)<\/p>/g, '<p style="font-size: 15px; line-height: 1.8; color: #334155; margin: 12px 0; letter-spacing: 0.5px; text-align: justify; word-break: break-word;">$1</p>');
-  html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<blockquote style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</blockquote>');
+  // Use <section> instead of <blockquote> to avoid WeChat Web Editor's 300-character blockquote limit
+  html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, '<section style="border-left: 3.5px solid #0d9488; background-color: #f0fdfa; padding: 10px 14px; margin: 14px 0; color: #0f766e; font-size: 14px; border-radius: 0 4px 4px 0; line-height: 1.7;">$1</section>');
 
   // 7. CRITICAL FIX: Eliminate phantom bullets in lists
   html = html.replace(/<ul([^>]*)>[\s\r\n]*/gi, '<ul$1 style="padding-left: 20px; margin: 10px 0; font-size: 14.5px; color: #334155; line-height: 1.75;">');
