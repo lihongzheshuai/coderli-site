@@ -89,9 +89,9 @@ export default function TagPage({ params }: TagPageProps) {
 
       {/* Main Grid: Stream + Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
-        {/* Left: Filtered Post Stream */}
+        {/* Left: Filtered Post Stream (cap serialized client payload to latest 80 posts to prevent multi-MB tag pages) */}
         <div>
-          <HomePostStream posts={posts} initialCount={20} pageSize={20} />
+          <HomePostStream posts={posts.slice(0, 80)} initialCount={20} pageSize={20} />
         </div>
 
         {/* Right: Sidebar */}

@@ -231,7 +231,7 @@ export default async function PostPage({ params }: PageProps) {
             label="广告位 4 · 侧边栏吸顶"
           />
 
-          <PopularTagsCard limit={20} />
+          <PopularTagsCard limit={12} />
         </aside>
       </div>
     </div>

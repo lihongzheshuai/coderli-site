@@ -25,7 +25,7 @@ import { codeToHtml, bundledLanguages, isPlainLang, isSpecialLang } from 'shiki'
 import type { PostMeta, PostDetail } from '../types/post';
 
 const postsDirectory = path.join(process.cwd(), '_posts');
-const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache');
+const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v2');
 
 // Helper to strip markdown symbols for excerpts
 function cleanExcerpt(content: string): string {
@@ -50,13 +50,13 @@ function cleanExcerpt(content: string): string {
   text = text.replace(/[*_~`>]/g, '');
   text = text.replace(/\s+/g, ' ').trim();
 
-  if (text.length <= 160) return text;
+  if (text.length <= 96) return text;
 
-  let truncated = text.slice(0, 160);
+  let truncated = text.slice(0, 96);
   // Ensure we don't truncate inside an inline LaTeX formula $...$
   const dollarCount = (truncated.match(/(?<!\\)\$/g) || []).length;
   if (dollarCount % 2 !== 0) {
-    const remainder = text.slice(160);
+    const remainder = text.slice(96);
     const closingIndex = remainder.indexOf('$');
     if (closingIndex !== -1 && closingIndex < 40) {
       truncated += remainder.slice(0, closingIndex + 1);
@@ -299,14 +299,18 @@ export function getAllPosts(): PostMeta[] {
       date: postDate,
       author: data.author ? String(data.author) : 'OneCoder',
       categories,
-      tags,
+      tags: tags.slice(0, 6),
       readTime,
       excerpt,
       topic,
       topicName,
       subtopic,
       previewImg,
-      previewGraphic,
+      previewGraphic: {
+        symbol: previewGraphic.symbol,
+        title: previewGraphic.title,
+        desc: '',
+      },
       hasMath: !!data.math,
       pinned,
       pinOrder,
@@ -473,7 +477,7 @@ export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
       .use(remarkGfm)
       .use(remarkMath)
       .use(remarkRehype, { allowDangerousHtml: true })
-      .use(rehypeKatex, { strict: false, throwOnError: false })
+      .use(rehypeKatex, { output: 'html', strict: false, throwOnError: false } as any)
       .use(rehypeSlug)
       .use(rehypeStringify, { allowDangerousHtml: true });
 
@@ -679,47 +683,8 @@ async function highlightCodeBlocks(html: string): Promise<string> {
         transformers: [lineNumbersTransformer],
       });
 
-      // Wrap with custom UI container (macOS dots, language, line count, line number & wrap toggles, copy button)
-      const enhanced = `
-        <div class="code-block my-6 rounded-xl overflow-hidden border border-slate-700/60 dark:border-slate-800 shadow-lg shadow-black/10" style="--ln-gutter-width: ${gutterWidth};">
-          <div class="code-header flex items-center justify-between px-3.5 py-2.5 bg-[#21252b] border-b border-[#181a1f] text-xs font-mono select-none">
-            <div class="flex items-center gap-2">
-              <div class="flex items-center gap-1.5" aria-hidden="true">
-                <span class="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/40 inline-block shadow-sm"></span>
-                <span class="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/40 inline-block shadow-sm"></span>
-                <span class="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/40 inline-block shadow-sm"></span>
-              </div>
-              <span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-teal-500/10 text-teal-400 border border-teal-500/25">
-                ${langDisplay}
-              </span>
-              <span class="text-[11px] text-slate-400 font-mono">
-                ${lineCount} 行
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" class="code-action-btn toggle-lines-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="显示/隐藏行号" aria-label="切换行号">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="10" y1="6" x2="21" y2="6"></line>
-                  <line x1="10" y1="12" x2="21" y2="12"></line>
-                  <line x1="10" y1="18" x2="21" y2="18"></line>
-                  <path d="M4 6h1v4"></path>
-                  <path d="M4 10h2"></path>
-                  <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path>
-                </svg>
-                <span class="btn-text hidden sm:inline">行号</span>
-              </button>
-              <button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" data-code="${encodeURIComponent(normalizedCode)}" title="复制代码" aria-label="复制代码">
-                <svg class="copy-icon w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                <span class="copy-label">复制</span>
-              </button>
-            </div>
-          </div>
-          ${highlighted}
-        </div>
-      `;
+      // Wrap with compact UI container (macOS dots, language, line count, line number toggle, copy button - no duplicate data-code bloat)
+      const enhanced = `<div class="code-block my-6 rounded-xl overflow-hidden border border-slate-700/60 dark:border-slate-800 shadow-lg shadow-black/10" style="--ln-gutter-width:${gutterWidth}"><div class="code-header flex items-center justify-between px-3.5 py-2.5 bg-[#21252b] border-b border-[#181a1f] text-xs font-mono select-none"><div class="flex items-center gap-2"><div class="flex items-center gap-1.5" aria-hidden="true"><span class="w-3 h-3 rounded-full bg-[#ff5f56] inline-block"></span><span class="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block"></span><span class="w-3 h-3 rounded-full bg-[#27c93f] inline-block"></span></div><span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-teal-500/10 text-teal-400 border border-teal-500/25">${langDisplay}</span><span class="text-[11px] text-slate-400 font-mono">${lineCount} 行</span></div><div class="flex items-center gap-1.5"><button type="button" class="code-action-btn toggle-lines-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="显示/隐藏行号"><span class="btn-text"># 行号</span></button><button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" title="复制代码"><span class="copy-label">📋 复制</span></button></div></div>${highlighted}</div>`;
 
       result = result.replace(fullMatch, enhanced);
     } catch {

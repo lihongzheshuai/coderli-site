@@ -36,9 +36,22 @@ export default function CopyCodeHandler() {
       const copyBtn = target.closest('.copy-code-btn') as HTMLElement | null;
       if (copyBtn) {
         const encodedCode = copyBtn.getAttribute('data-code');
-        if (!encodedCode) return;
-
-        const code = decodeURIComponent(encodedCode);
+        let code = '';
+        if (encodedCode) {
+          code = decodeURIComponent(encodedCode);
+        } else {
+          const codeBlock = copyBtn.closest('.code-block');
+          if (codeBlock) {
+            const lineEls = codeBlock.querySelectorAll('.line-content');
+            if (lineEls.length > 0) {
+              code = Array.from(lineEls).map(el => el.textContent || '').join('\n');
+            } else {
+              const preCode = codeBlock.querySelector('pre code');
+              code = preCode?.textContent || '';
+            }
+          }
+        }
+        if (!code) return;
         copyToClipboard(code).then(() => {
           const originalHTML = copyBtn.innerHTML;
           copyBtn.innerHTML = `
