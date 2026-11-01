@@ -129,6 +129,18 @@ export default function Header({ postCount }: HeaderProps) {
               </Link>
             );
           })}
+          <a
+            href="https://oi.coderli.com/?utm_source=coderli_nav"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 px-3.5 py-1.5 rounded-lg text-sm font-bold bg-gradient-to-r from-cyan-500/15 to-blue-500/15 dark:from-cyan-500/20 dark:to-blue-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40 hover:border-cyan-400 hover:shadow-sm transition flex items-center gap-1.5"
+            title="前往 OneCoder C++ 信奥远征互动闯关平台"
+          >
+            <span>🎮 信奥闯关</span>
+            <span className="px-1.5 py-0.2 text-[10px] font-mono font-extrabold bg-amber-500 text-slate-950 rounded-full leading-tight">
+              HOT
+            </span>
+          </a>
         </nav>
 
         {/* Actions */}
@@ -199,6 +211,15 @@ export default function Header({ postCount }: HeaderProps) {
               </Link>
             );
           })}
+          <a
+            href="https://oi.coderli.com/?utm_source=coderli_nav_mobile"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-4 py-2.5 rounded-xl text-base font-bold text-cyan-600 dark:text-cyan-300 bg-cyan-50/70 dark:bg-cyan-950/50 border border-cyan-500/30 transition"
+          >
+            🎮 信奥闯关 (oi.coderli.com) 🔥
+          </a>
         </div>
       )}
     </header>

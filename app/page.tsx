@@ -6,6 +6,7 @@ import GoogleAd from '@/components/GoogleAd';
 import LatexText from '@/components/LatexText';
 import PopularTagsCard from '@/components/PopularTagsCard';
 import CategoryNavTree from '@/components/CategoryNavTree';
+import OiGamePromo from '@/components/OiGamePromo';
 
 export const revalidate = false; // ISR static caching
 
@@ -206,6 +207,9 @@ export default function HomePage() {
               </a>
             </div>
           </div>
+
+          {/* OI-Game 信奥远征宣传卡 */}
+          <OiGamePromo variant="sidebar" />
 
           {/* Categories Hierarchical Navigation Tree */}
           <CategoryNavTree categories={categoryTree} limit={10} />

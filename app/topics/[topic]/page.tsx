@@ -6,6 +6,7 @@ import { getAllPosts } from '@/lib/posts';
 import GoogleAd from '@/components/GoogleAd';
 import TopicPostList from '@/components/TopicPostList';
 import PopularTagsCard from '@/components/PopularTagsCard';
+import OiGamePromo from '@/components/OiGamePromo';
 
 const topicMetaMap: Record<
   string,
@@ -132,6 +133,8 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
               })}
             </div>
           </div>
+
+          <OiGamePromo variant="sidebar" />
 
           <GoogleAd
             slot="6734143049"

@@ -11,6 +11,7 @@ import LatexText from '@/components/LatexText';
 import PostNavigation from '@/components/PostNavigation';
 import RelatedPosts from '@/components/RelatedPosts';
 import PopularTagsCard from '@/components/PopularTagsCard';
+import OiGamePromo from '@/components/OiGamePromo';
 
 interface PageProps {
   params: { slug: string };
@@ -155,6 +156,9 @@ export default async function PostPage({ params }: PageProps) {
             label="广告位 2 · 文中穿插"
           />
 
+          {/* OI-Game 信奥远征文末互动横幅 */}
+          <OiGamePromo variant="banner" />
+
           {/* Community Callouts */}
           <div className="my-8 space-y-3">
             <div className="p-4 rounded-xl border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
@@ -215,6 +219,9 @@ export default async function PostPage({ params }: PageProps) {
         {/* Right: Sticky TOC & Sticky Sidebar Ad & Popular Tags */}
         <aside className="sticky top-20 space-y-6">
           <TOC toc={post.toc} />
+
+          {/* OI-Game 信奥远征侧边栏宣传卡 */}
+          <OiGamePromo variant="sidebar" />
 
           {/* Google Ad Slot 4: Sidebar sticky ad (Slot 6734143049) */}
           <GoogleAd
