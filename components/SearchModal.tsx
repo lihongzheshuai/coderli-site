@@ -76,7 +76,8 @@ export default function SearchModal() {
 
   function highlight(text: string) {
     if (!q) return text;
-    const parts = text.split(new RegExp(`(${q})`, 'gi'));
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
     return parts.map((part, i) =>
       part.toLowerCase() === q ? (
         <mark key={i} className="bg-teal-500/25 text-teal-600 dark:text-teal-400 font-semibold px-0.5 rounded">

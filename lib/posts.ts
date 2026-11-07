@@ -418,14 +418,23 @@ export function getPostsByCategory(parentCategory: string, subCategory?: string)
   });
 }
 
-export async function getPostBySlug(slug: string): Promise<PostDetail | null> {
+export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null> {
+  let decoded = rawSlug;
+  try {
+    decoded = decodeURIComponent(rawSlug);
+  } catch {}
+  const normalizedPlus = decoded.replace(/\s+/g, '+');
+
+  const allPosts = getAllPosts();
+  const meta = allPosts.find(
+    p => p.slug === rawSlug || p.slug === decoded || p.slug === normalizedPlus
+  );
+  if (!meta) return null;
+
+  const slug = meta.slug;
   if (postDetailCache.has(slug)) {
     return postDetailCache.get(slug)!;
   }
-
-  const allPosts = getAllPosts();
-  const meta = allPosts.find(p => p.slug === slug);
-  if (!meta) return null;
 
   const fullPath = path.join(postsDirectory, meta.filename);
   if (!fs.existsSync(fullPath)) return null;
