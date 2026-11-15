@@ -24,7 +24,7 @@ echo "Analyzing modified files between HEAD^ and HEAD..."
 CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
 
 # If any core application code changed, must build
-CORE_PATTERNS="app/|components/|lib/|types/|public/|package.json|pnpm-lock.yaml|next.config|tailwind.config|tsconfig"
+CORE_PATTERNS="app/|components/|lib/|types/|public/|scripts/|package.json|pnpm-lock.yaml|next.config|tailwind.config|tsconfig"
 if echo "$CHANGED_FILES" | grep -E -q "$CORE_PATTERNS"; then
   echo "Core application code modified. Proceeding with build."
   exit 1

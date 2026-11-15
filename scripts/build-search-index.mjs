@@ -23,33 +23,36 @@ function cleanExcerpt(content) {
   } else if (text.includes('<!-- more -->')) {
     text = text.split('<!-- more -->')[0];
   }
-  text = text.replace(/{%.*?%}/g, '');
-  text = text.replace(/{{.*?}}/g, '');
-  text = text.replace(/```[\s\S]*?```/g, '');
-  text = text.replace(/!\[.*?\]\(.*?\)/g, '');
-  text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
-  text = text.replace(/#{1,6}\s+/g, '');
-  text = text.replace(/[*_~`>]/g, '');
-  text = text.replace(/\s+/g, ' ').trim();
+  text = text
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;|&#39;/gi, "'")
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/{%.*?%}/g, '')
+    .replace(/{{.*?}}/g, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/!\[.*?\]\(.*?\)/g, '')
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    .replace(/\$([^$\n]+)\$/g, (_, expr) =>
+      expr
+        .replace(/\\times\b/g, '×')
+        .replace(/\\le(?:q)?\b/g, '≤')
+        .replace(/\\ge(?:q)?\b/g, '≥')
+        .replace(/\\log\b/g, 'log')
+        .replace(/\\[a-zA-Z]+/g, '')
+        .replace(/[{}]/g, '')
+    )
+    .replace(/#{1,6}\s+/g, '')
+    .replace(/[*_~`>|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
   if (text.length <= 160) return text;
-
-  let truncated = text.slice(0, 160);
-  const dollarCount = (truncated.match(/(?<!\\)\$/g) || []).length;
-  if (dollarCount % 2 !== 0) {
-    const remainder = text.slice(160);
-    const closingIndex = remainder.indexOf('$');
-    if (closingIndex !== -1 && closingIndex < 40) {
-      truncated += remainder.slice(0, closingIndex + 1);
-    } else {
-      const lastDollar = truncated.lastIndexOf('$');
-      if (lastDollar !== -1) {
-        truncated = truncated.slice(0, lastDollar).trim();
-      }
-    }
-  }
-
-  return truncated.trim() + (text.length > truncated.length ? '...' : '');
+  return text.slice(0, 160).trim() + '...';
 }
 
 function extractFirstImage(content) {

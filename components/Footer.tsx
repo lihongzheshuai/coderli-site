@@ -17,7 +17,16 @@ export default function Footer() {
           </p>
         </div>
 
-        <div className="flex items-center gap-6 text-xs">
+        <div className="flex flex-wrap items-center justify-center gap-5 text-xs">
+          <Link href="/archives/" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+            全站归档
+          </Link>
+          <a href="/rss.xml" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+            RSS订阅
+          </a>
+          <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+            LLMs.txt
+          </a>
           <Link href="https://github.com/lihongzheshuai" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             GitHub ↗
           </Link>

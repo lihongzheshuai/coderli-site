@@ -29,9 +29,21 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   } catch {
     tag = params.tag;
   }
+  const canonicalPath = `/tags/${encodeURIComponent(tag)}/`;
   return {
     title: `标签：#${tag} · OneCoder`,
     description: `OneCoder 博客中包含标签「${tag}」的技术文章与题目解析列表。`,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `标签：#${tag} · OneCoder`,
+      description: `OneCoder 博客中包含标签「${tag}」的技术文章与题目解析列表。`,
+      url: `https://www.coderli.com${canonicalPath}`,
+      siteName: 'OneCoder',
+      locale: 'zh_CN',
+      type: 'website',
+    },
   };
 }
 

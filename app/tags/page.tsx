@@ -7,6 +7,9 @@ import GoogleAd from '@/components/GoogleAd';
 export const metadata: Metadata = {
   title: '全部标签 · OneCoder',
   description: 'OneCoder 博客全站技术标签归档与索引。',
+  alternates: {
+    canonical: '/tags/',
+  },
 };
 
 export default function AllTagsPage() {

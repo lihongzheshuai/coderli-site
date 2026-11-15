@@ -27,14 +27,71 @@ import type { PostMeta, PostDetail } from '../types/post';
 const postsDirectory = path.join(process.cwd(), '_posts');
 const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v2');
 
+// Convert inline LaTeX and HTML fragments into clean plain text for SEO meta descriptions & GEO summaries
+export function stripHtmlAndLatexForPlainText(input: string): string {
+  let text = input
+    // Decode common HTML entities first so escaped HTML tags in legacy posts get stripped too
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;|&#39;/gi, "'")
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&');
+
+  // Remove HTML comments and HTML tags
+  text = text.replace(/<!--[\s\S]*?-->/g, ' ');
+  text = text.replace(/<[^>]+>/g, ' ');
+
+  // Convert display & inline math $...$ into readable plain symbols
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, ' $1 ');
+  text = text.replace(/\$([^$\n]+)\$/g, (_, expr: string) => {
+    return expr
+      .replace(/\\times\b/g, '×')
+      .replace(/\\div\b/g, '÷')
+      .replace(/\\le(?:q)?\b/g, '≤')
+      .replace(/\\ge(?:q)?\b/g, '≥')
+      .replace(/\\ne(?:q)?\b/g, '≠')
+      .replace(/\\approx\b/g, '≈')
+      .replace(/\\pm\b/g, '±')
+      .replace(/\\infty\b/g, '∞')
+      .replace(/\\(?:c|l|v)?dots\b/g, '...')
+      .replace(/\\to\b|\\rightarrow\b/g, '→')
+      .replace(/\\log\b/g, 'log')
+      .replace(/\\min\b/g, 'min')
+      .replace(/\\max\b/g, 'max')
+      .replace(/\\gcd\b/g, 'gcd')
+      .replace(/\\lcm\b/g, 'lcm')
+      .replace(/\\bmod\b|\\mod\b/g, ' mod ')
+      .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1/$2)')
+      .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
+      .replace(/\\(?:text|mathrm|mathbf|mathit|texttt)\{([^{}]+)\}/g, '$1')
+      .replace(/\\[a-zA-Z]+/g, '')
+      .replace(/[{}]/g, '');
+  });
+
+  return text;
+}
+
 // Helper to strip markdown symbols for excerpts
-function cleanExcerpt(content: string): string {
-  // If <!--more--> exists, take the part before it
+function cleanExcerpt(
+  content: string,
+  fallbackTitle = '',
+  categories: string[] = [],
+  tags: string[] = [],
+  explicitSummary?: string
+): string {
+  if (explicitSummary && explicitSummary.trim().length >= 25) {
+    return stripHtmlAndLatexForPlainText(explicitSummary).replace(/\s+/g, ' ').trim().slice(0, 150);
+  }
+
+  // If <!--more--> exists, take the part before it; if too short, fall back to full content
   let text = content;
   if (text.includes('<!--more-->')) {
-    text = text.split('<!--more-->')[0];
+    const head = text.split('<!--more-->')[0];
+    if (head.trim().length >= 35) text = head;
   } else if (text.includes('<!-- more -->')) {
-    text = text.split('<!-- more -->')[0];
+    const head = text.split('<!-- more -->')[0];
+    if (head.trim().length >= 35) text = head;
   }
 
   // Remove Jekyll Liquid tags like {% include ... %} and Kramdown prompt IAL
@@ -46,29 +103,46 @@ function cleanExcerpt(content: string): string {
   text = text.replace(/```[\s\S]*?```/g, '');
   text = text.replace(/!\[.*?\]\(.*?\)/g, '');
   text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+  text = stripHtmlAndLatexForPlainText(text);
   text = text.replace(/#{1,6}\s+/g, '');
-  text = text.replace(/[*_~`>]/g, '');
+  text = text.replace(/[*_~`>|]/g, '');
   text = text.replace(/\s+/g, ' ').trim();
 
-  if (text.length <= 96) return text;
-
-  let truncated = text.slice(0, 96);
-  // Ensure we don't truncate inside an inline LaTeX formula $...$
-  const dollarCount = (truncated.match(/(?<!\\)\$/g) || []).length;
-  if (dollarCount % 2 !== 0) {
-    const remainder = text.slice(96);
-    const closingIndex = remainder.indexOf('$');
-    if (closingIndex !== -1 && closingIndex < 40) {
-      truncated += remainder.slice(0, closingIndex + 1);
-    } else {
-      const lastDollar = truncated.lastIndexOf('$');
-      if (lastDollar !== -1) {
-        truncated = truncated.slice(0, lastDollar).trim();
-      }
-    }
+  if (text.length < 25 && fallbackTitle) {
+    const metaKeywords = Array.from(new Set([...categories, ...tags])).filter(Boolean).slice(0, 4).join('、');
+    const prefix = `OneCoder 技术详解：${fallbackTitle}`;
+    text = text
+      ? `${prefix}。${text}${metaKeywords ? `（涉及考点与技术栈：${metaKeywords}）` : ''}`
+      : `${prefix}${metaKeywords ? `，涵盖 ${metaKeywords} 核心原理、代码实战与易错点复盘。` : '，包含原理剖析与实战代码总结。'}`;
   }
 
-  return truncated.trim() + (text.length > truncated.length ? '...' : '');
+  const MAX_LEN = 135;
+  if (text.length <= MAX_LEN) return text;
+
+  const truncated = text.slice(0, MAX_LEN).trim();
+  return truncated + '...';
+}
+
+export function resolveSeoCoverImage(post: Pick<PostMeta, 'previewImg' | 'topic' | 'subtopic' | 'slug' | 'title'>): string {
+  if (post.previewImg) {
+    if (post.previewImg.startsWith('http://') || post.previewImg.startsWith('https://')) {
+      return post.previewImg;
+    }
+    return post.previewImg.startsWith('/') ? post.previewImg : `/${post.previewImg}`;
+  }
+  const slugAndTitle = `${post.slug} ${post.title}`.toLowerCase();
+  if (slugAndTitle.includes('knowledge') || post.title.includes('考点') || post.title.includes('考纲')) {
+    return '/images/gesp_csp_knowledge_default_cover.png';
+  }
+  if (post.topic === 'gesp') {
+    return '/images/gesp_exam_default_cover.png';
+  }
+  if (post.topic === 'csp') {
+    return post.subtopic === 'NOIP'
+      ? '/images/noip_exam_default_cover.png'
+      : '/images/csp_exam_default_cover.png';
+  }
+  return '/images/gesp_csp_default_cover.png';
 }
 
 // Extract first markdown image
@@ -274,7 +348,13 @@ export function getAllPosts(): PostMeta[] {
 
     const readMinutes = Math.max(2, Math.ceil(content.length / 450));
     const readTime = `${readMinutes} 分钟`;
-    const excerpt = cleanExcerpt(content);
+    const explicitDesc =
+      typeof data.description === 'string'
+        ? data.description
+        : typeof data.summary === 'string'
+        ? data.summary
+        : undefined;
+    const excerpt = cleanExcerpt(content, title, categories, tags, explicitDesc);
 
     // Pinning / Featured metadata detection (pin: true, featured: true, or top: 1)
     const pinned = !!(

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { PostMeta } from '@/types/post';
 import ArticleCard from '@/components/ArticleCard';
 import GoogleAd from '@/components/GoogleAd';
@@ -84,6 +85,11 @@ export default function HomePostStream({
             <span>已全部呈现所有 {posts.length} 篇博文（可使用页面右上角或快捷键 <strong>/</strong> 搜索精准定位）</span>
           </div>
         )}
+        <div className="mt-4 text-xs text-slate-400 dark:text-slate-500">
+          <Link href="/archives/" className="hover:text-teal-600 dark:hover:text-teal-400 underline underline-offset-4 transition">
+            🗂️ 浏览全站博文归档总目录 →
+          </Link>
+        </div>
       </div>
     </div>
   );

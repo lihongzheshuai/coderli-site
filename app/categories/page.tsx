@@ -10,6 +10,9 @@ import PopularTagsCard from '@/components/PopularTagsCard';
 export const metadata: Metadata = {
   title: '全部专题与分类大厅 · OneCoder',
   description: 'OneCoder 博客全站技术专题、考级题解与多级分类索引全集。',
+  alternates: {
+    canonical: '/categories/',
+  },
 };
 
 export default function AllCategoriesPage() {

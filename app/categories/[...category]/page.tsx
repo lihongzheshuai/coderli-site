@@ -56,10 +56,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { parent, child } = parseCategoryParams(params.category || []);
   const title = child ? `${parent} · ${child} 专题` : `${parent} 专题`;
+  const canonicalPath = getCategoryLink(parent, child);
 
   return {
     title: `${title} · OneCoder`,
     description: `OneCoder 博客「${title}」分类下的所有技术博文与考级真题解析。`,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `${title} · OneCoder`,
+      description: `OneCoder 博客「${title}」分类下的所有技术博文与考级真题解析。`,
+      url: `https://www.coderli.com${canonicalPath}`,
+      siteName: 'OneCoder',
+      locale: 'zh_CN',
+      type: 'website',
+    },
   };
 }
 

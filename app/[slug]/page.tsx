@@ -2,7 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getAllPosts, getPostBySlug } from '@/lib/posts';
+import { getAllPosts, getPostBySlug, resolveSeoCoverImage } from '@/lib/posts';
 import TOC from '@/components/TOC';
 import GoogleAd from '@/components/GoogleAd';
 import ViewCounter from '@/components/ViewCounter';
@@ -32,18 +32,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: '文章未找到 · OneCoder' };
   }
 
+  const canonicalPath = `/${post.slug}/`;
+  const canonicalUrl = `https://www.coderli.com${canonicalPath}`;
+  const coverUrl = resolveSeoCoverImage(post);
+
   return {
     title: `${post.title} · OneCoder`,
     description: post.excerpt,
-    keywords: [...post.tags, ...post.categories, 'OneCoder'],
+    keywords: Array.from(new Set([...post.tags, ...post.categories, post.topicName, 'OneCoder'])),
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt,
+      url: canonicalUrl,
+      siteName: 'OneCoder',
+      locale: 'zh_CN',
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],
+      section: post.topicName,
       tags: post.tags,
-      images: post.previewImg ? [{ url: post.previewImg }] : undefined,
+      images: [{ url: coverUrl, alt: post.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [coverUrl],
     },
   };
 }
@@ -54,8 +71,77 @@ export default async function PostPage({ params }: PageProps) {
     notFound();
   }
 
+  const canonicalUrl = `https://www.coderli.com/${post.slug}/`;
+  const coverPath = resolveSeoCoverImage(post);
+  const absoluteCoverUrl = coverPath.startsWith('http')
+    ? coverPath
+    : `https://www.coderli.com${coverPath}`;
+
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'TechArticle',
+        '@id': `${canonicalUrl}#article`,
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': canonicalUrl,
+        },
+        headline: post.title,
+        description: post.excerpt,
+        image: [absoluteCoverUrl],
+        datePublished: post.date,
+        dateModified: post.date,
+        author: {
+          '@type': 'Person',
+          '@id': 'https://www.coderli.com/#author',
+          name: post.author || 'OneCoder',
+          url: 'https://www.coderli.com/',
+        },
+        publisher: {
+          '@type': 'Person',
+          '@id': 'https://www.coderli.com/#author',
+          name: 'OneCoder',
+          url: 'https://www.coderli.com/',
+        },
+        articleSection: [post.topicName, post.subtopic, ...post.categories].filter(Boolean),
+        keywords: Array.from(new Set([...post.tags, ...post.categories])).join(', '),
+        inLanguage: 'zh-CN',
+        isPartOf: { '@id': 'https://www.coderli.com/#website' },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: '首页',
+            item: 'https://www.coderli.com/',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: post.topicName,
+            item: `https://www.coderli.com/topics/${post.topic}/`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: post.title,
+            item: canonicalUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Top Breadcrumb navigation */}
       <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 mt-5 mb-4">
         <Link
@@ -124,12 +210,13 @@ export default async function PostPage({ params }: PageProps) {
             <span>⏱️ {post.readTime}</span>
             <div className="flex items-center gap-1.5 ml-auto flex-wrap">
               {post.tags.map(t => (
-                <span
+                <Link
                   key={t}
-                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono text-[11px]"
+                  href={`/tags/${encodeURIComponent(t)}/`}
+                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-950/60 text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 font-mono text-[11px] transition"
                 >
                   #{t}
-                </span>
+                </Link>
               ))}
             </div>
           </div>

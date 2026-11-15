@@ -52,9 +52,21 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { topic: string } }): Promise<Metadata> {
   const meta = topicMetaMap[params.topic];
   if (!meta) return { title: '专题 · OneCoder' };
+  const canonicalPath = `/topics/${params.topic}/`;
   return {
     title: `${meta.name} · OneCoder`,
     description: meta.desc,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `${meta.name} · OneCoder`,
+      description: meta.desc,
+      url: `https://www.coderli.com${canonicalPath}`,
+      siteName: 'OneCoder',
+      locale: 'zh_CN',
+      type: 'website',
+    },
   };
 }
 
