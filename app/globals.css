@@ -466,3 +466,26 @@ html.dark .prose mark {
 .code-block pre.shiki::-webkit-scrollbar-thumb:hover {
   background: #5c6370;
 }
+
+/* ========================================================
+   Google AdSense Anti-Occlusion & Clean Slot Rules
+   (Suppress floating Anchor / Side-rail / Auto-placed ads that cover content,
+    while keeping explicit manual data-ad-slot units neat in-flow)
+   ======================================================== */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+.google-auto-placed,
+ins.adsbygoogle[data-anchor-status],
+ins.adsbygoogle[data-vignette-loaded],
+ins.adsbygoogle:not([data-ad-slot]) {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
