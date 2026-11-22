@@ -121,13 +121,14 @@ export default function Header({ postCount }: HeaderProps) {
   const canGrow = fontScale < MAX_SCALE;
 
   return (
-    <header
-      className="sticky top-0 z-30 h-[52px] backdrop-blur-md transition-colors"
-      style={{
-        backgroundColor: 'color-mix(in srgb, var(--bg-canvas) 94%, transparent)',
-        boxShadow: 'inset 0 -1px 0 var(--border-hairline)',
-      }}
-    >
+    <>
+      <header
+        className="sticky top-0 z-30 h-[52px] backdrop-blur-md transition-colors"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--bg-canvas) 94%, transparent)',
+          boxShadow: 'inset 0 -1px 0 var(--border-hairline)',
+        }}
+      >
       <div className="h-full max-w-[1680px] mx-auto grid grid-cols-[auto_1fr_auto] lg:grid-cols-[264px_minmax(0,1fr)_auto] items-center px-3 lg:px-0 lg:pr-7 gap-2 lg:gap-0">
         {/* Left Brand Column (264px aligned with desktop sidebar) */}
         <div
@@ -340,17 +341,18 @@ export default function Header({ postCount }: HeaderProps) {
           </a>
         </nav>
       </div>
+      </header>
 
-      {/* Mobile Quick Font-Size Bar */}
+      {/* Mobile Quick Font-Size Bar (rendered outside backdrop-blur header so fixed backdrop covers full viewport) */}
       {mobileFontOpen && (
         <>
           <div
             aria-hidden="true"
             onClick={() => setMobileFontOpen(false)}
-            className="sm:hidden fixed inset-0 top-[52px] z-20 bg-black/25 backdrop-blur-[1px]"
+            className="sm:hidden fixed inset-0 top-[52px] z-20 bg-black/30 backdrop-blur-[1px]"
           />
           <div
-            className="sm:hidden relative z-30 border-b px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-lg"
+            className="sm:hidden fixed inset-x-0 top-[52px] z-30 border-b px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-lg"
             style={{
               backgroundColor: 'var(--bg-canvas)',
               borderColor: 'var(--border-strong)',
@@ -403,13 +405,19 @@ export default function Header({ postCount }: HeaderProps) {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div
-          className="lg:hidden border-b px-4 py-3 space-y-2.5 shadow-lg"
-          style={{
-            backgroundColor: 'var(--bg-canvas)',
-            borderColor: 'var(--border-strong)',
-          }}
-        >
+        <>
+          <div
+            aria-hidden="true"
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden fixed inset-0 top-[52px] z-20 bg-black/30 backdrop-blur-[1px]"
+          />
+          <div
+            className="lg:hidden fixed inset-x-0 top-[52px] z-30 border-b px-4 py-3 space-y-2.5 shadow-lg max-h-[calc(100vh-52px)] overflow-y-auto"
+            style={{
+              backgroundColor: 'var(--bg-canvas)',
+              borderColor: 'var(--border-strong)',
+            }}
+          >
           <div className="grid grid-cols-2 gap-1.5">
             <Link href="/" prefetch={false} className="wb-sb-item" data-active={isHome}>
               <span className="flex items-center gap-2">
@@ -536,7 +544,8 @@ export default function Header({ postCount }: HeaderProps) {
             </a>
           </div>
         </div>
+        </>
       )}
-    </header>
+    </>
   );
 }
