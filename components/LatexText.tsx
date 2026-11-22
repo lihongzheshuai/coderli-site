@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import katex from 'katex';
 
 interface LatexTextProps {
@@ -8,40 +6,63 @@ interface LatexTextProps {
   className?: string;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /**
- * Parses inline math ($...$) and block math ($$...$$) in plain text
- * using KaTeX and outputs HTML markup.
+ * Server-side parser for inline math ($...$) and block math ($$...$$) in plain text.
+ * Escapes non-math segments to prevent XSS and avoids shipping KaTeX JS to browsers.
  */
 export function parseLatexInText(text: string): string {
-  if (!text || !text.includes('$')) return text;
+  if (!text || !text.includes('$')) return escapeHtml(text || '');
 
-  return text.replace(/\$\$([^\$]+?)\$\$|\$([^\$\n]+?)\$/g, (match, blockFormula, inlineFormula) => {
+  const regex = /\$\$([^\$]+?)\$\$|\$([^\$\n]+?)\$/g;
+  let lastIndex = 0;
+  let result = '';
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      result += escapeHtml(text.slice(lastIndex, match.index));
+    }
+
+    const fullMatch = match[0];
+    const blockFormula = match[1];
+    const inlineFormula = match[2];
     const formula = (blockFormula || inlineFormula)?.trim();
-    if (!formula) return match;
 
-    // Filter out bash variables (like $JAVA_HOME, $PATH) and standalone numbers ($100)
-    if (/^[A-Z0-9_]{3,}$/.test(formula) || /^\d+$/.test(formula)) {
-      return match;
+    if (!formula || /^[A-Z0-9_]{3,}$/.test(formula) || /^\d+$/.test(formula)) {
+      result += escapeHtml(fullMatch);
+    } else {
+      try {
+        result += katex.renderToString(formula, {
+          output: 'html',
+          throwOnError: false,
+          strict: false,
+          displayMode: !!blockFormula,
+        });
+      } catch {
+        result += escapeHtml(fullMatch);
+      }
     }
 
-    try {
-      return katex.renderToString(formula, {
-        output: 'html',
-        throwOnError: false,
-        strict: false,
-        displayMode: !!blockFormula,
-      });
-    } catch {
-      return match;
-    }
-  });
+    lastIndex = match.index + fullMatch.length;
+  }
+
+  if (lastIndex < text.length) {
+    result += escapeHtml(text.slice(lastIndex));
+  }
+
+  return result;
 }
 
 export default function LatexText({ text, className = '' }: LatexTextProps) {
-  const rendered = useMemo(() => {
-    return parseLatexInText(text);
-  }, [text]);
-
   if (!text) return null;
   if (!text.includes('$')) {
     return <span className={className}>{text}</span>;
@@ -50,7 +71,7 @@ export default function LatexText({ text, className = '' }: LatexTextProps) {
   return (
     <span
       className={className}
-      dangerouslySetInnerHTML={{ __html: rendered }}
+      dangerouslySetInnerHTML={{ __html: parseLatexInText(text) }}
     />
   );
 }

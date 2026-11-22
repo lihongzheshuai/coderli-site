@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { getAllPosts, getFeaturedPost, getCategoryTree } from '@/lib/posts';
+import { getAllPosts, getFeaturedPost, getCategoryTree, toPostCardMeta } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
 import LatexText from '@/components/LatexText';
@@ -129,38 +129,50 @@ export default function HomePage() {
           <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6 border-b border-slate-200 dark:border-slate-800 text-sm">
             <Link
               href="/"
+              prefetch={false}
               className="px-3.5 py-1.5 rounded-full bg-teal-600 text-white font-medium text-xs whitespace-nowrap shadow-sm"
             >
               全部博文 ({posts.length})
             </Link>
             <Link
               href="/topics/gesp/"
+              prefetch={false}
               className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-teal-500 text-xs whitespace-nowrap transition"
             >
               🏆 GESP 考级 ({topicStats.gesp})
             </Link>
             <Link
               href="/topics/java/"
+              prefetch={false}
               className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-teal-500 text-xs whitespace-nowrap transition"
             >
               ☕ Java 架构 ({topicStats.java})
             </Link>
             <Link
               href="/topics/csp/"
+              prefetch={false}
               className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-teal-500 text-xs whitespace-nowrap transition"
             >
               ⌘ CSP / NOIP ({topicStats.csp})
             </Link>
             <Link
               href="/topics/algo/"
+              prefetch={false}
               className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-teal-500 text-xs whitespace-nowrap transition"
             >
               🧮 算法专题 ({topicStats.algo})
             </Link>
           </div>
 
-          {/* Article Stream with Lazy Load / Pagination */}
-          <HomePostStream posts={streamPosts} initialCount={20} pageSize={20} />
+          {/* Article Stream: only inline first 40 slim cards in HTML/RSC, lazy-load remaining from search-index.json */}
+          <HomePostStream
+            posts={streamPosts.slice(0, 40).map(toPostCardMeta)}
+            totalCount={streamPosts.length}
+            lazySource="home"
+            excludeSlug={featured?.slug}
+            initialCount={20}
+            pageSize={20}
+          />
         </div>
 
         {/* Right Column: Sidebar */}
@@ -182,20 +194,22 @@ export default function HomePage() {
               一个中年人的自留地，记录学习 Java、Python、C++ 以及算法架构的心得体会。本站唯一网址：coderli.com
             </p>
             <div className="flex flex-wrap gap-2 text-sm font-medium">
-              <Link
+              <a
                 href="https://github.com/lihongzheshuai"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-teal-500 transition"
               >
                 🐙 GitHub
-              </Link>
-              <Link
+              </a>
+              <a
                 href="https://twitter.com/wushikezuohehe"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-teal-500 transition"
               >
                 🐦 Twitter/X
-              </Link>
+              </a>
               <a
                 href="https://qm.qq.com/q/fykBPjH8ru"
                 target="_blank"

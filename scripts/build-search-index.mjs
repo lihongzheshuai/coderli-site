@@ -104,7 +104,7 @@ function resolveTopic(categories = [], tags = [], title = '') {
 
   if (combinedStr.includes('gesp')) {
     const level = categories.find(c => ['一级', '二级', '三级', '四级', '五级', '六级', '七级', '八级'].includes(c)) ||
-      (title.includes('一级') ? '一级' : title.includes('二级') ? '二级' : title.includes('三级') ? '三级' : title.includes('四级') ? '四级' : title.includes('五级') ? '五级' : '考级题解');
+      (title.includes('一级') ? '一级' : title.includes('二级') ? '二级' : title.includes('三级') ? '三级' : title.includes('四级') ? '四级' : title.includes('五级') ? '五级' : title.includes('六级') ? '六级' : title.includes('七级') ? '七级' : title.includes('八级') ? '八级' : '考级题解');
     return {
       topic: 'gesp',
       topicName: 'GESP 编程与算法',

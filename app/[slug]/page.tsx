@@ -140,12 +140,13 @@ export default async function PostPage({ params }: PageProps) {
     <div className="pb-20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c') }}
       />
       {/* Top Breadcrumb navigation */}
       <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 mt-5 mb-4">
         <Link
           href="/"
+          prefetch={false}
           className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition"
         >
           <span>← 返回全站首页</span>
@@ -158,9 +159,9 @@ export default async function PostPage({ params }: PageProps) {
         <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-12 shadow-sm min-w-0">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-xs text-slate-400 mb-5 flex-wrap">
-            <Link href="/" className="hover:text-teal-500">首页</Link>
+            <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
             <span>/</span>
-            <Link href={`/topics/${post.topic}/`} className="hover:text-teal-500">{post.topicName}</Link>
+            <Link href={`/topics/${post.topic}/`} prefetch={false} className="hover:text-teal-500">{post.topicName}</Link>
             <span>/</span>
             <span className="text-slate-600 dark:text-slate-300 font-medium">{post.subtopic}</span>
           </nav>
@@ -213,6 +214,7 @@ export default async function PostPage({ params }: PageProps) {
                 <Link
                   key={t}
                   href={`/tags/${encodeURIComponent(t)}/`}
+                  prefetch={false}
                   className="px-2 py-0.5 rounded bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-950/60 text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 font-mono text-[11px] transition"
                 >
                   #{t}
@@ -250,7 +252,7 @@ export default async function PostPage({ params }: PageProps) {
           <div className="my-8 space-y-3">
             <div className="p-4 rounded-xl border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
               <strong className="text-blue-600 dark:text-blue-400 block mb-1">💡 OneCoder 资源指引</strong>
-              <p>所有代码开源上传至 GitHub：<a href="https://github.com/lihongzheshuai/yummy-code" target="_blank" className="text-teal-600 dark:text-teal-400 underline font-semibold">yummy-code 仓库</a> · GESP 专题站：<a href="https://wiki.coderli.com/" target="_blank" className="text-teal-600 dark:text-teal-400 underline font-semibold">GESP WIKI</a></p>
+              <p>所有代码开源上传至 GitHub：<a href="https://github.com/lihongzheshuai/yummy-code" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 underline font-semibold">yummy-code 仓库</a> · GESP 专题站：<a href="https://wiki.coderli.com/" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 underline font-semibold">GESP WIKI</a></p>
             </div>
 
             <div className="p-4 rounded-xl border-l-4 border-teal-500 bg-teal-50/50 dark:bg-teal-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
@@ -292,8 +294,8 @@ export default async function PostPage({ params }: PageProps) {
               </p>
               <div className="flex flex-wrap gap-3 text-xs text-teal-600 dark:text-teal-400">
                 <a href="mailto:wushikezuo@gmail.com">📫 wushikezuo@gmail.com</a>
-                <a href="https://github.com/lihongzheshuai" target="_blank">🐙 GitHub</a>
-                <a href="https://twitter.com/wushikezuohehe" target="_blank">🐦 Twitter/X</a>
+                <a href="https://github.com/lihongzheshuai" target="_blank" rel="noopener noreferrer">🐙 GitHub</a>
+                <a href="https://twitter.com/wushikezuohehe" target="_blank" rel="noopener noreferrer">🐦 Twitter/X</a>
                 <a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer">👥 QQ群: 688906745</a>
               </div>
             </div>

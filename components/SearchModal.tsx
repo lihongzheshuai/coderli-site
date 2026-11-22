@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import LatexText from '@/components/LatexText';
 
 interface SearchIndexItem {
   id: string;
@@ -163,7 +162,7 @@ export default function SearchModal() {
                   {highlight(item.title)}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-                  <LatexText text={item.excerpt} />
+                  {item.excerpt}
                 </p>
               </Link>
             ))}

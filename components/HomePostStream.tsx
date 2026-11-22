@@ -2,34 +2,76 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { PostMeta } from '@/types/post';
+import { PostCardMeta } from '@/types/post';
 import ArticleCard from '@/components/ArticleCard';
 import GoogleAd from '@/components/GoogleAd';
 
 interface HomePostStreamProps {
-  posts: PostMeta[];
+  posts: PostCardMeta[];
+  totalCount?: number;
+  lazySource?: 'home';
+  excludeSlug?: string;
   initialCount?: number;
   pageSize?: number;
 }
 
 export default function HomePostStream({
   posts,
+  totalCount,
+  lazySource,
+  excludeSlug,
   initialCount = 20,
   pageSize = 20,
 }: HomePostStreamProps) {
+  const [loadedPosts, setLoadedPosts] = useState<PostCardMeta[]>(posts);
+  const [hasLoadedRemote, setHasLoadedRemote] = useState(false);
   const [displayCount, setDisplayCount] = useState(initialCount);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const visiblePosts = posts.slice(0, displayCount);
-  const hasMore = displayCount < posts.length;
+  const effectiveTotal = hasLoadedRemote
+    ? loadedPosts.length
+    : Math.max(totalCount ?? posts.length, loadedPosts.length);
+  const visiblePosts = loadedPosts.slice(0, displayCount);
+  const hasMore = displayCount < effectiveTotal;
 
-  function handleLoadMore() {
+  async function handleLoadMore() {
     setIsLoadingMore(true);
-    // Tiny microtask delay for smooth UI feedback
-    setTimeout(() => {
-      setDisplayCount(prev => Math.min(prev + pageSize, posts.length));
+    try {
+      const nextCount = displayCount + pageSize;
+      if (lazySource === 'home' && !hasLoadedRemote && nextCount > loadedPosts.length) {
+        const res = await fetch('/search-index.json', { cache: 'force-cache' });
+        if (res.ok) {
+          const raw: any[] = await res.json();
+          const mapped: PostCardMeta[] = raw
+            .filter(item => item.slug && item.slug !== excludeSlug)
+            .map(item => ({
+              slug: item.slug,
+              title: item.title,
+              date: item.date,
+              tags: Array.isArray(item.tags) ? item.tags.slice(0, 6) : [],
+              readTime: item.readTime || '3 分钟',
+              excerpt: item.excerpt || '',
+              topic: item.topic || 'gesp',
+              topicName: item.topicName || '技术笔记',
+              subtopic: item.subtopic || '精讲',
+              previewImg: item.previewImg || null,
+              previewGraphic: {
+                symbol: item.previewGraphic?.symbol || 'OneCoder',
+                title: item.previewGraphic?.title || '技术专题',
+              },
+            }));
+          setLoadedPosts(mapped);
+          setHasLoadedRemote(true);
+          setDisplayCount(Math.min(nextCount, mapped.length));
+          return;
+        }
+      }
+      setDisplayCount(prev => Math.min(prev + pageSize, loadedPosts.length));
+    } catch {
+      setDisplayCount(prev => Math.min(prev + pageSize, loadedPosts.length));
+    } finally {
       setIsLoadingMore(false);
-    }, 150);
+    }
   }
 
   return (
@@ -39,8 +81,8 @@ export default function HomePostStream({
         {visiblePosts.map((post, idx) => (
           <React.Fragment key={post.slug}>
             <ArticleCard post={post} />
-            {/* Insert In-Feed Google Ad periodically (after 5th, 20th, 35th... articles) */}
-            {(idx === 4 || (idx > 4 && (idx + 1) % 15 === 5)) && (
+            {/* Cap in-feed Google Ads to at most 3 slots for clean UX & AdSense policy compliance */}
+            {(idx === 4 || idx === 19 || idx === 34) && (
               <GoogleAd
                 slot="9656071817"
                 format="fluid"
@@ -71,7 +113,7 @@ export default function HomePostStream({
               <>
                 <span>加载后续文章</span>
                 <span className="text-xs text-slate-400 dark:text-slate-500 group-hover:text-teal-500 transition">
-                  (已显示 {visiblePosts.length} / 共 {posts.length} 篇)
+                  (已显示 {visiblePosts.length} / 共 {effectiveTotal} 篇)
                 </span>
                 <span className="text-sm font-bold text-teal-600 dark:text-teal-400 group-hover:translate-y-0.5 transition">
                   ↓
@@ -82,11 +124,11 @@ export default function HomePostStream({
         ) : (
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
             <span>🎉</span>
-            <span>已全部呈现所有 {posts.length} 篇博文（可使用页面右上角或快捷键 <strong>/</strong> 搜索精准定位）</span>
+            <span>已全部呈现所有 {effectiveTotal} 篇博文（可使用页面右上角或快捷键 <strong>/</strong> 搜索精准定位）</span>
           </div>
         )}
         <div className="mt-4 text-xs text-slate-400 dark:text-slate-500">
-          <Link href="/archives/" className="hover:text-teal-600 dark:hover:text-teal-400 underline underline-offset-4 transition">
+          <Link href="/archives/" prefetch={false} className="hover:text-teal-600 dark:hover:text-teal-400 underline underline-offset-4 transition">
             🗂️ 浏览全站博文归档总目录 →
           </Link>
         </div>

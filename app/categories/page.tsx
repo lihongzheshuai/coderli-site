@@ -23,7 +23,7 @@ export default function AllCategoriesPage() {
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       {/* Top Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" className="hover:text-teal-500">首页</Link>
+        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
         <span>/</span>
         <span className="text-slate-600 dark:text-slate-300 font-medium">全部专题分类全集</span>
       </nav>
@@ -57,6 +57,7 @@ export default function AllCategoriesPage() {
               <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-slate-800">
                 <Link
                   href={getCategoryLink(parent.name)}
+                  prefetch={false}
                   className="flex items-center gap-2.5 text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition"
                 >
                   <span className="text-teal-600 dark:text-teal-400 font-mono text-base">📁</span>
@@ -64,6 +65,7 @@ export default function AllCategoriesPage() {
                 </Link>
                 <Link
                   href={getCategoryLink(parent.name)}
+                  prefetch={false}
                   className="font-mono text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-full border border-teal-500/20 hover:bg-teal-100 transition"
                 >
                   查看全部 {parent.count} 篇 →
@@ -79,6 +81,7 @@ export default function AllCategoriesPage() {
                       <Link
                         key={child.name}
                         href={getCategoryLink(parent.name, child.name)}
+                        prefetch={false}
                         className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/60 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 text-xs md:text-sm border border-transparent hover:border-teal-500/30 transition flex items-center gap-1.5 group cursor-pointer"
                       >
                         <span className="text-slate-400 text-xs">└</span>

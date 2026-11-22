@@ -5,8 +5,86 @@
     <link>https://www.coderli.com/</link>
     <description>始于2012年的独立技术知识库：涵盖 GESP 1-8级考纲精讲与真题题解、CSP-J/S &amp; NOIP 信奥算法、Java 架构与 Python 工程实战。</description>
     <language>zh-CN</language>
-    <lastBuildDate>Sun, 15 Nov 2026 00:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 22 Nov 2026 00:00:00 GMT</lastBuildDate>
     <atom:link href="https://www.coderli.com/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：算术基本定理（唯一分解定理）与约数个数、约数和公式推导</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-unique-factorization-divisors/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-unique-factorization-divisors/</guid>
+      <pubDate>Sun, 22 Nov 2026 00:00:00 GMT</pubDate>
+      <description>在数论与计数类考题中，许多同学一看到“求 360 有多少个正约数、约数和是多少”或“把一个高达 10^12 的整数拆成质因数乘积”，就陷入了两头踩坑的窘境：手写质因数分解代码时，枚举完 i 1)，结果在 36 上测试完美通过，一遇上 12、84 或任意大质数就漏掉最大的...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：从 O(√n) 试除法到埃氏筛、欧拉线性筛——为什么一行 break 能做到严格 O(n)？</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-prime-sieves/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-prime-sieves/</guid>
+      <pubDate>Sat, 21 Nov 2026 00:00:00 GMT</pubDate>
+      <description>在质数判定与批量求质数的考场实战中，许多同学以为“质数很简单”，结果一交代码就撞上各种离奇失分：判单个大数是否为质数时，循环条件顺手写了 i i &lt;= n，碰上 32 位最大梅森素数 2147483647 时 46341 46341 瞬间撑爆 int 回绕成负数，程序直...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：欧几里得辗转相除法原理、时间复杂度证明与防溢出 LCM 写法</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-gcd-lcm-euclidean/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-gcd-lcm-euclidean/</guid>
+      <pubDate>Thu, 19 Nov 2026 00:00:00 GMT</pubDate>
+      <description>在面对“求两个大整数 a, b（最高可达 10^18）的最大公约数与最小公倍数”时，如果还停留在从 min(a, b) 一路递减枚举的暴力试除法，单次查询 O(min(a, b)) 的耗时足以让程序瞬间 TLE（运行超时）；而哪怕背下了短短一行的欧几里得辗转相除法，不少...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：同余定理与取模铁律——为什么减法取模要先 +MOD，而除法绝对不能直接取模？</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-modular-arithmetic/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-modular-arithmetic/</guid>
+      <pubDate>Wed, 18 Nov 2026 00:00:00 GMT</pubDate>
+      <description>在信奥赛场上，几乎每一道递推计数、动态规划或数论求值题的末尾都会印着那句熟悉的提示：“由于答案可能很大，请输出答案对 10^9 + 7（即 1000000007）取模后的结果。” 许多同学看到这句话暗自窃喜，以为只要在 cout 输出前顺手补一个 % MOD 就万事大吉...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：二分答案——如何把棘手的“求最值问题”转化为简单的“是非判定问题”？</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-binary-search-on-answer/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-binary-search-on-answer/</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 GMT</pubDate>
+      <description>给你 n 根长短不一的原木，要求切成至少 k 段等长的小木头，每段最长能切多少厘米？或者河道中分布着 n 块岩石，最多允许移走 m 块，如何让选手每次跳跃的“最短距离尽可能大”？许多同学面对这类复杂的全局最优化问题，第一反应是硬推贪心公式或设计动态规划状态，结果越推越乱...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
+    <item>
+      <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：二分查找为什么会死循环？mid=(l+r)/2 与 (l+r+1)/2 终极判定指南</title>
+      <link>https://www.coderli.com/gesp-5-knowledge-binary-search-boundaries/</link>
+      <guid isPermaLink="true">https://www.coderli.com/gesp-5-knowledge-binary-search-boundaries/</guid>
+      <pubDate>Mon, 16 Nov 2026 00:00:00 GMT</pubDate>
+      <description>算法竞赛圈流传着一句经典的自嘲：“二分查找思路只需十秒钟，调试边界死循环却要两小时！”为什么明明只是在一个有序数组里折半找数，有的时候写 mid = (l + r) / 2 顺畅通关，有的时候把 r = mid 换成 l = mid，程序就瞬间卡死在 while (l...</description>
+      <category>GESP C++ 编程考级</category>
+      <category>GESP</category>
+      <category>五级</category>
+      <category>CSP-J</category>
+      <category>C++</category>
+      <category>考点精讲</category>
+    </item>
     <item>
       <title>【GESP/CSP考点精讲】GESP五级 / CSP-J 必背：快速排序（Quick Sort）基准划分原理、不稳定性与 O(n^2) 退化陷阱</title>
       <link>https://www.coderli.com/gesp-5-knowledge-quick-sort-partition/</link>
@@ -664,109 +742,6 @@
       <category>差分</category>
       <category>进阶算法</category>
       <category>GESP八级</category>
-    </item>
-    <item>
-      <title>【GESP/CSP练习】GESP八级 / CSP-S 题解：luogu-P3374 【模板】树状数组 1</title>
-      <link>https://www.coderli.com/gesp-8-luogu-p3374/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-8-luogu-p3374/</guid>
-      <pubDate>Thu, 08 Oct 2026 00:00:00 GMT</pubDate>
-      <description>在序列维护与区间统计问题中，单点动态修改与区间和查询是一对经典而基础的矛盾操作：静态前缀和虽然能支持 O(1) 的高速区间查询，但在面对单点修改时需要重构后续所有前缀和，单次更新开销高达 O(n)；普通数组虽具备 O(1) 的原地单点写入效率，但任意区间的求和却退化为...</description>
-      <category>CSP / NOIP 信奥竞赛</category>
-      <category>CSP/NOIP</category>
-      <category>CSP-S</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>数据结构</category>
-      <category>树状数组</category>
-      <category>二进制</category>
-      <category>前缀和</category>
-      <category>GESP八级</category>
-    </item>
-    <item>
-      <title>【GESP/CSP练习】GESP七级 / CSP-S 题解：luogu-P3379 【模板】最近公共祖先（LCA）</title>
-      <link>https://www.coderli.com/gesp-7-luogu-p3379/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-7-luogu-p3379/</guid>
-      <pubDate>Wed, 07 Oct 2026 00:00:00 GMT</pubDate>
-      <description>树结构作为非线性数据结构的核心代表，任意两个节点之间的拓扑亲缘关系判定是图论与树算法的基石。洛谷 P3379「【模板】最近公共祖先（LCA）」是 CCF GESP 七级与 CSP-S 组别中最基础且最重要的经典模板题之一。题目要求在一棵具有 N 个节点且以 S 为根的有...</description>
-      <category>CSP / NOIP 信奥竞赛</category>
-      <category>CSP/NOIP</category>
-      <category>CSP-S</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>树论</category>
-      <category>最近公共祖先</category>
-      <category>LCA</category>
-      <category>树上倍增</category>
-      <category>GESP七级</category>
-    </item>
-    <item>
-      <title>【NOIP真题】2008 没有上司的舞会 luogu-P1352 | 适用于 GESP七级 / CSP-S 练习</title>
-      <link>https://www.coderli.com/gesp-7-luogu-p1352/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-7-luogu-p1352/</guid>
-      <pubDate>Tue, 06 Oct 2026 00:00:00 GMT</pubDate>
-      <description>在层级森严的树形组织架构中，上级与下属之间往往存在着天然的排他约束。洛谷 P1352「[NOIP2008 提高组] 没有上司的舞会」作为全国青少年信息学奥林匹克联赛（NOIP）与计算机学会认证（CCF GESP 七级、CSP-S 组）中最具标志性的经典树形动态规划（Tr...</description>
-      <category>GESP C++ 编程考级</category>
-      <category>GESP</category>
-      <category>七级</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>动态规划</category>
-      <category>树形DP</category>
-      <category>状态机DP</category>
-      <category>GESP七级</category>
-      <category>CSP-S</category>
-      <category>NOIP</category>
-    </item>
-    <item>
-      <title>【GESP/CSP练习】GESP七级 / CSP-S 题解：luogu-P1880 [NOI1995] 石子合并</title>
-      <link>https://www.coderli.com/gesp-7-luogu-p1880/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-7-luogu-p1880/</guid>
-      <pubDate>Mon, 05 Oct 2026 00:00:00 GMT</pubDate>
-      <description>在环形序列合并优化中，相邻堆合并的顺序直接决定了中间产物与累加得分的演化。洛谷 P1880「[NOI1995] 石子合并」作为全国青少年信息学奥林匹克竞赛（NOI）经典里程碑题，同时也是 CCF GESP 七级考纲（区间动态规划、环形结构破环成链、最值优化）与 CSP-...</description>
-      <category>CSP / NOIP 信奥竞赛</category>
-      <category>CSP/NOIP</category>
-      <category>CSP-S</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>动态规划</category>
-      <category>区间DP</category>
-      <category>环形DP</category>
-      <category>GESP七级</category>
-      <category>NOI</category>
-    </item>
-    <item>
-      <title>【GESP/CSP练习】GESP七级 / CSP-S 题解：luogu-P3366 【模板】最小生成树</title>
-      <link>https://www.coderli.com/gesp-7-luogu-p3366/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-7-luogu-p3366/</guid>
-      <pubDate>Sun, 04 Oct 2026 00:00:00 GMT</pubDate>
-      <description>在通信基站管网布线、电力网架设以及交通枢纽规划等重大工程中，如何在保证所有节点相互连通的前提下，使铺设线路的总建设开销（边权之和）达到全局最小，是经典的最小生成树（Minimum Spanning Tree, MST）离散优化问题。洛谷 P3366「【模板】最小生成树」...</description>
-      <category>CSP / NOIP 信奥竞赛</category>
-      <category>CSP/NOIP</category>
-      <category>CSP-S</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>图论</category>
-      <category>最小生成树</category>
-      <category>Kruskal</category>
-      <category>并查集</category>
-      <category>GESP七级</category>
-    </item>
-    <item>
-      <title>【GESP/CSP练习】GESP七级 / CSP-S 题解：luogu-P3371 【模板】单源最短路径（弱化版）</title>
-      <link>https://www.coderli.com/gesp-7-luogu-p3371/</link>
-      <guid isPermaLink="true">https://www.coderli.com/gesp-7-luogu-p3371/</guid>
-      <pubDate>Sat, 03 Oct 2026 00:00:00 GMT</pubDate>
-      <description>在交通网络寻径、物流供应链调度与通信路由协议中，求解从指定始发枢纽到网络中所有连通节点的最优开销，是离散优化与图论的核心基石。洛谷 P3371「【模板】单源最短路径（弱化版）」给出了非负权有向图单源最短路径（Single-Source Shortest Path, SS...</description>
-      <category>CSP / NOIP 信奥竞赛</category>
-      <category>CSP/NOIP</category>
-      <category>CSP-S</category>
-      <category>洛谷</category>
-      <category>C++</category>
-      <category>图论</category>
-      <category>最短路</category>
-      <category>Dijkstra</category>
-      <category>优先队列</category>
-      <category>GESP七级</category>
     </item>
   </channel>
 </rss>

@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getAllTags, getPostsByTag } from '@/lib/posts';
+import { getAllTags, getPostsByTag, toPostCardMeta } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
 import PopularTagsCard from '@/components/PopularTagsCard';
@@ -30,9 +30,11 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
     tag = params.tag;
   }
   const canonicalPath = `/tags/${encodeURIComponent(tag)}/`;
+  const tagPosts = getPostsByTag(tag);
   return {
     title: `标签：#${tag} · OneCoder`,
     description: `OneCoder 博客中包含标签「${tag}」的技术文章与题目解析列表。`,
+    robots: tagPosts.length < 2 ? { index: false, follow: true } : undefined,
     alternates: {
       canonical: canonicalPath,
     },
@@ -63,9 +65,9 @@ export default function TagPage({ params }: TagPageProps) {
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       {/* Top Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" className="hover:text-teal-500">首页</Link>
+        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
         <span>/</span>
-        <Link href="/tags/" className="hover:text-teal-500">全站标签</Link>
+        <Link href="/tags/" prefetch={false} className="hover:text-teal-500">全站标签</Link>
         <span>/</span>
         <span className="text-slate-600 dark:text-slate-300 font-medium">#{tag}</span>
       </nav>
@@ -92,6 +94,7 @@ export default function TagPage({ params }: TagPageProps) {
 
           <Link
             href="/"
+            prefetch={false}
             className="self-start sm:self-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-500 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
           >
             <span>✕ 清除筛选，返回首页</span>
@@ -103,7 +106,7 @@ export default function TagPage({ params }: TagPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
         {/* Left: Filtered Post Stream (cap serialized client payload to latest 80 posts to prevent multi-MB tag pages) */}
         <div>
-          <HomePostStream posts={posts.slice(0, 80)} initialCount={20} pageSize={20} />
+          <HomePostStream posts={posts.slice(0, 80).map(toPostCardMeta)} initialCount={20} pageSize={20} />
         </div>
 
         {/* Right: Sidebar */}

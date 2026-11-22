@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getCategoryTree, getPostsByCategory } from '@/lib/posts';
+import { getCategoryTree, getPostsByCategory, toPostCardMeta } from '@/lib/posts';
 import { getCategoryLink } from '@/lib/categories';
 import HomePostStream from '@/components/HomePostStream';
 import CategoryNavTree from '@/components/CategoryNavTree';
@@ -89,13 +89,13 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       {/* Top Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6 flex-wrap">
-        <Link href="/" className="hover:text-teal-500">首页</Link>
+        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
         <span>/</span>
-        <Link href="/categories/" className="hover:text-teal-500">全部专题分类</Link>
+        <Link href="/categories/" prefetch={false} className="hover:text-teal-500">全部专题分类</Link>
         <span>/</span>
         {child ? (
           <>
-            <Link href={getCategoryLink(parent)} className="hover:text-teal-500">
+            <Link href={getCategoryLink(parent)} prefetch={false} className="hover:text-teal-500">
               {parent}
             </Link>
             <span>/</span>
@@ -130,6 +130,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 
           <Link
             href="/"
+            prefetch={false}
             className="self-start sm:self-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-500 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
           >
             <span>✕ 清除筛选，返回首页</span>
@@ -141,7 +142,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
         {/* Left: Filtered Post Stream */}
         <div>
-          <HomePostStream posts={posts} initialCount={20} pageSize={20} />
+          <HomePostStream posts={posts.map(toPostCardMeta)} initialCount={20} pageSize={20} />
         </div>
 
         {/* Right: Sidebar */}

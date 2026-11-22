@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getAllPosts } from '@/lib/posts';
+import { getAllPosts, toPostCardMeta } from '@/lib/posts';
 import GoogleAd from '@/components/GoogleAd';
 import TopicPostList from '@/components/TopicPostList';
 import PopularTagsCard from '@/components/PopularTagsCard';
@@ -95,7 +95,7 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       {/* Top Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" className="hover:text-teal-500">首页</Link>
+        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
         <span>/</span>
         <span>专题专栏</span>
         <span>/</span>
@@ -119,7 +119,7 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
       {/* Main Content & Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8 items-start">
         <div>
-          <TopicPostList posts={topicPosts} subtopics={subtopics} />
+          <TopicPostList posts={topicPosts.map(toPostCardMeta)} subtopics={subtopics} />
         </div>
 
         <aside className="sticky top-20 space-y-6">
@@ -134,6 +134,7 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
                   <Link
                     key={key}
                     href={`/topics/${key}/`}
+                    prefetch={false}
                     className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 transition font-medium"
                   >
                     <span>{item.icon} {item.name}</span>

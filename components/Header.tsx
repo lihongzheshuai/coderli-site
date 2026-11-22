@@ -88,6 +88,7 @@ export default function Header({ postCount }: HeaderProps) {
         {/* Brand */}
         <Link
           href="/"
+          prefetch={false}
           onClick={handleHomeClick}
           className="flex items-center gap-3 group"
           title="点击返回首页或回到顶部"
@@ -118,6 +119,7 @@ export default function Header({ postCount }: HeaderProps) {
               <Link
                 key={n.href}
                 href={n.href}
+                prefetch={false}
                 onClick={n.onClick}
                 className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition ${
                   isActive
@@ -197,6 +199,7 @@ export default function Header({ postCount }: HeaderProps) {
               <Link
                 key={n.href}
                 href={n.href}
+                prefetch={false}
                 onClick={e => {
                   if (n.onClick) n.onClick(e);
                   setMobileMenuOpen(false);

@@ -1,18 +1,24 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { PostMeta } from '@/types/post';
+import React, { useState, useMemo, useEffect } from 'react';
+import { PostCardMeta } from '@/types/post';
 import ArticleCard from '@/components/ArticleCard';
 import GoogleAd from '@/components/GoogleAd';
 
 interface TopicPostListProps {
-  posts: PostMeta[];
+  posts: PostCardMeta[];
   subtopics: string[];
+  pageSize?: number;
 }
 
-export default function TopicPostList({ posts, subtopics }: TopicPostListProps) {
+export default function TopicPostList({ posts, subtopics, pageSize = 24 }: TopicPostListProps) {
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [displayCount, setDisplayCount] = useState(pageSize);
+
+  useEffect(() => {
+    setDisplayCount(pageSize);
+  }, [selectedSubtopic, searchTerm, pageSize]);
 
   // Calculate counts for each subtopic
   const subtopicCounts = useMemo(() => {
@@ -27,15 +33,19 @@ export default function TopicPostList({ posts, subtopics }: TopicPostListProps) 
 
   // Filtered posts
   const filteredPosts = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
     return posts.filter(post => {
       const matchSub = !selectedSubtopic || post.subtopic === selectedSubtopic;
       const matchSearch =
-        !searchTerm.trim() ||
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+        !q ||
+        post.title.toLowerCase().includes(q) ||
+        post.tags.some(t => t.toLowerCase().includes(q));
       return matchSub && matchSearch;
     });
   }, [posts, selectedSubtopic, searchTerm]);
+
+  const visiblePosts = filteredPosts.slice(0, displayCount);
+  const hasMore = displayCount < filteredPosts.length;
 
   return (
     <div className="space-y-6">
@@ -147,10 +157,11 @@ export default function TopicPostList({ posts, subtopics }: TopicPostListProps) 
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredPosts.map((post, idx) => (
+          {visiblePosts.map((post, idx) => (
             <React.Fragment key={post.slug}>
               <ArticleCard post={post} />
-              {(idx === 4 || (idx > 4 && (idx + 1) % 15 === 5)) && (
+              {/* Cap topic in-feed ads to at most 2 slots (was 37 ads on /topics/gesp/) */}
+              {(idx === 4 || idx === 19) && (
                 <GoogleAd
                   slot="9656071817"
                   format="fluid"
@@ -160,6 +171,26 @@ export default function TopicPostList({ posts, subtopics }: TopicPostListProps) 
               )}
             </React.Fragment>
           ))}
+
+          <div className="text-center pt-6">
+            {hasMore ? (
+              <button
+                type="button"
+                onClick={() => setDisplayCount(prev => Math.min(prev + pageSize, filteredPosts.length))}
+                className="px-8 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 text-slate-700 dark:text-slate-200 transition shadow-sm inline-flex items-center gap-2.5 cursor-pointer group"
+              >
+                <span>加载更多专栏文章</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 group-hover:text-teal-500 transition">
+                  (已显示 {visiblePosts.length} / 共 {filteredPosts.length} 篇)
+                </span>
+                <span className="text-sm font-bold text-teal-600 dark:text-teal-400">↓</span>
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                <span>已呈现当前筛选下的全部 {filteredPosts.length} 篇文章</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

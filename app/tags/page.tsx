@@ -19,7 +19,7 @@ export default function AllTagsPage() {
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       {/* Top Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" className="hover:text-teal-500">首页</Link>
+        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
         <span>/</span>
         <span className="text-slate-600 dark:text-slate-300 font-medium">全站技术标签</span>
       </nav>
@@ -47,6 +47,7 @@ export default function AllTagsPage() {
             <Link
               key={item.tag}
               href={`/tags/${encodeURIComponent(item.tag)}/`}
+              prefetch={false}
               className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/60 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 font-mono text-xs md:text-sm border border-transparent hover:border-teal-500/30 transition flex items-center gap-1.5 group cursor-pointer"
             >
               <span>#{item.tag}</span>

@@ -18,7 +18,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-5 text-xs">
-          <Link href="/archives/" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+          <Link href="/archives/" prefetch={false} className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             全站归档
           </Link>
           <a href="/rss.xml" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
@@ -27,18 +27,18 @@ export default function Footer() {
           <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             LLMs.txt
           </a>
-          <Link href="https://github.com/lihongzheshuai" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+          <a href="https://github.com/lihongzheshuai" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             GitHub ↗
-          </Link>
-          <Link href="https://twitter.com/wushikezuohehe" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+          </a>
+          <a href="https://twitter.com/wushikezuohehe" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             Twitter/X ↗
-          </Link>
+          </a>
           <a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             QQ交流群 ↗
           </a>
-          <Link href="https://wiki.coderli.com/" target="_blank" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
+          <a href="https://wiki.coderli.com/" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 dark:hover:text-teal-400 transition">
             GESP WIKI ↗
-          </Link>
+          </a>
           <button
             onClick={scrollToTop}
             className="px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 hover:border-teal-500 text-slate-600 dark:text-slate-400 transition"

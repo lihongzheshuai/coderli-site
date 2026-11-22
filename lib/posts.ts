@@ -22,7 +22,26 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
 import { codeToHtml, bundledLanguages, isPlainLang, isSpecialLang } from 'shiki';
-import type { PostMeta, PostDetail } from '../types/post';
+import type { PostMeta, PostCardMeta, PostDetail } from '../types/post';
+
+export function toPostCardMeta(post: PostMeta): PostCardMeta {
+  return {
+    slug: post.slug,
+    title: post.title,
+    date: post.date,
+    tags: post.tags.slice(0, 6),
+    readTime: post.readTime,
+    excerpt: post.excerpt,
+    topic: post.topic,
+    topicName: post.topicName,
+    subtopic: post.subtopic,
+    previewImg: post.previewImg,
+    previewGraphic: {
+      symbol: post.previewGraphic.symbol,
+      title: post.previewGraphic.title,
+    },
+  };
+}
 
 const postsDirectory = path.join(process.cwd(), '_posts');
 const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v2');
@@ -202,7 +221,7 @@ export function resolveTopic(categories: string[] = [], tags: string[] = [], tit
   // 2. GESP
   if (combinedStr.includes('gesp')) {
     const levelMatch = categories.find(c => ['一级', '二级', '三级', '四级', '五级', '六级', '七级', '八级'].includes(c)) ||
-      (title.includes('一级') ? '一级' : title.includes('二级') ? '二级' : title.includes('三级') ? '三级' : title.includes('四级') ? '四级' : title.includes('五级') ? '五级' : '考级精选题解');
+      (title.includes('一级') ? '一级' : title.includes('二级') ? '二级' : title.includes('三级') ? '三级' : title.includes('四级') ? '四级' : title.includes('五级') ? '五级' : title.includes('六级') ? '六级' : title.includes('七级') ? '七级' : title.includes('八级') ? '八级' : '考级精选题解');
     return {
       topic: 'gesp' as const,
       topicName: 'GESP 编程与算法',

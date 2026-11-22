@@ -1,48 +1,46 @@
 #!/usr/bin/env bash
 
-# Vercel Ignored Build Step Script
+# Vercel Ignored Build Step Script (Static Export mode)
 # Exit 1: Proceed with Vercel build
 # Exit 0: Cancel / Skip Vercel build
 
 echo "=== Vercel Ignored Build Step Check ==="
 
+COMMIT_MSG=$(git log -1 --pretty=%B 2>/dev/null || echo "")
+
 # 1. Force build if commit message contains [build] or [rebuild]
-COMMIT_MSG=$(git log -1 --pretty=%B)
-if [[ "$COMMIT_MSG" =~ "\[build\]" ]] || [[ "$COMMIT_MSG" =~ "\[rebuild\]" ]]; then
+if [[ "$COMMIT_MSG" =~ \[build\] ]] || [[ "$COMMIT_MSG" =~ \[rebuild\] ]]; then
   echo "Commit message contains [build] flag. Proceeding with full build."
   exit 1
 fi
 
 # 2. Skip build if commit message contains [skip-build] or [skip ci]
-if [[ "$COMMIT_MSG" =~ "\[skip-build\]" ]] || [[ "$COMMIT_MSG" =~ "\[skip ci\]" ]]; then
-  echo "Commit message contains [skip-build] flag. Skipping Vercel build."
+if [[ "$COMMIT_MSG" =~ \[skip-build\] ]] || [[ "$COMMIT_MSG" =~ \[skip\ ci\] ]]; then
+  echo "Commit message contains skip flag. Skipping Vercel build."
   exit 0
 fi
 
-# 3. Check what files changed in the latest commit
-echo "Analyzing modified files between HEAD^ and HEAD..."
-CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+# 3. Determine diff base (prefer Vercel's previous deployed SHA for multi-commit pushes)
+BASE_REF="HEAD^"
+if [ -n "${VERCEL_GIT_PREVIOUS_SHA:-}" ] && git cat-file -e "${VERCEL_GIT_PREVIOUS_SHA}^{commit}" 2>/dev/null; then
+  BASE_REF="$VERCEL_GIT_PREVIOUS_SHA"
+fi
 
-# If any core application code changed, must build
-CORE_PATTERNS="app/|components/|lib/|types/|public/|scripts/|package.json|pnpm-lock.yaml|next.config|tailwind.config|tsconfig"
-if echo "$CHANGED_FILES" | grep -E -q "$CORE_PATTERNS"; then
-  echo "Core application code modified. Proceeding with build."
+CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD 2>/dev/null)
+if [ -z "$CHANGED_FILES" ]; then
+  echo "Unable to determine changed files (initial commit or shallow clone). Proceeding with build."
   exit 1
 fi
 
-# 4. Check if only existing posts were edited (no new post created)
-# If a new markdown was added (status 'A'), we must build so the new file exists in Vercel Serverless container
-ADDED_POSTS=$(git diff --name-status HEAD^ HEAD | grep -E '^A[[:space:]]+_posts/')
-if [ -n "$ADDED_POSTS" ]; then
-  echo "New post added to _posts/. Proceeding with fast build to include file in serverless bundle."
+echo "Changed files since $BASE_REF:"
+echo "$CHANGED_FILES"
+
+# 4. In static export mode, any change to posts, app code, build scripts, public assets, or build configs requires a build
+BUILD_PATTERNS='^(_posts/|app/|components/|lib/|types/|public/|scripts/build-|package\.json|pnpm-lock\.yaml|next\.config|vercel\.json|tailwind\.config|postcss\.config|tsconfig)'
+if echo "$CHANGED_FILES" | grep -E -q "$BUILD_PATTERNS"; then
+  echo "Site content or build-relevant files modified. Proceeding with Vercel build."
   exit 1
 fi
 
-# If only existing markdown files were modified (e.g. typos, minor edits)
-if echo "$CHANGED_FILES" | grep -E -q "^_posts/"; then
-  echo "Only existing articles modified in _posts/. Skipping Vercel build (On-Demand ISR handles update)."
-  exit 0
-fi
-
-echo "No build-triggering changes detected. Skipping build."
+echo "Only non-site files changed (e.g. docs/aux scripts). Skipping Vercel build."
 exit 0

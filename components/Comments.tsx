@@ -61,6 +61,21 @@ function formatRelativeTime(dateStr: string): string {
   }
 }
 
+function getSafeHttpUrl(raw?: string | null): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 interface ReplyTarget {
   id: string;
   author: string;
@@ -68,7 +83,37 @@ interface ReplyTarget {
 }
 
 export default function Comments({ slug, postTitle }: { slug: string; postTitle?: string }) {
-  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(`${API_BASE}/api/comments/${slug}`, fetcher);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [shouldFetch, setShouldFetch] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setShouldFetch(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          setShouldFetch(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '400px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const { data, mutate } = useSWR<{ comments: CommentItem[] }>(
+    shouldFetch ? `${API_BASE}/api/comments/${slug}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000,
+    }
+  );
   const [author, setAuthor] = useState('匿名');
   const [email, setEmail] = useState('');
   const [site, setSite] = useState('');
@@ -162,6 +207,13 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       return;
     }
 
+    const trimmedSite = site.trim();
+    const safeSiteInput = trimmedSite ? getSafeHttpUrl(trimmedSite) : null;
+    if (trimmedSite && !safeSiteInput) {
+      setMessage('个人网站链接仅支持 http:// 或 https:// 协议');
+      return;
+    }
+
     if (!content.trim()) return;
 
     setIsSubmitting(true);
@@ -172,7 +224,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       try {
         localStorage.setItem(
           'onecoder_comment_user',
-          JSON.stringify({ author: finalAuthor, email: trimmedEmail, site: site.trim() })
+          JSON.stringify({ author: finalAuthor, email: trimmedEmail, site: safeSiteInput || '' })
         );
       } catch {
         // ignore
@@ -187,7 +239,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         body: JSON.stringify({
           author: finalAuthor,
           email: trimmedEmail,
-          site: site.trim(),
+          site: safeSiteInput || '',
           content: content.trim(),
           postTitle,
           replyToId: replyTarget?.id,
@@ -319,7 +371,11 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
   }
 
   return (
-    <section className="mt-14 pt-8 border-t-2 border-slate-200 dark:border-slate-800" id="comments">
+    <section
+      ref={sectionRef}
+      className="mt-14 pt-8 border-t-2 border-slate-200 dark:border-slate-800"
+      id="comments"
+    >
       {/* Title Bar */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
@@ -470,21 +526,24 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
                   {/* Author Header */}
                   <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
                     <div className="flex items-center gap-2">
-                      {c.site ? (
-                        <a
-                          href={c.site}
-                          target="_blank"
-                          rel="nofollow noopener noreferrer"
-                          className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition inline-flex items-center gap-1"
-                        >
-                          <span>{c.author}</span>
-                          <ExternalLink className="w-3 h-3 text-slate-400" />
-                        </a>
-                      ) : (
-                        <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                          {c.author}
-                        </span>
-                      )}
+                      {(() => {
+                        const safeSite = getSafeHttpUrl(c.site);
+                        return safeSite ? (
+                          <a
+                            href={safeSite}
+                            target="_blank"
+                            rel="nofollow noopener noreferrer"
+                            className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition inline-flex items-center gap-1"
+                          >
+                            <span>{c.author}</span>
+                            <ExternalLink className="w-3 h-3 text-slate-400" />
+                          </a>
+                        ) : (
+                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                            {c.author}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <time
                       className="text-xs text-slate-400 font-mono"

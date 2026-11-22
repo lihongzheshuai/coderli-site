@@ -39,7 +39,7 @@ export default function ArchivesPage() {
   return (
     <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
       <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" className="hover:text-teal-500">
+        <Link href="/" prefetch={false} className="hover:text-teal-500">
           首页
         </Link>
         <span>/</span>

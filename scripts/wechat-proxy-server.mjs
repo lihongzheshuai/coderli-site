@@ -9,7 +9,11 @@ import https from 'https';
 import { URL } from 'url';
 
 const PORT = process.env.PORT || 8080;
-const PROXY_TOKEN = process.env.PROXY_TOKEN || 'onecoder-wechat-proxy-secret';
+const PROXY_TOKEN = (process.env.PROXY_TOKEN || '').trim();
+if (!PROXY_TOKEN) {
+  console.error('FATAL: PROXY_TOKEN environment variable must be set before starting WeChat Proxy Gateway.');
+  process.exit(1);
+}
 
 // In-memory token cache: { token, expiresAt }
 let tokenCache = null;
@@ -36,9 +40,9 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 2. Authentication check
-  const clientToken = req.headers['x-proxy-token'] || reqUrl.searchParams.get('token');
-  if (clientToken !== PROXY_TOKEN) {
+  // 2. Authentication check (header-only; never accept secret token in URL query logs)
+  const clientToken = req.headers['x-proxy-token'];
+  if (!clientToken || clientToken !== PROXY_TOKEN) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ errcode: 401, errmsg: 'Unauthorized: Invalid x-proxy-token' }));
     return;

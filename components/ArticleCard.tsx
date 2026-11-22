@@ -2,10 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { PostMeta } from '@/types/post';
-import LatexText from '@/components/LatexText';
+import { PostCardMeta } from '@/types/post';
 
-export default function ArticleCard({ post }: { post: PostMeta }) {
+export default function ArticleCard({ post }: { post: PostCardMeta }) {
   return (
     <article className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-xl p-5 md:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-500/50 hover:shadow-md flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
       <div className="flex-1 min-w-0">
@@ -21,12 +20,12 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
 
         <h3 className="text-xl md:text-[22px] font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-snug mb-2.5">
           <Link href={`/${post.slug}/`} className="block" prefetch={false}>
-            <LatexText text={post.title} />
+            {post.title}
           </Link>
         </h3>
 
         <p className="text-[15px] md:text-base text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2 mb-3.5">
-          <LatexText text={post.excerpt} />
+          {post.excerpt}
         </p>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">

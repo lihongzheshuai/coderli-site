@@ -23,6 +23,23 @@ export interface PostMeta {
   pinOrder?: number;
 }
 
+export interface PostCardMeta {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  readTime: string;
+  excerpt: string;
+  topic: 'gesp' | 'csp' | 'java' | 'algo' | 'python-data';
+  topicName: string;
+  subtopic: string;
+  previewImg: string | null;
+  previewGraphic: {
+    symbol: string;
+    title: string;
+  };
+}
+
 export interface PostDetail extends PostMeta {
   contentHtml: string;
   toc: {
