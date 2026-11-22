@@ -5,7 +5,7 @@ export const FONT_SCALE_STORAGE_KEY = 'onecoder_font_scale';
  * Stored strictly in the visitor's own browser localStorage (never sent to server,
  * never affects other users or CDN cache).
  */
-export const FONT_SCALE_STEPS = [0.85, 0.92, 1, 1.1, 1.2] as const;
+export const FONT_SCALE_STEPS = [0.85, 0.92, 1, 1.08, 1.16] as const;
 
 export type FontScaleStep = (typeof FONT_SCALE_STEPS)[number];
 

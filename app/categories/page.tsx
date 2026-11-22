@@ -19,9 +19,49 @@ export const metadata: Metadata = {
 export default function AllCategoriesPage() {
   const tree = getCategoryTree();
   const totalPosts = getAllPosts().length;
+  const categoriesJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': 'https://www.coderli.com/categories/#collection',
+        url: 'https://www.coderli.com/categories/',
+        name: '全部专题与分类大厅 · OneCoder',
+        description: `OneCoder 博客全站技术专题、考级题解与多级分类索引全集（共 ${totalPosts} 篇原创文章）。`,
+        inLanguage: 'zh-CN',
+        isPartOf: { '@id': 'https://www.coderli.com/#website' },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': 'https://www.coderli.com/categories/#list',
+        name: 'OneCoder 专题分类列表',
+        numberOfItems: tree.length,
+        itemListElement: tree.map((parent, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: parent.name,
+          url: `https://www.coderli.com${getCategoryLink(parent.name)}`,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': 'https://www.coderli.com/categories/#breadcrumb',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://www.coderli.com/' },
+          { '@type': 'ListItem', position: 2, name: '全站专题分类', item: 'https://www.coderli.com/categories/' },
+        ],
+      },
+    ],
+  };
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(categoriesJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <nav
         aria-label="面包屑导航"
         className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"

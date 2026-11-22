@@ -128,3 +128,65 @@ export function formatCompactTitle(title: string): string {
   t = t.replace(/\s*\|\s*适用于\s*GESP.*$/i, '').trim();
   return t.length >= 6 ? t : title.trim();
 }
+
+/**
+ * Build keyword-frontloaded HTML <title> for higher Google/Baidu/Bing CTR.
+ * Preserves H1 and URL verbatim; only moves boilerplate brackets behind the core topic/problem ID.
+ */
+export function buildSeoPageTitle(rawTitle: string, topic: string, subtopic?: string): string {
+  const original = String(rawTitle || '').trim();
+  if (!original) return 'OneCoder';
+
+  const core = formatCompactTitle(original);
+  if (core !== original && core.length >= 4) {
+    let suffix = '';
+    if (topic === 'gesp' && subtopic && subtopic.includes('级')) {
+      suffix = `GESP${subtopic}`;
+      if (/CSP-J/i.test(original)) suffix += '/CSP-J';
+      else if (/CSP-S/i.test(original)) suffix += '/CSP-S';
+    } else if (topic === 'csp') {
+      suffix = subtopic || 'CSP/NOIP';
+      const lvMatch = original.match(/GESP[一二三四五六七八\d]+级(?:\s*\/\s*[一二三四五六七八\d]+级)?/i);
+      if (lvMatch) suffix += ` · ${lvMatch[0].replace(/\s+/g, '')}`;
+    }
+
+    const kindHint = /考点精讲/.test(original)
+      ? '考点精讲'
+      : /题解|真题|练习/.test(original) && !/题解/.test(core)
+      ? '题解'
+      : '';
+
+    const tail = [kindHint, suffix].filter(Boolean).join(' - ');
+    return tail ? `${core} - ${tail} | OneCoder` : `${core} | OneCoder`;
+  }
+
+  return `${original} | OneCoder`;
+}
+
+const GESP_LEVEL_NUM: Record<string, string> = {
+  一级: '1',
+  二级: '2',
+  三级: '3',
+  四级: '4',
+  五级: '5',
+  六级: '6',
+  七级: '7',
+  八级: '8',
+};
+
+/**
+ * Resolve exact verified deep link on wiki.coderli.com for same-level domain-cluster reinforcement.
+ */
+export function getWikiDeepUrl(topic: string, subtopic?: string): string {
+  if (topic === 'gesp' && subtopic && GESP_LEVEL_NUM[subtopic]) {
+    return `https://wiki.coderli.com/gesp/${GESP_LEVEL_NUM[subtopic]}/`;
+  }
+  if (topic === 'gesp') {
+    return 'https://wiki.coderli.com/gesp/';
+  }
+  if (topic === 'csp') {
+    if (subtopic === 'NOIP') return 'https://wiki.coderli.com/noirelated/noip/';
+    return 'https://wiki.coderli.com/csp/j/';
+  }
+  return 'https://wiki.coderli.com/';
+}

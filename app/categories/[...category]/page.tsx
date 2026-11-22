@@ -84,9 +84,67 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const categoryTree = getCategoryTree();
+  const pageTitle = child ? `${parent} · ${child} 专题` : `${parent} 专题`;
+  const canonicalUrl = `https://www.coderli.com${getCategoryLink(parent, child)}`;
+  const breadcrumbItems: Record<string, any>[] = [
+    { '@type': 'ListItem', position: 1, name: '首页', item: 'https://www.coderli.com/' },
+    { '@type': 'ListItem', position: 2, name: '专题分类', item: 'https://www.coderli.com/categories/' },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: parent,
+      item: `https://www.coderli.com${getCategoryLink(parent)}`,
+    },
+  ];
+  if (child) {
+    breadcrumbItems.push({
+      '@type': 'ListItem',
+      position: 4,
+      name: child,
+      item: canonicalUrl,
+    });
+  }
+  const categoryJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${canonicalUrl}#collection`,
+        url: canonicalUrl,
+        name: `${pageTitle} · OneCoder`,
+        description: `OneCoder 博客「${pageTitle}」分类下的所有技术博文与考级真题解析（共 ${posts.length} 篇）。`,
+        inLanguage: 'zh-CN',
+        isPartOf: { '@id': 'https://www.coderli.com/#website' },
+        mainEntity: { '@id': `${canonicalUrl}#list` },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${canonicalUrl}#list`,
+        name: `${pageTitle}文章列表`,
+        numberOfItems: Math.min(posts.length, 20),
+        itemListElement: posts.slice(0, 20).map((p, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: p.title,
+          url: `https://www.coderli.com/${p.slug}/`,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl}#breadcrumb`,
+        itemListElement: breadcrumbItems,
+      },
+    ],
+  };
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(categoryJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <nav
         aria-label="面包屑导航"
         className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4 flex-wrap"

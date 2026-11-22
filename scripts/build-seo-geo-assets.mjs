@@ -6,6 +6,7 @@ import yaml from 'js-yaml';
 const BASE_URL = 'https://www.coderli.com';
 const postsDir = path.join(process.cwd(), '_posts');
 const publicDir = path.join(process.cwd(), 'public');
+const mdOutDir = path.join(publicDir, 'md');
 
 function safeMatter(raw) {
   return matter(raw, {
@@ -27,24 +28,37 @@ function stripHtmlAndLatex(input) {
     .replace(/&amp;/gi, '&');
 
   text = text.replace(/<!--[\s\S]*?-->/g, ' ');
-  text = text.replace(/<[^>]+>/g, ' ');
+  // Strip ONLY genuine HTML tags so C++ operators (i <= n / i ... if (n > 1)) remain intact
+  text = text.replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(\s[^>]*)?\/?>/g, ' ');
   text = text.replace(/\$\$([\s\S]*?)\$\$/g, ' $1 ');
   text = text.replace(/\$([^$\n]+)\$/g, (_, expr) =>
     expr
       .replace(/\\times\b/g, '×')
+      .replace(/\\cdot\b/g, '·')
       .replace(/\\div\b/g, '÷')
       .replace(/\\le(?:q)?\b/g, '≤')
       .replace(/\\ge(?:q)?\b/g, '≥')
       .replace(/\\ne(?:q)?\b/g, '≠')
       .replace(/\\approx\b/g, '≈')
       .replace(/\\(?:c|l|v)?dots\b/g, '...')
+      .replace(/\\iff\b|\\Longleftrightarrow\b/g, '⇔')
       .replace(/\\to\b|\\rightarrow\b/g, '→')
       .replace(/\\log\b/g, 'log')
       .replace(/\\min\b/g, 'min')
       .replace(/\\max\b/g, 'max')
       .replace(/\\gcd\b/g, 'gcd')
+      .replace(/\\sigma\b/g, 'σ')
+      .replace(/\\pi\b/g, 'π')
+      .replace(/\\phi\b|\\varphi\b/g, 'φ')
+      .replace(/\\alpha\b/g, 'α')
+      .replace(/\\beta\b/g, 'β')
+      .replace(/\\theta\b/g, 'θ')
+      .replace(/\\Omega\b/g, 'Ω')
+      .replace(/\\binom\{([^{}]+)\}\{([^{}]+)\}/g, 'C($1,$2)')
       .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1/$2)')
-      .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
+      .replace(/\\sqrt\{([^{}]+)\}/g, (__, inner) =>
+        inner.length <= 2 ? `√${inner}` : `√(${inner})`
+      )
       .replace(/\\(?:text|mathrm|mathbf|mathit|texttt)\{([^{}]+)\}/g, '$1')
       .replace(/\\[a-zA-Z]+/g, '')
       .replace(/[{}]/g, '')
@@ -54,7 +68,7 @@ function stripHtmlAndLatex(input) {
 
 function cleanPlainSummary(content, title, categories = [], tags = [], explicitSummary = '') {
   if (explicitSummary && explicitSummary.trim().length >= 25) {
-    return stripHtmlAndLatex(explicitSummary).replace(/\s+/g, ' ').trim().slice(0, 140);
+    return stripHtmlAndLatex(explicitSummary).replace(/\s+/g, ' ').trim().slice(0, 150);
   }
   let text = content;
   if (text.includes('<!--more-->')) {
@@ -72,8 +86,12 @@ function cleanPlainSummary(content, title, categories = [], tags = [], explicitS
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[(.*?)\]\(.*?\)/g, '$1');
   text = stripHtmlAndLatex(text)
+    .replace(/^\s*>\s*/gm, '')
     .replace(/#{1,6}\s+/g, '')
-    .replace(/[*_~`>|]/g, '')
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/~~([^~\n]+)~~/g, '$1')
+    .replace(/`([^`\n]+)`/g, '$1')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -81,7 +99,17 @@ function cleanPlainSummary(content, title, categories = [], tags = [], explicitS
     const kw = Array.from(new Set([...categories, ...tags])).filter(Boolean).slice(0, 4).join('、');
     text = `OneCoder 技术详解：${title}${kw ? `（涉及：${kw}）` : ''}`;
   }
-  return text.length > 135 ? text.slice(0, 135).trim() + '...' : text;
+  return text.length > 140 ? text.slice(0, 140).trim() + '...' : text;
+}
+
+function cleanMarkdownForAi(rawBody) {
+  return String(rawBody || '')
+    .replace(/{%\s*include\s+.*?%}/g, '')
+    .replace(/{{.*?}}/g, '')
+    .replace(/^\s*(?:>\s*)?\{:\s*\.prompt-[^}]+\}\s*$/gm, '')
+    .replace(/<!--\s*more\s*-->/gi, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function resolveTopic(categories = [], tags = [], title = '') {
@@ -127,6 +155,10 @@ function escapeXml(str) {
 const files = fs.existsSync(postsDir) ? fs.readdirSync(postsDir).filter(f => f.endsWith('.md')) : [];
 const posts = [];
 
+// Prepare clean /public/md/ output directory for per-post AI-friendly Markdown twins
+fs.rmSync(mdOutDir, { recursive: true, force: true });
+fs.mkdirSync(mdOutDir, { recursive: true });
+
 for (const filename of files) {
   const raw = fs.readFileSync(path.join(postsDir, filename), 'utf8');
   const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
@@ -153,12 +185,36 @@ for (const filename of files) {
     else if (data.date instanceof Date) postDate = data.date.toISOString().slice(0, 10);
   }
 
+  let updatedDate = postDate;
+  const rawUpdated = data.updated ?? data.lastmod ?? data.last_modified ?? data.modified;
+  if (rawUpdated) {
+    if (typeof rawUpdated === 'string') updatedDate = rawUpdated.slice(0, 10);
+    else if (rawUpdated instanceof Date) updatedDate = rawUpdated.toISOString().slice(0, 10);
+  }
+
   const explicitDesc = typeof data.description === 'string' ? data.description : typeof data.summary === 'string' ? data.summary : '';
   const summary = cleanPlainSummary(content, title, categories, tags, explicitDesc);
   const { topic, topicName, subtopic } = resolveTopic(categories, tags, title);
   const pinned = !!(data.pin === true || data.featured === true || data.top);
 
-  posts.push({ slug, title, date: postDate, categories, tags, summary, topic, topicName, subtopic, pinned });
+  posts.push({ slug, title, date: postDate, updatedDate, categories, tags, summary, topic, topicName, subtopic, pinned });
+
+  // Write clean pure-Markdown twin for AI Search / RAG / Agents: /md/<slug>.md
+  const safeSlugFile = slug.replace(/[\\/]/g, '_');
+  const mdTwinLines = [
+    `# ${title}`,
+    '',
+    `> Author: OneCoder (李宏哲) | Canonical: ${BASE_URL}/${slug}/`,
+    `> Published: ${postDate}${updatedDate !== postDate ? ` | Updated: ${updatedDate}` : ''} | Topic: ${topicName}${subtopic ? ` / ${subtopic}` : ''}`,
+    tags.length > 0 ? `> Tags: ${tags.join(', ')}` : null,
+    '',
+    cleanMarkdownForAi(content),
+    '',
+    '---',
+    `Source: OneCoder (${BASE_URL}/${slug}/) | GESP Wiki: https://wiki.coderli.com/ | OI-Game: https://oi.coderli.com/`,
+    '',
+  ].filter(v => v !== null);
+  fs.writeFileSync(path.join(mdOutDir, `${safeSlugFile}.md`), mdTwinLines.join('\n'), 'utf8');
 }
 
 posts.sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -170,7 +226,7 @@ const pinnedPosts = posts.filter(p => p.pinned).slice(0, 10);
 const llmsLines = [
   '# OneCoder 技术与信奥算法知识库 (coderli.com)',
   '',
-  '> OneCoder（李宏哲）独立技术博客，始于 2012 年，累计沉淀 ' + posts.length + '+ 篇原创技术文章。核心聚焦：CCF GESP C++ 编程能力等级认证（1～8级）考纲微知识点精讲与历年真题题解、CSP-J/S 与 NOIP 信息学奥赛算法推导、Java 服务端架构演进（Spring / Netty / JVM / 日志体系）以及 Python 数据工程实战。所有 C++ 题解代码严格遵循 C++11 标准与考场实战规范。',
+  '> OneCoder（李宏哲）独立技术博客，始于 2012 年，累计沉淀 ' + posts.length + '+ 篇原创技术文章。核心聚焦：CCF GESP C++ 编程能力等级认证（1～8级）考纲微知识点精讲与历年真题题解、CSP-J/S 与 NOIP 信息学奥赛算法推导、Java 服务端架构演进（Spring / Netty / JVM / 日志体系）以及 Python 数据工程实战。所有 C++ 题解代码严格遵循 C++11 标准与考场实战规范。每篇文章均提供纯 Markdown 副本：`https://www.coderli.com/md/<slug>.md`。',
   '',
   '## 权威导航与关联生态 (Core Hubs & Ecosystem)',
   '',
@@ -183,7 +239,7 @@ const llmsLines = [
   `- [Python 与数据工程专栏](${BASE_URL}/topics/python-data/): Python 工具链、MySQL/PostgreSQL 与大数据实战`,
   `- [GESP / CSP 体系化知识百科 (Wiki)](https://wiki.coderli.com/): 按等级结构化编排的 GESP/CSP/NOIP 知识库`,
   `- [OneCoder 信奥远征互动闯关平台](https://oi.coderli.com/): GESP 1-8级 240 关在线训练、考纲心法与全真模考系统`,
-  `- [全量知识目录 (LLMs Full Index)](${BASE_URL}/llms-full.txt): 包含全站所有 ${posts.length} 篇文章的完整标题、URL 与摘要清单`,
+  `- [全量知识目录 (LLMs Full Index)](${BASE_URL}/llms-full.txt): 包含全站所有 ${posts.length} 篇文章的完整标题、URL、Markdown 副本与摘要清单`,
   `- [RSS 订阅源](${BASE_URL}/rss.xml): 最新 50 篇文章标准 RSS 2.0 增量源`,
   '',
 ];
@@ -191,14 +247,14 @@ const llmsLines = [
 if (pinnedPosts.length > 0) {
   llmsLines.push('## 核心置顶与高频参考指南 (Featured Guides)', '');
   for (const p of pinnedPosts) {
-    llmsLines.push(`- [${p.title}](${BASE_URL}/${p.slug}/): ${p.summary}`);
+    llmsLines.push(`- [${p.title}](${BASE_URL}/${p.slug}/) ([MD](${BASE_URL}/md/${p.slug}.md)): ${p.summary}`);
   }
   llmsLines.push('');
 }
 
 llmsLines.push('## 最新更新文章 (Latest 50 Articles)', '');
 for (const p of latestPosts) {
-  llmsLines.push(`- [${p.title}](${BASE_URL}/${p.slug}/) (${p.date}): ${p.summary}`);
+  llmsLines.push(`- [${p.title}](${BASE_URL}/${p.slug}/) ([MD](${BASE_URL}/md/${p.slug}.md), ${p.updatedDate}): ${p.summary}`);
 }
 llmsLines.push('');
 
@@ -216,7 +272,7 @@ const topicOrder = [
 const fullLines = [
   '# OneCoder 全量文章索引目录 (llms-full.txt)',
   '',
-  `> 站点：${BASE_URL} | 总篇数：${posts.length} | 最新更新：${posts[0]?.date || ''}`,
+  `> 站点：${BASE_URL} | 总篇数：${posts.length} | 最新更新：${posts[0]?.date || ''} | 单篇纯 Markdown：${BASE_URL}/md/<slug>.md`,
   '',
 ];
 
@@ -225,7 +281,7 @@ for (const grp of topicOrder) {
   fullLines.push(`## ${grp.title} (${grpPosts.length} 篇)`, '');
   for (const p of grpPosts) {
     const badge = p.subtopic ? `[${p.subtopic}] ` : '';
-    fullLines.push(`- ${badge}[${p.title}](${BASE_URL}/${p.slug}/) (${p.date}): ${p.summary}`);
+    fullLines.push(`- ${badge}[${p.title}](${BASE_URL}/${p.slug}/) ([MD](${BASE_URL}/md/${p.slug}.md), ${p.updatedDate}): ${p.summary}`);
   }
   fullLines.push('');
 }
@@ -278,5 +334,5 @@ const rssXml = [
 fs.writeFileSync(path.join(publicDir, 'rss.xml'), rssXml, 'utf8');
 
 console.log(
-  `[SEO/GEO] Built llms.txt (${latestPosts.length} recent), llms-full.txt (${posts.length} total), and rss.xml (${rssPosts.length} items).`
+  `[SEO/GEO] Built llms.txt (${latestPosts.length} recent), llms-full.txt (${posts.length} total), rss.xml (${rssPosts.length} items), and ${posts.length} per-post Markdown twins (/md/*.md).`
 );

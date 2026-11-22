@@ -129,7 +129,7 @@ export default function Header({ postCount }: HeaderProps) {
           boxShadow: 'inset 0 -1px 0 var(--border-hairline)',
         }}
       >
-      <div className="h-full max-w-[1680px] mx-auto grid grid-cols-[auto_1fr_auto] lg:grid-cols-[264px_minmax(0,1fr)_auto] items-center px-3 lg:px-0 lg:pr-7 gap-2 lg:gap-0">
+      <div className="h-full max-w-[1680px] mx-auto grid grid-cols-[auto_1fr_auto] lg:grid-cols-[288px_minmax(0,1fr)_auto] items-center px-3 lg:px-0 lg:pr-7 gap-2 lg:gap-0">
         {/* Left Brand Column (264px aligned with desktop sidebar) */}
         <div
           className="h-full flex items-center gap-2 lg:gap-2.5 lg:px-4 lg:border-r lg:bg-[var(--bg-subtle)]"
@@ -181,7 +181,7 @@ export default function Header({ postCount }: HeaderProps) {
             <span className="flex items-center gap-2 min-w-0">
               <Search className="w-3.5 h-3.5 flex-shrink-0" />
               <span className="truncate">
-                搜索题号（P17456 / B4576）、GESP 考点或 Java 技术笔记…
+                搜索题号（P17456）、GESP 考点或技术笔记…
               </span>
             </span>
             <kbd className="wb-kbd">⌘K</kbd>

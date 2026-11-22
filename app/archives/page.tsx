@@ -37,9 +37,50 @@ export default function ArchivesPage() {
     groupedByYear.get(year)!.push(post);
   }
   const years = Array.from(groupedByYear.keys()).sort((a, b) => (a < b ? 1 : -1));
+  const archivesJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': 'https://www.coderli.com/archives/#collection',
+        url: 'https://www.coderli.com/archives/',
+        name: '全站博文归档总目录 · OneCoder',
+        description: `OneCoder 博客 2012 年至今全部 ${posts.length} 篇原创技术文章与信奥题解归档索引。`,
+        inLanguage: 'zh-CN',
+        isPartOf: { '@id': 'https://www.coderli.com/#website' },
+        mainEntity: { '@id': 'https://www.coderli.com/archives/#list' },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': 'https://www.coderli.com/archives/#list',
+        name: '最新归档文章',
+        numberOfItems: Math.min(posts.length, 25),
+        itemListElement: posts.slice(0, 25).map((p, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: p.title,
+          url: `https://www.coderli.com/${p.slug}/`,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': 'https://www.coderli.com/archives/#breadcrumb',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://www.coderli.com/' },
+          { '@type': 'ListItem', position: 2, name: '全站归档', item: 'https://www.coderli.com/archives/' },
+        ],
+      },
+    ],
+  };
 
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-7 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(archivesJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <nav
         aria-label="面包屑导航"
         className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"

@@ -17,8 +17,15 @@ import {
   getPostBySlug,
   getSiblingSeriesPosts,
   resolveSeoCoverImage,
+  stripHtmlAndLatexForPlainText,
 } from '@/lib/posts';
-import { extractProblemId, formatReadTimeCompact, formatCompactTitle } from '@/lib/workbench';
+import {
+  extractProblemId,
+  formatReadTimeCompact,
+  formatCompactTitle,
+  buildSeoPageTitle,
+  getWikiDeepUrl,
+} from '@/lib/workbench';
 import TOC from '@/components/TOC';
 import GoogleAd from '@/components/GoogleAd';
 import ViewCounter from '@/components/ViewCounter';
@@ -48,31 +55,41 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const canonicalPath = `/${post.slug}/`;
   const canonicalUrl = `https://www.coderli.com${canonicalPath}`;
+  const markdownUrl = `https://www.coderli.com/md/${post.slug}.md`;
   const coverUrl = resolveSeoCoverImage(post);
+  const cleanTitle = stripHtmlAndLatexForPlainText(post.title);
+  const seoTitle = buildSeoPageTitle(cleanTitle, post.topic, post.subtopic);
+  const modifiedDate = post.updatedDate || post.date;
 
   return {
-    title: `${post.title} · OneCoder`,
+    title: {
+      absolute: seoTitle,
+    },
     description: post.excerpt,
     keywords: Array.from(new Set([...post.tags, ...post.categories, post.topicName, 'OneCoder'])),
     alternates: {
       canonical: canonicalPath,
+      types: {
+        'text/markdown': markdownUrl,
+      },
     },
     openGraph: {
-      title: post.title,
+      title: seoTitle,
       description: post.excerpt,
       url: canonicalUrl,
       siteName: 'OneCoder',
       locale: 'zh_CN',
       type: 'article',
       publishedTime: post.date,
+      modifiedTime: modifiedDate,
       authors: [post.author],
       section: post.topicName,
       tags: post.tags,
-      images: [{ url: coverUrl, alt: post.title }],
+      images: [{ url: coverUrl, alt: cleanTitle }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: post.title,
+      title: seoTitle,
       description: post.excerpt,
       images: [coverUrl],
     },
@@ -89,74 +106,117 @@ export default async function PostPage({ params }: PageProps) {
   const series = getSiblingSeriesPosts(post, allPosts, 10);
   const problemId = extractProblemId(post.title, post.slug);
   const isOiTrack = post.topic === 'gesp' || post.topic === 'csp' || post.topic === 'algo';
+  const wikiDeepUrl = getWikiDeepUrl(post.topic, post.subtopic);
 
   const canonicalUrl = `https://www.coderli.com/${post.slug}/`;
+  const markdownUrl = `https://www.coderli.com/md/${post.slug}.md`;
   const coverPath = resolveSeoCoverImage(post);
   const absoluteCoverUrl = coverPath.startsWith('http')
     ? coverPath
     : `https://www.coderli.com${coverPath}`;
+  const cleanTitle = stripHtmlAndLatexForPlainText(post.title);
+  const modifiedDate = post.updatedDate || post.date;
+  const programmingLanguage = isOiTrack
+    ? 'C++11'
+    : post.topic === 'java'
+    ? 'Java'
+    : post.topic === 'python-data'
+    ? 'Python'
+    : undefined;
+  const educationalLevel =
+    post.topic === 'gesp' && post.subtopic?.includes('级')
+      ? `GESP ${post.subtopic}`
+      : post.topic === 'csp'
+      ? post.subtopic || 'CSP-J/S'
+      : undefined;
+
+  const jsonLdGraph: Record<string, any>[] = [
+    {
+      '@type': 'TechArticle',
+      '@id': `${canonicalUrl}#article`,
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': canonicalUrl,
+      },
+      headline: cleanTitle,
+      description: post.excerpt,
+      image: [absoluteCoverUrl],
+      datePublished: post.date,
+      dateModified: modifiedDate,
+      ...(post.wordCount ? { wordCount: post.wordCount } : {}),
+      ...(post.readMinutes ? { timeRequired: `PT${post.readMinutes}M` } : {}),
+      ...(programmingLanguage ? { programmingLanguage } : {}),
+      ...(educationalLevel ? { educationalLevel } : {}),
+      encoding: {
+        '@type': 'MediaObject',
+        encodingFormat: 'text/markdown',
+        contentUrl: markdownUrl,
+      },
+      author: {
+        '@type': 'Person',
+        '@id': 'https://www.coderli.com/#author',
+        name: post.author || 'OneCoder',
+        url: 'https://www.coderli.com/',
+      },
+      publisher: {
+        '@type': 'Person',
+        '@id': 'https://www.coderli.com/#author',
+        name: 'OneCoder',
+        url: 'https://www.coderli.com/',
+      },
+      articleSection: [post.topicName, post.subtopic, ...post.categories].filter(Boolean),
+      keywords: Array.from(new Set([...post.tags, ...post.categories])).join(', '),
+      inLanguage: 'zh-CN',
+      isPartOf: { '@id': 'https://www.coderli.com/#website' },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${canonicalUrl}#breadcrumb`,
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: '首页',
+          item: 'https://www.coderli.com/',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: post.topicName,
+          item: `https://www.coderli.com/topics/${post.topic}/`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: cleanTitle,
+          item: canonicalUrl,
+        },
+      ],
+    },
+  ];
+
+  if (post.faqItems && post.faqItems.length >= 2) {
+    jsonLdGraph.push({
+      '@type': 'FAQPage',
+      '@id': `${canonicalUrl}#faq`,
+      mainEntity: post.faqItems.map(item => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    });
+  }
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'TechArticle',
-        '@id': `${canonicalUrl}#article`,
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': canonicalUrl,
-        },
-        headline: post.title,
-        description: post.excerpt,
-        image: [absoluteCoverUrl],
-        datePublished: post.date,
-        dateModified: post.date,
-        author: {
-          '@type': 'Person',
-          '@id': 'https://www.coderli.com/#author',
-          name: post.author || 'OneCoder',
-          url: 'https://www.coderli.com/',
-        },
-        publisher: {
-          '@type': 'Person',
-          '@id': 'https://www.coderli.com/#author',
-          name: 'OneCoder',
-          url: 'https://www.coderli.com/',
-        },
-        articleSection: [post.topicName, post.subtopic, ...post.categories].filter(Boolean),
-        keywords: Array.from(new Set([...post.tags, ...post.categories])).join(', '),
-        inLanguage: 'zh-CN',
-        isPartOf: { '@id': 'https://www.coderli.com/#website' },
-      },
-      {
-        '@type': 'BreadcrumbList',
-        '@id': `${canonicalUrl}#breadcrumb`,
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: '首页',
-            item: 'https://www.coderli.com/',
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: post.topicName,
-            item: `https://www.coderli.com/topics/${post.topic}/`,
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: post.title,
-            item: canonicalUrl,
-          },
-        ],
-      },
-    ],
+    '@graph': jsonLdGraph,
   };
 
   return (
-    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_264px] xl:grid-cols-[264px_minmax(0,1fr)_264px] min-h-[calc(100vh-52px)]">
+    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_288px] xl:grid-cols-[288px_minmax(0,1fr)_288px] min-h-[calc(100vh-52px)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -225,14 +285,20 @@ export default async function PostPage({ params }: PageProps) {
             </Link>
             {isOiTrack && (
               <a
-                href="https://wiki.coderli.com/"
+                href={wikiDeepUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="wb-sb-item"
               >
                 <span className="flex items-center gap-2 min-w-0">
                   <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="truncate">GESP 考纲 Wiki 字典</span>
+                  <span className="truncate">
+                    {post.topic === 'gesp' && post.subtopic?.includes('级')
+                      ? `GESP ${post.subtopic} Wiki 知识库`
+                      : post.subtopic === 'NOIP'
+                      ? 'NOIP 真题 Wiki 知识库'
+                      : 'GESP / CSP Wiki 知识库'}
+                  </span>
                 </span>
               </a>
             )}
@@ -275,7 +341,8 @@ export default async function PostPage({ params }: PageProps) {
           </Link>
           <span>/</span>
           <span>
-            {post.subtopic} · 更新于 {post.date}
+            {post.subtopic} · 发布于 {post.date}
+            {post.updatedDate && post.updatedDate !== post.date ? ` · 更新于 ${post.updatedDate}` : ''}
           </span>
         </nav>
 
@@ -512,16 +579,28 @@ export default async function PostPage({ params }: PageProps) {
           contextLabel={post.topic === 'gesp' && post.subtopic ? `GESP ${post.subtopic}` : undefined}
         />
 
-        <a
-          href="/llms.txt"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2.5 rounded-[6px] text-[12px] font-medium bg-[var(--bg-canvas)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] transition-colors"
-          style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>全站 AI / Markdown 索引</span>
-        </a>
+        <div className="space-y-1.5">
+          <a
+            href={`/md/${post.slug}.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2.5 rounded-[6px] text-[12px] font-medium bg-[var(--bg-canvas)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] transition-colors"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>本篇纯 Markdown (AI 友好)</span>
+          </a>
+          <a
+            href="/llms.txt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2.5 rounded-[6px] text-[12px] font-medium bg-[var(--bg-canvas)] text-[var(--ink-muted)] hover:text-[var(--ink-primary)] transition-colors"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>全站 AI 知识库目录</span>
+          </a>
+        </div>
 
         {/* Compact WeChat QR */}
         <div

@@ -84,10 +84,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // 2. All Articles
+  // 2. All Articles (use updatedDate when present so search engines detect refreshed guides)
   const postRoutes: MetadataRoute.Sitemap = posts.map(post => ({
     url: `${baseUrl}/${post.slug}/`,
-    lastModified: parseSafeDate(post.date, latestSiteDate),
+    lastModified: parseSafeDate(post.updatedDate || post.date, latestSiteDate),
     changeFrequency: 'monthly',
     priority: post.pinned ? 0.9 : 0.75,
   }));

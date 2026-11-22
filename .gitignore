@@ -6,6 +6,9 @@
 /.next/
 /out/
 
+# auto-generated per-post GEO markdown twins (rebuilt on prebuild)
+/public/md/
+
 # local env files
 .env*.local
 

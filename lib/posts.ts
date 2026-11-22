@@ -45,7 +45,7 @@ export function toPostCardMeta(post: PostMeta): PostCardMeta {
 }
 
 const postsDirectory = path.join(process.cwd(), '_posts');
-const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v4');
+const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v5');
 
 // Convert inline LaTeX and HTML fragments into clean plain text for SEO meta descriptions, TOC labels & GEO summaries
 export function stripHtmlAndLatexForPlainText(input: string): string {
@@ -359,13 +359,23 @@ export function getAllPosts(): PostMeta[] {
       tags = data.tags.split(',').map(s => s.trim()).filter(Boolean);
     }
 
-    // Format date string (YYYY-MM-DD)
+    // Format date string (YYYY-MM-DD) & optional updated/lastmod date
     let postDate = fileDate;
     if (data.date) {
       if (typeof data.date === 'string') {
         postDate = data.date.slice(0, 10);
       } else if (data.date instanceof Date) {
         postDate = data.date.toISOString().slice(0, 10);
+      }
+    }
+
+    let updatedDate: string | undefined;
+    const rawUpdated = data.updated ?? data.lastmod ?? data.last_modified ?? data.modified;
+    if (rawUpdated) {
+      if (typeof rawUpdated === 'string') {
+        updatedDate = rawUpdated.slice(0, 10);
+      } else if (rawUpdated instanceof Date) {
+        updatedDate = rawUpdated.toISOString().slice(0, 10);
       }
     }
 
@@ -380,6 +390,8 @@ export function getAllPosts(): PostMeta[] {
       previewImg = extractFirstImage(content);
     }
 
+    const plainLength = content.replace(/```[\s\S]*?```/g, '').replace(/\s+/g, '').length;
+    const wordCount = Math.max(120, plainLength);
     const readMinutes = Math.max(2, Math.ceil(content.length / 450));
     const readTime = `${readMinutes} 分钟`;
     const explicitDesc =
@@ -411,10 +423,13 @@ export function getAllPosts(): PostMeta[] {
       filename,
       title,
       date: postDate,
+      updatedDate,
       author: data.author ? String(data.author) : 'OneCoder',
       categories,
       tags: tags.slice(0, 6),
       readTime,
+      readMinutes,
+      wordCount,
       excerpt,
       topic,
       topicName,
@@ -651,20 +666,27 @@ export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null>
   const cacheFilePath = path.join(postCacheDir, `${slug}.json`);
   let html: string | null = null;
   let toc: { id: string; title: string; depth: number }[] | null = null;
+  let faqItems: { question: string; answer: string }[] | null = null;
 
-  // 1. Check incremental build cache: if file content hash has not changed, reuse cached HTML & TOC
+  // 1. Check incremental build cache: if file content hash has not changed, reuse cached HTML, TOC & FAQ
   try {
     if (fs.existsSync(cacheFilePath)) {
       const cached = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
-      if (cached.hash === fileHash && cached.contentHtml && Array.isArray(cached.toc)) {
+      if (
+        cached.hash === fileHash &&
+        cached.contentHtml &&
+        Array.isArray(cached.toc) &&
+        Array.isArray(cached.faqItems)
+      ) {
         html = cached.contentHtml;
         toc = cached.toc;
+        faqItems = cached.faqItems;
       }
     }
   } catch {}
 
   // 2. If not in cache or file was modified, parse Markdown, KaTeX and run Shiki highlighting
-  if (!html || !toc) {
+  if (!html || !toc || !faqItems) {
     let { content } = safeMatter(fileContents);
 
     // Clean Jekyll liquid tags and Kramdown prompt syntax before rendering markdown
@@ -690,6 +712,35 @@ export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null>
         .replace(/\s+/g, ' ')
         .trim();
       toc.push({ id, title: cleanTitle, depth });
+    }
+
+    // Extract genuine Q&A / exam-pitfall pairs for FAQPage Schema (GEO & rich snippets)
+    faqItems = [];
+    const sectionBlocks = content.split(/\n(?=###\s+)/);
+    for (const block of sectionBlocks) {
+      const hMatch = block.match(/^###\s+(.+)\n([\s\S]+)/);
+      if (!hMatch) continue;
+      const rawQ = stripHtmlAndLatexForPlainText(hMatch[1])
+        .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+        .replace(/`([^`\n]+)`/g, '$1')
+        .replace(/^[❌⚠️💡🎯🔍📌✅🔥\d.\s]+/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const isQuestionOrPitfall =
+        /[？?]$/.test(rawQ) ||
+        /^(?:易错点|常见错误|避坑|为什么|如何|怎么|区别)/.test(rawQ);
+      if (!isQuestionOrPitfall || rawQ.length < 8 || rawQ.length > 90) continue;
+
+      const bodyWithoutSub = hMatch[2].split(/\n##\s+/)[0];
+      const cleanAns = cleanExcerpt(bodyWithoutSub, rawQ).slice(0, 260).trim();
+      if (cleanAns.length >= 35) {
+        const cleanBaseQ = rawQ.replace(/[！!。.,，:：;；]+$/g, '').trim();
+        const questionText = /[？?]$/.test(rawQ)
+          ? rawQ
+          : `${cleanBaseQ}，在 C++ 考场中该如何避免？`;
+        faqItems.push({ question: questionText, answer: cleanAns });
+        if (faqItems.length >= 4) break;
+      }
     }
 
     // Process Markdown to HTML with Unified, KaTeX & Shiki
@@ -719,6 +770,7 @@ export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null>
           hash: fileHash,
           contentHtml: html,
           toc,
+          faqItems,
         }),
         'utf8'
       );
@@ -737,6 +789,7 @@ export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null>
     ...meta,
     contentHtml: html,
     toc,
+    faqItems,
     prevPost,
     nextPost,
     relatedPosts,

@@ -27,6 +27,7 @@ import {
   formatCompactTitle,
   type WorkbenchSidebarStats,
 } from '@/lib/workbench';
+import { getCategoryLink } from '@/lib/categories';
 import OiGamePromo from '@/components/OiGamePromo';
 import GoogleAd from '@/components/GoogleAd';
 
@@ -101,6 +102,16 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
     if (next.kind !== 'all') {
       ensureFullIndex();
     }
+  }
+
+  // Progressive enhancement: crawlers & Cmd/Ctrl/middle clicks follow real static hub URLs;
+  // normal left-clicks filter the workbench instantaneously without page reload.
+  function handleScopeLinkClick(e: React.MouseEvent<HTMLAnchorElement>, next: ScopeFilter) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) {
+      return;
+    }
+    e.preventDefault();
+    handleSelectScope(next);
   }
 
   function handleSelectType(next: TypeTab) {
@@ -207,7 +218,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
   const yearsSince2012 = Math.max(14, new Date().getFullYear() - 2012);
 
   return (
-    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[264px_minmax(0,1fr)] min-h-[calc(100vh-52px)]">
+    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[288px_minmax(0,1fr)] min-h-[calc(100vh-52px)]">
       {/* =========================================================
           LEFT STICKY WORKBENCH SIDEBAR (Desktop lg+)
          ========================================================= */}
@@ -225,9 +236,9 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
             className="mb-2.5 pb-2.5 border-b"
             style={{ borderColor: 'var(--border-hairline)' }}
           >
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'all' })}
+            <a
+              href="/archives/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'all' })}
               className="wb-sb-item"
               data-active={scope.kind === 'all'}
             >
@@ -238,23 +249,30 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count opacity-80">
                 {stats.total.toLocaleString()}
               </span>
-            </button>
+            </a>
           </div>
 
           {/* Group 1: GESP C++ Levels 1-8 */}
           <div className="mb-3">
             <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
-              <span>GESP C++ 考级</span>
+              <Link
+                href="/topics/gesp/"
+                prefetch={false}
+                className="hover:text-[var(--brand)] transition-colors"
+              >
+                GESP C++ 考级
+              </Link>
               <span className="font-mono tnum">{stats.gespTotal}</span>
             </div>
             {GESP_LEVELS.map(spec => {
               const cnt = stats.gespLevels[spec.level] || 0;
               const active = scope.kind === 'gesp-level' && scope.level === spec.level;
+              const levelHref = getCategoryLink('GESP', spec.level);
               return (
-                <button
+                <a
                   key={spec.level}
-                  type="button"
-                  onClick={() => handleSelectScope({ kind: 'gesp-level', level: spec.level })}
+                  href={levelHref}
+                  onClick={e => handleScopeLinkClick(e, { kind: 'gesp-level', level: spec.level })}
                   className="wb-sb-item"
                   data-active={active}
                 >
@@ -265,13 +283,13 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
                   <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                     {cnt}
                   </span>
-                </button>
+                </a>
               );
             })}
             {stats.gespOther > 0 && (
-              <button
-                type="button"
-                onClick={() => handleSelectScope({ kind: 'gesp-other' })}
+              <a
+                href="/topics/gesp/"
+                onClick={e => handleScopeLinkClick(e, { kind: 'gesp-other' })}
                 className="wb-sb-item"
                 data-active={scope.kind === 'gesp-other'}
               >
@@ -282,19 +300,25 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
                 <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                   {stats.gespOther}
                 </span>
-              </button>
+              </a>
             )}
           </div>
 
           {/* Group 2: Informatics Contests */}
           <div className="mb-3">
             <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
-              <span>信息学竞赛</span>
+              <Link
+                href="/topics/csp/"
+                prefetch={false}
+                className="hover:text-[var(--brand)] transition-colors"
+              >
+                信息学竞赛
+              </Link>
               <span className="font-mono tnum">{stats.contestTotal}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'csp' })}
+            <a
+              href="/topics/csp/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'csp' })}
               className="wb-sb-item"
               data-active={scope.kind === 'csp'}
             >
@@ -305,10 +329,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.cspCount}
               </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'noip' })}
+            </a>
+            <a
+              href="/categories/CSP/NOIP/NOIP/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'noip' })}
               className="wb-sb-item"
               data-active={scope.kind === 'noip'}
             >
@@ -319,10 +343,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.noipCount}
               </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'algo' })}
+            </a>
+            <a
+              href="/topics/algo/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'algo' })}
               className="wb-sb-item"
               data-active={scope.kind === 'algo'}
             >
@@ -333,18 +357,24 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.algoCount}
               </span>
-            </button>
+            </a>
           </div>
 
           {/* Group 3: Engineering & Architecture */}
           <div>
             <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
-              <span>工程与架构</span>
+              <Link
+                href="/categories/"
+                prefetch={false}
+                className="hover:text-[var(--brand)] transition-colors"
+              >
+                工程与架构
+              </Link>
               <span className="font-mono tnum">{stats.engTotal}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'java' })}
+            <a
+              href="/topics/java/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'java' })}
               className="wb-sb-item"
               data-active={scope.kind === 'java'}
             >
@@ -355,10 +385,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.javaCount}
               </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSelectScope({ kind: 'python-data' })}
+            </a>
+            <a
+              href="/topics/python-data/"
+              onClick={e => handleScopeLinkClick(e, { kind: 'python-data' })}
               className="wb-sb-item"
               data-active={scope.kind === 'python-data'}
             >
@@ -369,7 +399,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.pythonDataCount}
               </span>
-            </button>
+            </a>
           </div>
         </div>
 

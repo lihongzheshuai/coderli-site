@@ -61,8 +61,57 @@ export default function TagPage({ params }: TagPageProps) {
     notFound();
   }
 
+  const canonicalUrl = `https://www.coderli.com/tags/${encodeURIComponent(tag)}/`;
+  const tagJsonLd =
+    posts.length >= 2
+      ? {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'CollectionPage',
+              '@id': `${canonicalUrl}#collection`,
+              url: canonicalUrl,
+              name: `标签：#${tag} · OneCoder`,
+              description: `OneCoder 博客中包含标签「${tag}」的技术文章与题目解析列表（共 ${posts.length} 篇）。`,
+              inLanguage: 'zh-CN',
+              isPartOf: { '@id': 'https://www.coderli.com/#website' },
+              mainEntity: { '@id': `${canonicalUrl}#list` },
+            },
+            {
+              '@type': 'ItemList',
+              '@id': `${canonicalUrl}#list`,
+              name: `#${tag} 文章列表`,
+              numberOfItems: Math.min(posts.length, 20),
+              itemListElement: posts.slice(0, 20).map((p, idx) => ({
+                '@type': 'ListItem',
+                position: idx + 1,
+                name: p.title,
+                url: `https://www.coderli.com/${p.slug}/`,
+              })),
+            },
+            {
+              '@type': 'BreadcrumbList',
+              '@id': `${canonicalUrl}#breadcrumb`,
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: '首页', item: 'https://www.coderli.com/' },
+                { '@type': 'ListItem', position: 2, name: '全站标签', item: 'https://www.coderli.com/tags/' },
+                { '@type': 'ListItem', position: 3, name: `#${tag}`, item: canonicalUrl },
+              ],
+            },
+          ],
+        }
+      : null;
+
   return (
     <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      {tagJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(tagJsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+      )}
       <nav
         aria-label="面包屑导航"
         className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"

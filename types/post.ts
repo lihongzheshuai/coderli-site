@@ -4,10 +4,13 @@ export interface PostMeta {
   filename: string;
   title: string;
   date: string;
+  updatedDate?: string;
   author: string;
   categories: string[];
   tags: string[];
   readTime: string;
+  readMinutes?: number;
+  wordCount?: number;
   excerpt: string;
   topic: 'gesp' | 'csp' | 'java' | 'algo' | 'python-data';
   topicName: string;
@@ -46,6 +49,10 @@ export interface PostDetail extends PostMeta {
     id: string;
     title: string;
     depth: number;
+  }[];
+  faqItems?: {
+    question: string;
+    answer: string;
   }[];
   prevPost?: PostMeta | null;
   nextPost?: PostMeta | null;

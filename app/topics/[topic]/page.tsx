@@ -111,8 +111,52 @@ export default function TopicPage({ params }: { params: { topic: string } }) {
     });
   }
 
+  const canonicalUrl = `https://www.coderli.com/topics/${params.topic}/`;
+  const topicJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        '@id': `${canonicalUrl}#collection`,
+        url: canonicalUrl,
+        name: `${meta.name} · OneCoder`,
+        description: meta.desc,
+        inLanguage: 'zh-CN',
+        isPartOf: { '@id': 'https://www.coderli.com/#website' },
+        mainEntity: { '@id': `${canonicalUrl}#list` },
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${canonicalUrl}#list`,
+        name: `${meta.name}精选文章列表`,
+        numberOfItems: Math.min(topicPosts.length, 25),
+        itemListElement: topicPosts.slice(0, 25).map((p, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: p.title,
+          url: `https://www.coderli.com/${p.slug}/`,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '首页', item: 'https://www.coderli.com/' },
+          { '@type': 'ListItem', position: 2, name: '专题专栏', item: 'https://www.coderli.com/categories/' },
+          { '@type': 'ListItem', position: 3, name: meta.name, item: canonicalUrl },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(topicJsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <nav
         aria-label="面包屑导航"
         className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"
