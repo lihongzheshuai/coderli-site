@@ -83,10 +83,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        {/* Instant Theme Restoration: default to Light unless explicitly saved as 'dark' */}
+        {/* Instant Theme & Personal Font-Scale Restoration (strictly localStorage, client-only) */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+            __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}var fs=parseFloat(localStorage.getItem('onecoder_font_scale'));if(fs>=0.85&&fs<=1.25){document.documentElement.style.setProperty('--font-scale',String(fs));}}catch(e){}})();`,
           }}
         />
         {/* Google AdSense Global Client Script */}

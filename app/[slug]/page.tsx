@@ -156,7 +156,7 @@ export default async function PostPage({ params }: PageProps) {
   };
 
   return (
-    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] xl:grid-cols-[248px_minmax(0,1fr)_240px] min-h-[calc(100vh-52px)]">
+    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_264px] xl:grid-cols-[264px_minmax(0,1fr)_264px] min-h-[calc(100vh-52px)]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -178,7 +178,7 @@ export default async function PostPage({ params }: PageProps) {
         <div className="space-y-4">
           {/* Same-level / same-series sibling list */}
           <div>
-            <div className="flex items-center justify-between px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
+            <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
               <span className="truncate">{series.heading}</span>
               <span className="font-mono tnum flex-shrink-0">{series.totalInSeries} 篇</span>
             </div>
@@ -195,7 +195,7 @@ export default async function PostPage({ params }: PageProps) {
                     title={item.title}
                   >
                     <span className="flex items-center gap-2 min-w-0">
-                      <span className="font-mono tnum text-[11px] text-[var(--ink-faint)] flex-shrink-0">
+                      <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)] flex-shrink-0">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <span className="truncate">{formatCompactTitle(item.title)}</span>
@@ -208,7 +208,7 @@ export default async function PostPage({ params }: PageProps) {
 
           {/* Quick Navigation */}
           <div>
-            <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
+            <div className="px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
               快速导航
             </div>
             <Link href="/" prefetch={false} className="wb-sb-item">
@@ -280,7 +280,7 @@ export default async function PostPage({ params }: PageProps) {
         </nav>
 
         {/* Article Title */}
-        <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.02em] leading-[1.32] text-[var(--ink-primary)] mb-3.5">
+        <h1 className="wb-article-h1 font-semibold tracking-[-0.02em] text-[var(--ink-primary)] mb-3.5">
           <LatexText text={post.title} />
         </h1>
 
@@ -345,7 +345,7 @@ export default async function PostPage({ params }: PageProps) {
               <Info className="w-3.5 h-3.5 flex-shrink-0" />
               <span>TL;DR · 核心摘要</span>
             </div>
-            <p className="text-[13.5px] text-[var(--ink-primary)] leading-relaxed">
+            <p className="wb-tldr-text text-[var(--ink-primary)]">
               <LatexText text={post.excerpt} />
             </p>
           </div>

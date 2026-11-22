@@ -38,33 +38,42 @@ export default function TOC({ toc }: TOCProps) {
 
   return (
     <nav aria-label="本文目录">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)] mb-2">
+      <div className="wb-toc-heading font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)] mb-2.5">
         On This Page
       </div>
-      <ul
-        className="border-l space-y-0.5 max-h-[48vh] overflow-y-auto pr-1.5 pb-3"
-        style={{ borderColor: 'var(--border-hairline)' }}
-      >
-        {toc.map(item => {
-          const isActive = activeId === item.id;
-          return (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className={`block -ml-px border-l-2 py-1 text-[12.5px] leading-snug transition-colors ${
-                  item.depth === 3 ? 'pl-5' : 'pl-3'
-                } ${
-                  isActive
-                    ? 'border-[var(--brand)] text-[var(--brand)] font-semibold'
-                    : 'border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
-                }`}
-              >
-                {item.title}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="relative">
+        <ul
+          className="border-l space-y-0.5 max-h-[52vh] overflow-y-auto pr-1.5 pb-6"
+          style={{ borderColor: 'var(--border-hairline)' }}
+        >
+          {toc.map(item => {
+            const isActive = activeId === item.id;
+            return (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  className={`block -ml-px border-l-2 py-1.5 wb-toc-link transition-colors ${
+                    item.depth === 3 ? 'pl-5' : 'pl-3'
+                  } ${
+                    isActive
+                      ? 'border-[var(--brand)] text-[var(--brand)] font-semibold'
+                      : 'border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
+                  }`}
+                >
+                  {item.title}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-7"
+          style={{
+            background: 'linear-gradient(to top, var(--bg-canvas) 15%, transparent)',
+          }}
+        />
+      </div>
     </nav>
   );
 }

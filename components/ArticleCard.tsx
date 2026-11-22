@@ -35,14 +35,14 @@ export default function ArticleCard({ post }: { post: PostCardMeta }) {
             <span className="font-mono tnum">{formatReadTimeCompact(post.readTime)}</span>
           </div>
 
-          <h3 className="text-[15.5px] sm:text-[16px] font-semibold text-[var(--ink-primary)] group-hover:text-[var(--brand)] transition-colors leading-snug mb-1.5">
+          <h3 className="wb-card-title font-semibold text-[var(--ink-primary)] group-hover:text-[var(--brand)] transition-colors mb-1.5">
             <Link href={`/${post.slug}/`} title={post.title} className="block" prefetch={false}>
               {formatCompactTitle(post.title)}
             </Link>
           </h3>
 
           {post.excerpt && (
-            <p className="text-[13px] text-[var(--ink-muted)] leading-relaxed line-clamp-2 mb-2.5">
+            <p className="wb-card-excerpt text-[var(--ink-muted)] line-clamp-2 mb-2.5">
               {post.excerpt}
             </p>
           )}

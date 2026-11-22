@@ -45,23 +45,23 @@ export default function CategoryNavTree({
   return (
     <div className={`wb-card p-4 ${className}`}>
       <div
-        className="text-[13px] font-semibold text-[var(--ink-primary)] mb-3 pb-2.5 border-b flex items-center justify-between"
+        className="wb-nav-link font-semibold text-[var(--ink-primary)] mb-3 pb-2.5 border-b flex items-center justify-between"
         style={{ borderColor: 'var(--border-hairline)' }}
       >
         <span className="flex items-center gap-1.5">
-          <FolderTree className="w-3.5 h-3.5 text-[var(--brand)]" />
+          <FolderTree className="w-4 h-4 text-[var(--brand)]" />
           <span>专题分类目录</span>
         </span>
         <Link
           href="/categories/"
           prefetch={false}
-          className="font-mono tnum text-[11.5px] text-[var(--brand)] hover:underline font-medium"
+          className="font-mono tnum wb-sb-count text-[var(--brand)] hover:underline font-medium"
         >
           全集 ({totalCount}) →
         </Link>
       </div>
 
-      <div className="space-y-0.5 text-[13px]">
+      <div className="space-y-0.5">
         {displayList.map(node => {
           const hasChildren = node.children && node.children.length > 0;
           const isExpanded = !!expanded[node.name.toLowerCase()];
@@ -105,7 +105,7 @@ export default function CategoryNavTree({
                   </Link>
                 </div>
 
-                <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)] ml-2 flex-shrink-0">
+                <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)] ml-2 flex-shrink-0">
                   {node.count}
                 </span>
               </div>
@@ -127,11 +127,11 @@ export default function CategoryNavTree({
                         key={child.name}
                         href={getCategoryLink(node.name, child.name)}
                         prefetch={false}
-                        className="wb-sb-item text-[12.5px]"
+                        className="wb-sb-item"
                         data-active={!!isChildActive}
                       >
                         <span className="truncate">{child.name}</span>
-                        <span className="font-mono tnum text-[11px] text-[var(--ink-faint)] ml-2 flex-shrink-0">
+                        <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)] ml-2 flex-shrink-0">
                           {child.count}
                         </span>
                       </Link>

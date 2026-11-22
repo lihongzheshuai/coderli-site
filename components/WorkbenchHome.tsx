@@ -207,7 +207,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
   const yearsSince2012 = Math.max(14, new Date().getFullYear() - 2012);
 
   return (
-    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[248px_minmax(0,1fr)] min-h-[calc(100vh-52px)]">
+    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[264px_minmax(0,1fr)] min-h-[calc(100vh-52px)]">
       {/* =========================================================
           LEFT STICKY WORKBENCH SIDEBAR (Desktop lg+)
          ========================================================= */}
@@ -235,7 +235,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
                 <Menu className="w-3.5 h-3.5 flex-shrink-0" />
                 <span className="truncate">全部原创文章</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] opacity-75">
+              <span className="font-mono tnum wb-sb-count opacity-80">
                 {stats.total.toLocaleString()}
               </span>
             </button>
@@ -243,7 +243,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
 
           {/* Group 1: GESP C++ Levels 1-8 */}
           <div className="mb-3">
-            <div className="flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)]">
+            <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
               <span>GESP C++ 考级</span>
               <span className="font-mono tnum">{stats.gespTotal}</span>
             </div>
@@ -259,10 +259,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
                   data-active={active}
                 >
                   <span className="flex items-center gap-2 min-w-0">
-                    <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                    <BookOpen className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">{spec.label}</span>
                   </span>
-                  <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+                  <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                     {cnt}
                   </span>
                 </button>
@@ -276,10 +276,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
                 data-active={scope.kind === 'gesp-other'}
               >
                 <span className="flex items-center gap-2 min-w-0">
-                  <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                  <BookOpen className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">GESP 综合与考前策略</span>
                 </span>
-                <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+                <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                   {stats.gespOther}
                 </span>
               </button>
@@ -288,7 +288,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
 
           {/* Group 2: Informatics Contests */}
           <div className="mb-3">
-            <div className="flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)]">
+            <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
               <span>信息学竞赛</span>
               <span className="font-mono tnum">{stats.contestTotal}</span>
             </div>
@@ -299,10 +299,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               data-active={scope.kind === 'csp'}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Trophy className="w-3.5 h-3.5 flex-shrink-0" />
+                <Trophy className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">CSP-J / S 竞赛真题</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+              <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.cspCount}
               </span>
             </button>
@@ -313,10 +313,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               data-active={scope.kind === 'noip'}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Star className="w-3.5 h-3.5 flex-shrink-0" />
+                <Star className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">NOIP 全国联赛</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+              <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.noipCount}
               </span>
             </button>
@@ -327,10 +327,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               data-active={scope.kind === 'algo'}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Code2 className="w-3.5 h-3.5 flex-shrink-0" />
+                <Code2 className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">LeetCode / 经典算法</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+              <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.algoCount}
               </span>
             </button>
@@ -338,7 +338,7 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
 
           {/* Group 3: Engineering & Architecture */}
           <div>
-            <div className="flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)]">
+            <div className="flex items-center justify-between px-2.5 pb-1.5 wb-sb-group-title font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
               <span>工程与架构</span>
               <span className="font-mono tnum">{stats.engTotal}</span>
             </div>
@@ -349,10 +349,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               data-active={scope.kind === 'java'}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Monitor className="w-3.5 h-3.5 flex-shrink-0" />
+                <Monitor className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">Java 架构与日志</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+              <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.javaCount}
               </span>
             </button>
@@ -363,10 +363,10 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
               data-active={scope.kind === 'python-data'}
             >
               <span className="flex items-center gap-2 min-w-0">
-                <Database className="w-3.5 h-3.5 flex-shrink-0" />
+                <Database className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">Python 与数据工程</span>
               </span>
-              <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)]">
+              <span className="font-mono tnum wb-sb-count text-[var(--ink-faint)]">
                 {stats.pythonDataCount}
               </span>
             </button>
@@ -711,11 +711,11 @@ export default function WorkbenchHome({ initialPosts, stats }: WorkbenchHomeProp
 
                     {/* Col 3: Title + Core Takeaway */}
                     <div className="order-3 flex-[1_0_100%] md:flex-initial min-w-0">
-                      <div className="text-[14px] md:text-[13.5px] font-medium text-[var(--ink-primary)] group-hover:text-[var(--brand)] leading-snug line-clamp-2 md:line-clamp-1 transition-colors">
+                      <div className="wb-table-title font-medium text-[var(--ink-primary)] group-hover:text-[var(--brand)] line-clamp-2 md:line-clamp-1 transition-colors">
                         {formatCompactTitle(post.title)}
                       </div>
                       {!compact && post.excerpt ? (
-                        <div className="text-[12px] text-[var(--ink-muted)] truncate mt-0.5">
+                        <div className="wb-table-excerpt text-[var(--ink-muted)] truncate mt-0.5">
                           {post.excerpt}
                         </div>
                       ) : null}
