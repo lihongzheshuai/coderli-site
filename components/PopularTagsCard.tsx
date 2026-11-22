@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { Tags } from 'lucide-react';
 import { getAllTags } from '@/lib/posts';
 
 interface PopularTagsCardProps {
@@ -12,22 +13,25 @@ export default function PopularTagsCard({ currentTag, limit = 24 }: PopularTagsC
   const displayTags = allTags.slice(0, limit);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-      <div className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div className="wb-card p-4">
+      <div
+        className="text-[13px] font-semibold text-[var(--ink-primary)] mb-3 pb-2.5 border-b flex items-center justify-between"
+        style={{ borderColor: 'var(--border-hairline)' }}
+      >
         <span className="flex items-center gap-1.5">
-          <span>🔥</span>
+          <Tags className="w-3.5 h-3.5 text-[var(--brand)]" />
           <span>热门技术标签</span>
         </span>
         <Link
           href="/tags/"
           prefetch={false}
-          className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
+          className="font-mono tnum text-[11.5px] text-[var(--brand)] hover:underline font-medium"
         >
           全部 ({allTags.length}) →
         </Link>
       </div>
 
-      <div className="flex flex-wrap gap-2 text-xs">
+      <div className="flex flex-wrap gap-1.5">
         {displayTags.map(item => {
           const isCurrent =
             currentTag && item.tag.toLowerCase() === currentTag.toLowerCase();
@@ -36,21 +40,24 @@ export default function PopularTagsCard({ currentTag, limit = 24 }: PopularTagsC
               key={item.tag}
               href={`/tags/${encodeURIComponent(item.tag)}/`}
               prefetch={false}
-              className={`px-2.5 py-1 rounded-lg transition font-mono flex items-center gap-1 ${
+              className="px-2 py-0.5 rounded-[5px] transition-colors font-mono text-[11.5px] inline-flex items-center gap-1"
+              style={
                 isCurrent
-                  ? 'bg-teal-600 text-white font-bold shadow-sm'
-                  : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-teal-50 dark:hover:bg-teal-950/60 hover:text-teal-600 dark:hover:text-teal-400 hover:border-teal-500/30 border border-transparent'
-              }`}
+                  ? {
+                      backgroundColor: 'var(--brand)',
+                      color: 'var(--brand-cta-text)',
+                      fontWeight: 600,
+                    }
+                  : {
+                      backgroundColor: 'var(--bg-subtle)',
+                      color: 'var(--ink-secondary)',
+                      boxShadow: 'inset 0 0 0 1px var(--border-hairline)',
+                    }
+              }
               title={`查看「#${item.tag}」相关的 ${item.count} 篇博文`}
             >
               <span>#{item.tag}</span>
-              <span
-                className={`text-[10px] ${
-                  isCurrent ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'
-                }`}
-              >
-                {item.count}
-              </span>
+              <span className="tnum text-[10.5px] opacity-65">{item.count}</span>
             </Link>
           );
         })}

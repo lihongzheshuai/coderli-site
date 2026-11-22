@@ -23,22 +23,21 @@ const fetcher = (url: string) =>
     .then(r => r.json())
     .catch(() => ({ comments: [] }));
 
-const AVATAR_GRADIENTS = [
-  'from-teal-500 to-emerald-600',
-  'from-blue-500 to-indigo-600',
-  'from-violet-500 to-purple-600',
-  'from-rose-500 to-pink-600',
-  'from-amber-500 to-orange-600',
-  'from-cyan-500 to-teal-600',
+const AVATAR_TONES = [
+  'bg-[#0D9488]',
+  'bg-[#2563EB]',
+  'bg-[#4F46E5]',
+  'bg-[#B45309]',
+  'bg-[#0F766E]',
+  'bg-[#334155]',
 ];
 
-function getAvatarGradient(name: string): string {
+function getAvatarTone(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % AVATAR_GRADIENTS.length;
-  return AVATAR_GRADIENTS[index];
+  return AVATAR_TONES[Math.abs(hash) % AVATAR_TONES.length];
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -122,14 +121,11 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
   const [message, setMessage] = useState('');
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
-  // Spam protection state (honeypot field)
   const [honeypot, setHoneypot] = useState<string>('');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const comments = data?.comments || [];
 
-  // Restore author info from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('onecoder_comment_user');
@@ -144,7 +140,6 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     }
   }, []);
 
-  // Smooth scroll to an existing comment and briefly highlight it
   function scrollToComment(id?: string) {
     if (!id) return;
     const el = document.getElementById(`comment-${id}`);
@@ -157,7 +152,6 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     }
   }
 
-  // Set reply target and focus form
   function handleStartReply(c: CommentItem) {
     setReplyTarget({ id: c.id, author: c.author, content: c.content });
     const formEl = document.getElementById('comment-form');
@@ -169,7 +163,6 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     }, 100);
   }
 
-  // Quote comment into textarea as markdown blockquote
   function handleStartQuote(c: CommentItem) {
     setReplyTarget({ id: c.id, author: c.author, content: c.content });
     const snippet = c.content.trim().slice(0, 160);
@@ -220,7 +213,6 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     setMessage('');
 
     try {
-      // Remember user details in browser
       try {
         localStorage.setItem(
           'onecoder_comment_user',
@@ -255,7 +247,7 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         setContent('');
         setReplyTarget(null);
         setHoneypot('');
-        setMessage(replyTarget ? '🎉 回复成功！已通知站长与作者。' : '🎉 留言成功！感谢你的交流与支持。');
+        setMessage(replyTarget ? '回复成功，已通知站长与原留言作者。' : '留言成功，感谢你的交流与支持。');
         setTimeout(() => setMessage(''), 4000);
       } else {
         setMessage(result.error || '提交失败，请稍后重试');
@@ -267,7 +259,6 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     }
   }
 
-  // Helper to parse markdown links, bold, italic, code, and raw URLs in comments
   function formatCommentLine(line: string) {
     const regex = /(\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\))|(https?:\/\/[^\s\)\],。，！？]+)|(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)/g;
     let lastIndex = 0;
@@ -280,51 +271,47 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       }
 
       if (match[1]) {
-        // [text](url)
         elements.push(
           <a
             key={match.index}
             href={match[3]}
             target="_blank"
             rel="nofollow noopener noreferrer"
-            className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 transition"
+            className="text-[var(--brand)] font-medium underline underline-offset-2"
           >
             {match[2]}
           </a>
         );
       } else if (match[4]) {
-        // raw URL
         elements.push(
           <a
             key={match.index}
             href={match[4]}
             target="_blank"
             rel="nofollow noopener noreferrer"
-            className="text-teal-600 dark:text-teal-400 font-medium underline underline-offset-2 hover:text-teal-700 dark:hover:text-teal-300 break-all transition"
+            className="text-[var(--brand)] font-medium underline underline-offset-2 break-all"
           >
             {match[4]}
           </a>
         );
       } else if (match[5]) {
-        // **bold**
         elements.push(
-          <strong key={match.index} className="font-bold text-slate-900 dark:text-white">
+          <strong key={match.index} className="font-semibold text-[var(--ink-primary)]">
             {match[6]}
           </strong>
         );
       } else if (match[7]) {
-        // *italic*
         elements.push(
           <em key={match.index} className="italic">
             {match[8]}
           </em>
         );
       } else if (match[9]) {
-        // `code`
         elements.push(
           <code
             key={match.index}
-            className="font-mono text-xs bg-slate-100 dark:bg-slate-800 text-teal-600 dark:text-teal-400 px-1 py-0.5 rounded border border-slate-200 dark:border-slate-700"
+            className="font-mono text-xs bg-[var(--bg-subtle)] text-[var(--brand)] px-1 py-0.5 rounded"
+            style={{ boxShadow: 'inset 0 0 0 1px var(--border-hairline)' }}
           >
             {match[10]}
           </code>
@@ -341,17 +328,17 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
     return elements.length > 0 ? elements : line;
   }
 
-  // Render markdown quotes in comment content nicely
   function renderCommentBody(text: string) {
     const lines = text.split('\n');
     return (
-      <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-1 break-words">
+      <div className="text-[13.5px] text-[var(--ink-secondary)] leading-relaxed space-y-1 break-words">
         {lines.map((line, idx) => {
           if (line.startsWith('>')) {
             return (
               <blockquote
                 key={idx}
-                className="border-l-2 border-teal-500/70 pl-2.5 my-1 text-slate-500 dark:text-slate-400 italic text-xs md:text-sm bg-slate-50/60 dark:bg-slate-800/40 py-0.5 rounded-r"
+                className="border-l-2 pl-2.5 my-1 text-[var(--ink-muted)] italic text-[12.5px] bg-[var(--bg-subtle)] py-1 rounded-r"
+                style={{ borderColor: 'var(--brand)' }}
               >
                 {formatCommentLine(line.replace(/^>\s*/, ''))}
               </blockquote>
@@ -373,18 +360,16 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
   return (
     <section
       ref={sectionRef}
-      className="mt-14 pt-8 border-t-2 border-slate-200 dark:border-slate-800"
+      className="mt-10 pt-7 border-t"
+      style={{ borderColor: 'var(--border-hairline)' }}
       id="comments"
     >
-      {/* Title Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2.5">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-            <span>读者讨论与留言</span>
-          </h3>
-        </div>
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[16px] font-semibold text-[var(--ink-primary)] flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-[var(--brand)]" />
+          <span>读者讨论与留言</span>
+        </h3>
+        <span className="text-[12px] text-[var(--ink-muted)] font-mono tnum">
           共 {comments.length} 条讨论
         </span>
       </div>
@@ -393,18 +378,27 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
       <form
         id="comment-form"
         onSubmit={handleSubmit}
-        className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-8 shadow-sm transition-all"
+        className="rounded-[8px] p-4 sm:p-5 mb-6"
+        style={{
+          backgroundColor: 'var(--bg-subtle)',
+          boxShadow: '0 0 0 1px var(--border-hairline)',
+        }}
       >
-        {/* Active Reply Banner */}
         {replyTarget && (
-          <div className="mb-3.5 p-3 rounded-lg bg-teal-50/90 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/80 flex items-start justify-between gap-3 text-xs animate-in fade-in duration-200">
+          <div
+            className="mb-3 p-3 rounded-[6px] flex items-start justify-between gap-3 text-xs"
+            style={{
+              backgroundColor: 'var(--brand-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+            }}
+          >
             <div className="flex items-start gap-2 min-w-0">
-              <CornerDownRight className="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5" />
+              <CornerDownRight className="w-3.5 h-3.5 text-[var(--brand)] flex-shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <span className="font-bold text-teal-800 dark:text-teal-300">
+                <span className="font-semibold text-[var(--brand)]">
                   正在回复 @{replyTarget.author}：
                 </span>
-                <p className="text-slate-600 dark:text-slate-400 truncate mt-0.5 italic">
+                <p className="text-[var(--ink-muted)] truncate mt-0.5 italic">
                   “{replyTarget.content}”
                 </p>
               </div>
@@ -412,37 +406,39 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
             <button
               type="button"
               onClick={() => setReplyTarget(null)}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-teal-100/60 dark:hover:bg-teal-900/60 transition flex-shrink-0"
-              title="取消回复模式"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[var(--ink-muted)] hover:text-[var(--ink-primary)] cursor-pointer flex-shrink-0"
             >
               <X className="w-3.5 h-3.5" />
-              <span>取消回复</span>
+              <span>取消</span>
             </button>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-2.5">
           <input
             type="text"
             value={author}
             onChange={e => setAuthor(e.target.value)}
             placeholder="昵称 (默认匿名)"
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
+            className="w-full px-3 py-2 rounded-[6px] bg-[var(--bg-canvas)] text-[var(--ink-primary)] placeholder:text-[var(--ink-faint)] text-[13px] outline-none focus:ring-2 focus:ring-[var(--brand)]"
+            style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
           />
           <input
             type="email"
             required
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="邮箱 (必填，用于接收回复与反垃圾验证)"
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
+            placeholder="邮箱 (必填，用于接收回复)"
+            className="w-full px-3 py-2 rounded-[6px] bg-[var(--bg-canvas)] text-[var(--ink-primary)] placeholder:text-[var(--ink-faint)] text-[13px] outline-none focus:ring-2 focus:ring-[var(--brand)]"
+            style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
           />
           <input
             type="url"
             value={site}
             onChange={e => setSite(e.target.value)}
             placeholder="个人主页 (选填)"
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
+            className="w-full px-3 py-2 rounded-[6px] bg-[var(--bg-canvas)] text-[var(--ink-primary)] placeholder:text-[var(--ink-faint)] text-[13px] outline-none focus:ring-2 focus:ring-[var(--brand)]"
+            style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
           />
         </div>
 
@@ -454,13 +450,14 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
           onChange={e => setContent(e.target.value)}
           placeholder={
             replyTarget
-              ? `回复 @${replyTarget.author}... (写下你的想法或交流答疑)`
-              : '写下你的技术见解与疑问... (支持点击下方留言直接「回复」与「引用」)'
+              ? `回复 @${replyTarget.author}…`
+              : '写下你的解题思路、疑问或改进建议… (支持基础 Markdown 语法)'
           }
-          className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:border-teal-500 transition"
+          className="w-full px-3 py-2.5 rounded-[6px] bg-[var(--bg-canvas)] text-[var(--ink-primary)] placeholder:text-[var(--ink-faint)] text-[13px] outline-none focus:ring-2 focus:ring-[var(--brand)]"
+          style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
         />
 
-        {/* Honeypot field (hidden from real users, lures spam bots) */}
+        {/* Honeypot anti-spam field */}
         <div style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }} aria-hidden="true">
           <input
             type="text"
@@ -473,31 +470,41 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
         </div>
 
         <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
-          <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+          <span className="text-[12px] text-[var(--ink-muted)] flex items-center gap-1.5">
             {message ? (
-              <span className="text-teal-600 dark:text-teal-400 font-semibold">{message}</span>
+              <span className="text-[var(--brand)] font-semibold">{message}</span>
             ) : (
               <>
-                <ShieldCheck className="w-3.5 h-3.5 text-teal-600/70 dark:text-teal-400/70" />
-                <span>邮箱必填 · 支持 Markdown 格式与直接回复</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--brand)]" />
+                <span>邮箱仅用于接收回复通知，不对外展示</span>
               </>
             )}
           </span>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold text-sm transition shadow-sm cursor-pointer disabled:cursor-not-allowed"
+            className="px-4 py-1.5 rounded-[6px] text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: 'var(--brand)',
+              color: 'var(--brand-cta-text)',
+            }}
           >
-            {isSubmitting ? '提交中...' : replyTarget ? `发表回复 (@${replyTarget.author})` : '发表评论'}
+            {isSubmitting ? '提交中…' : replyTarget ? `发表回复 (@${replyTarget.author})` : '发表评论'}
           </button>
         </div>
       </form>
 
       {/* Comment List */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {comments.length === 0 ? (
-          <div className="text-center py-10 text-slate-500 dark:text-slate-400 text-sm bg-slate-50/50 dark:bg-slate-900/20 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-            💬 还没有读者留言，快来成为第一个讨论者吧！
+          <div
+            className="text-center py-8 text-[var(--ink-muted)] text-[13px] rounded-[8px]"
+            style={{
+              backgroundColor: 'var(--bg-subtle)',
+              boxShadow: '0 0 0 1px var(--border-hairline)',
+            }}
+          >
+            还没有读者留言，欢迎写下你的第一条交流笔记。
           </div>
         ) : (
           comments.map(c => {
@@ -506,25 +513,24 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
               <div
                 key={c.id}
                 id={`comment-${c.id}`}
-                className={`p-4 md:p-5 rounded-xl border transition-all duration-300 flex gap-3.5 ${
+                className="wb-card p-4 flex gap-3 transition-all duration-200"
+                style={
                   isHighlighted
-                    ? 'bg-teal-50/80 dark:bg-teal-950/40 border-teal-500 shadow-md ring-2 ring-teal-500/30'
-                    : 'bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
+                    ? {
+                        backgroundColor: 'var(--brand-surface)',
+                        boxShadow: '0 0 0 1.5px var(--brand)',
+                      }
+                    : undefined
+                }
               >
-                {/* Avatar */}
                 <div
-                  className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br ${getAvatarGradient(
-                    c.author
-                  )} text-white font-bold flex items-center justify-center flex-shrink-0 text-sm shadow-sm select-none`}
+                  className={`w-8 h-8 rounded-[7px] ${getAvatarTone(c.author)} text-white font-semibold flex items-center justify-center flex-shrink-0 text-[13px] select-none`}
                 >
                   {c.author.charAt(0).toUpperCase()}
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 min-w-0">
-                  {/* Author Header */}
-                  <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                  <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                     <div className="flex items-center gap-2">
                       {(() => {
                         const safeSite = getSafeHttpUrl(c.site);
@@ -533,67 +539,65 @@ export default function Comments({ slug, postTitle }: { slug: string; postTitle?
                             href={safeSite}
                             target="_blank"
                             rel="nofollow noopener noreferrer"
-                            className="font-bold text-sm text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition inline-flex items-center gap-1"
+                            className="font-semibold text-[13.5px] text-[var(--ink-primary)] hover:text-[var(--brand)] inline-flex items-center gap-1"
                           >
                             <span>{c.author}</span>
-                            <ExternalLink className="w-3 h-3 text-slate-400" />
+                            <ExternalLink className="w-3 h-3 text-[var(--ink-faint)]" />
                           </a>
                         ) : (
-                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                          <span className="font-semibold text-[13.5px] text-[var(--ink-primary)]">
                             {c.author}
                           </span>
                         );
                       })()}
                     </div>
                     <time
-                      className="text-xs text-slate-400 font-mono"
+                      className="text-[11.5px] text-[var(--ink-faint)] font-mono tnum"
                       title={new Date(c.createdAt).toLocaleString('zh-CN')}
                     >
                       {formatRelativeTime(c.createdAt)}
                     </time>
                   </div>
 
-                  {/* Quoted Reference Tag (if this comment is a reply) */}
                   {c.replyToAuthor && (
                     <button
                       type="button"
                       onClick={() => scrollToComment(c.replyToId)}
-                      className="inline-flex items-center gap-1.5 mb-2.5 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs text-slate-600 dark:text-slate-300 transition group text-left max-w-full"
-                      title={c.replyToId ? '点击定位并高亮原留言' : undefined}
+                      className="inline-flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-[5px] bg-[var(--bg-subtle)] text-[11.5px] text-[var(--ink-secondary)] hover:text-[var(--brand)] transition-colors cursor-pointer max-w-full"
+                      style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
                     >
-                      <CornerDownRight className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                      <span className="font-semibold text-teal-700 dark:text-teal-400 flex-shrink-0">
+                      <CornerDownRight className="w-3 h-3 text-[var(--brand)] flex-shrink-0" />
+                      <span className="font-semibold text-[var(--brand)] flex-shrink-0">
                         @{c.replyToAuthor}
                       </span>
                       {c.replyToContent && (
-                        <span className="text-slate-400 dark:text-slate-500 truncate max-w-[180px] md:max-w-[340px]">
+                        <span className="text-[var(--ink-muted)] truncate max-w-[180px] md:max-w-[320px]">
                           : “{c.replyToContent}”
                         </span>
                       )}
                     </button>
                   )}
 
-                  {/* Comment Body */}
                   {renderCommentBody(c.content)}
 
-                  {/* Actions (Reply & Quote) */}
-                  <div className="flex items-center gap-3 mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/60 text-xs text-slate-400 dark:text-slate-500">
+                  <div
+                    className="flex items-center gap-3.5 mt-2.5 pt-2 border-t text-[11.5px] text-[var(--ink-muted)]"
+                    style={{ borderColor: 'var(--border-hairline)' }}
+                  >
                     <button
                       type="button"
                       onClick={() => handleStartReply(c)}
-                      className="inline-flex items-center gap-1 hover:text-teal-600 dark:hover:text-teal-400 transition font-medium"
-                      title={`回复 @${c.author}`}
+                      className="inline-flex items-center gap-1 hover:text-[var(--brand)] font-medium cursor-pointer"
                     >
-                      <Reply className="w-3.5 h-3.5" />
+                      <Reply className="w-3 h-3" />
                       <span>回复</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleStartQuote(c)}
-                      className="inline-flex items-center gap-1 hover:text-teal-600 dark:hover:text-teal-400 transition"
-                      title={`引用 @${c.author} 的留言`}
+                      className="inline-flex items-center gap-1 hover:text-[var(--brand)] cursor-pointer"
                     >
-                      <Quote className="w-3.5 h-3.5" />
+                      <Quote className="w-3 h-3" />
                       <span>引用</span>
                     </button>
                   </div>

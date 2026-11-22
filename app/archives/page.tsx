@@ -1,7 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Archive } from 'lucide-react';
 import { getAllPosts } from '@/lib/posts';
+import { getBadgeMeta } from '@/lib/workbench';
 
 export const revalidate = false;
 
@@ -37,34 +39,46 @@ export default function ArchivesPage() {
   const years = Array.from(groupedByYear.keys()).sort((a, b) => (a < b ? 1 : -1));
 
   return (
-    <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
-      <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" prefetch={false} className="hover:text-teal-500">
+    <div className="max-w-[1180px] mx-auto px-4 md:px-7 py-6">
+      <nav
+        aria-label="面包屑导航"
+        className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"
+      >
+        <Link href="/" prefetch={false} className="hover:text-[var(--brand)]">
           首页
         </Link>
         <span>/</span>
-        <span className="text-slate-600 dark:text-slate-300 font-medium">全站博文归档</span>
+        <span className="text-[var(--ink-primary)] font-medium">全站归档</span>
       </nav>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-10 mb-8 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3.5 mb-2">
-          <span className="text-3xl md:text-4xl">🗂️</span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+      <div className="wb-card p-5 sm:p-6 mb-6">
+        <div className="flex flex-wrap items-center gap-2.5 mb-2">
+          <span
+            className="w-8 h-8 rounded-[7px] grid place-items-center text-[var(--brand)]"
+            style={{
+              backgroundColor: 'var(--brand-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+            }}
+          >
+            <Archive className="w-4 h-4" />
+          </span>
+          <h1 className="text-[20px] sm:text-[23px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
             全站博文归档总目录
           </h1>
-          <span className="text-xs font-mono font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 px-3 py-1 rounded-full border border-teal-500/20">
-            共 {posts.length} 篇独立博文 · 覆盖 {years.length} 个年份
+          <span className="wb-pill wb-pill-gesp font-mono tnum">
+            {posts.length.toLocaleString()} 篇 · {years.length} 个年份
           </span>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-3xl leading-relaxed mb-4">
-          按时间倒序完整收录 2012 年至今的所有原创笔记与信奥题解，点击年份可快速跳转定位。
+        <p className="text-[13.5px] text-[var(--ink-muted)] max-w-3xl leading-relaxed mb-4">
+          按时间倒序完整收录 2012 年至今的所有原创笔记与信奥题解，点击年份快速锚点跳转。
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {years.map(y => (
             <a
               key={y}
               href={`#year-${y}`}
-              className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-950/60 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition"
+              className="px-2.5 py-1 rounded-[5px] bg-[var(--bg-subtle)] text-[12px] font-mono tnum font-medium text-[var(--ink-secondary)] hover:text-[var(--brand)] transition-colors"
+              style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
             >
               {y} ({groupedByYear.get(y)!.length})
             </a>
@@ -72,39 +86,61 @@ export default function ArchivesPage() {
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-5">
         {years.map(year => {
           const yearPosts = groupedByYear.get(year)!;
           return (
             <section
               key={year}
               id={`year-${year}`}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm scroll-mt-20"
+              className="wb-card overflow-hidden scroll-mt-[68px]"
             >
-              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-slate-800">
-                <h2 className="text-xl md:text-2xl font-extrabold font-mono text-slate-900 dark:text-slate-100">
+              <div
+                className="flex items-center justify-between px-4 py-2.5 border-b"
+                style={{
+                  backgroundColor: 'var(--bg-subtle)',
+                  borderColor: 'var(--border-strong)',
+                }}
+              >
+                <h2 className="text-[15px] font-semibold font-mono tnum text-[var(--ink-primary)]">
                   {year} 年
                 </h2>
-                <span className="text-xs font-mono text-slate-400">{yearPosts.length} 篇</span>
+                <span className="text-[12px] font-mono tnum text-[var(--ink-muted)]">
+                  {yearPosts.length} 篇
+                </span>
               </div>
-              <ul className="divide-y divide-slate-100 dark:divide-slate-800/70">
-                {yearPosts.map(post => (
-                  <li key={post.slug} className="py-2.5 flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-4">
-                    <span className="text-xs font-mono text-slate-400 flex-shrink-0 w-24">
-                      {post.date}
-                    </span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-teal-700 dark:text-teal-400 flex-shrink-0 w-fit">
-                      {post.subtopic || post.topicName}
-                    </span>
-                    <Link
-                      href={`/${post.slug}/`}
-                      prefetch={false}
-                      className="text-sm font-medium text-slate-800 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition leading-snug"
+              <ul className="divide-y" style={{ borderColor: 'var(--border-hairline)' }}>
+                {yearPosts.map(post => {
+                  const badge = getBadgeMeta(post);
+                  const pillCls =
+                    badge.track === 'gesp'
+                      ? 'wb-pill-gesp'
+                      : badge.track === 'contest'
+                      ? 'wb-pill-contest'
+                      : 'wb-pill-arch';
+                  return (
+                    <li
+                      key={post.slug}
+                      className="px-4 py-2.5 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 hover:bg-[var(--bg-hover)] transition-colors"
+                      style={{ borderColor: 'var(--border-hairline)' }}
                     >
-                      {post.title}
-                    </Link>
-                  </li>
-                ))}
+                      <time
+                        dateTime={post.date}
+                        className="text-[12px] font-mono tnum text-[var(--ink-muted)] flex-shrink-0 w-[86px]"
+                      >
+                        {post.date}
+                      </time>
+                      <span className={`wb-pill ${pillCls} flex-shrink-0`}>{badge.label}</span>
+                      <Link
+                        href={`/${post.slug}/`}
+                        prefetch={false}
+                        className="text-[13.5px] font-medium text-[var(--ink-primary)] hover:text-[var(--brand)] transition-colors leading-snug min-w-0 truncate"
+                      >
+                        {post.title}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );

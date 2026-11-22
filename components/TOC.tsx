@@ -11,18 +11,19 @@ interface TOCProps {
 }
 
 export default function TOC({ toc }: TOCProps) {
-  const [activeId, setActiveId] = useState<string>('');
+  const [activeId, setActiveId] = useState<string>(toc[0]?.id || '');
 
   useEffect(() => {
+    if (!toc || toc.length === 0) return;
     const observer = new IntersectionObserver(
       entries => {
-        entries.forEach(entry => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id);
           }
-        });
+        }
       },
-      { rootMargin: '0% 0% -65% 0%' }
+      { rootMargin: '-72px 0% -68% 0%' }
     );
 
     toc.forEach(item => {
@@ -36,25 +37,26 @@ export default function TOC({ toc }: TOCProps) {
   if (!toc || toc.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-      <div className="flex items-center justify-between text-base font-bold text-slate-900 dark:text-slate-100 mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
-        <span>📑 本文目录大纲</span>
-        <span className="text-xs font-mono text-slate-400">TOC</span>
+    <nav aria-label="本文目录">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--ink-muted)] mb-2">
+        On This Page
       </div>
-      <ul className="space-y-1.5 text-[15px]">
+      <ul
+        className="border-l space-y-0.5 max-h-[48vh] overflow-y-auto pr-1.5 pb-3"
+        style={{ borderColor: 'var(--border-hairline)' }}
+      >
         {toc.map(item => {
           const isActive = activeId === item.id;
           return (
-            <li
-              key={item.id}
-              className={`${item.depth === 3 ? 'pl-4' : ''}`}
-            >
+            <li key={item.id}>
               <a
                 href={`#${item.id}`}
-                className={`block py-1.5 px-2.5 rounded-lg transition leading-relaxed ${
+                className={`block -ml-px border-l-2 py-1 text-[12.5px] leading-snug transition-colors ${
+                  item.depth === 3 ? 'pl-5' : 'pl-3'
+                } ${
                   isActive
-                    ? 'text-teal-600 dark:text-teal-400 font-bold bg-teal-50 dark:bg-teal-950/60 border-l-2 border-teal-500'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
+                    ? 'border-[var(--brand)] text-[var(--brand)] font-semibold'
+                    : 'border-transparent text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
                 }`}
               >
                 {item.title}
@@ -63,6 +65,6 @@ export default function TOC({ toc }: TOCProps) {
           );
         })}
       </ul>
-    </div>
+    </nav>
   );
 }

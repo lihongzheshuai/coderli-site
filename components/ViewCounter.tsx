@@ -19,8 +19,7 @@ const incrementFetcher = (url: string) => {
     .catch(() => ({ views: undefined }));
 };
 
-export default function ViewCounter({ slug }: { slug: string }) {
-  // Opening the page automatically triggers POST to increment view count by 1 in DB
+export default function ViewCounter({ slug, plain = false }: { slug: string; plain?: boolean }) {
   const apiUrl = `${API_BASE}/api/views/${slug}`;
   const { data } = useSWR(apiUrl, incrementFetcher, {
     revalidateOnFocus: false,
@@ -30,10 +29,21 @@ export default function ViewCounter({ slug }: { slug: string }) {
 
   const count = data?.views;
 
+  if (plain) {
+    return (
+      <span className="font-mono tnum">
+        {count !== undefined ? `${count.toLocaleString()} 次` : '实时统计'}
+      </span>
+    );
+  }
+
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
-      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
-      <span>{count !== undefined ? `${count.toLocaleString()} 次阅读` : '计算中...'}</span>
+    <span className="inline-flex items-center gap-1.5 font-mono tnum text-[12.5px] font-semibold text-[var(--ink-primary)]">
+      <span
+        className="w-1.5 h-1.5 rounded-full inline-block"
+        style={{ backgroundColor: 'var(--brand)' }}
+      />
+      <span>{count !== undefined ? `${count.toLocaleString()} 次阅读` : '统计中…'}</span>
     </span>
   );
 }

@@ -31,7 +31,7 @@ function cleanExcerpt(content) {
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
+    .replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^<>]*)?\/?>/g, ' ')
     .replace(/{%.*?%}/g, '')
     .replace(/{{.*?}}/g, '')
     .replace(/```[\s\S]*?```/g, '')
@@ -40,14 +40,21 @@ function cleanExcerpt(content) {
     .replace(/\$([^$\n]+)\$/g, (_, expr) =>
       expr
         .replace(/\\times\b/g, '×')
+        .replace(/\\cdot\b/g, '·')
         .replace(/\\le(?:q)?\b/g, '≤')
         .replace(/\\ge(?:q)?\b/g, '≥')
+        .replace(/\\sigma\b/g, 'σ')
+        .replace(/\\sqrt\{([^{}]+)\}/g, (__, inner) => (inner.length <= 2 ? `√${inner}` : `√(${inner})`))
         .replace(/\\log\b/g, 'log')
         .replace(/\\[a-zA-Z]+/g, '')
         .replace(/[{}]/g, '')
     )
-    .replace(/#{1,6}\s+/g, '')
-    .replace(/[*_~`>|]/g, '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*>\s*/gm, '')
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/~~([^~\n]+)~~/g, '$1')
+    .replace(/`([^`\n]+)`/g, '$1')
     .replace(/\s+/g, ' ')
     .trim();
 

@@ -81,9 +81,9 @@ export default function RootLayout({
   const postCount = posts.length;
 
   return (
-    <html lang="zh-CN" className="scroll-smooth">
+    <html lang="zh-CN" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        {/* Dark mode restoration script: default to Light theme unless 'dark' is saved */}
+        {/* Instant Theme Restoration: default to Light unless explicitly saved as 'dark' */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`,
@@ -162,14 +162,14 @@ export default function RootLayout({
               (function() {
                 var hm = document.createElement("script");
                 hm.src = "https://hm.baidu.com/hm.js?c38895d905174718ae7d95e42ce528c7";
-                var s = document.getElementsByTagName("script")[0]; 
+                var s = document.getElementsByTagName("script")[0];
                 s.parentNode.insertBefore(hm, s);
               })();
             `,
           }}
         />
       </head>
-      <body className="min-h-screen flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+      <body className="min-h-screen flex flex-col font-sans bg-[var(--bg-canvas)] text-[var(--ink-primary)] selection:bg-[#0D9488] selection:text-white antialiased">
         <AnalyticsTracker />
         <Header postCount={postCount} />
         <main className="flex-1">{children}</main>

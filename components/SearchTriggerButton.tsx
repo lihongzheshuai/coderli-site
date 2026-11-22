@@ -1,19 +1,22 @@
 'use client';
 
 import React from 'react';
+import { Search } from 'lucide-react';
 
 export default function SearchTriggerButton() {
   function handleOpenSearch() {
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
+    window.dispatchEvent(new CustomEvent('onecoder:open-search'));
   }
 
   return (
     <button
       type="button"
       onClick={handleOpenSearch}
-      className="px-6 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-medium hover:border-teal-500 text-slate-700 dark:text-slate-300 transition shadow-sm inline-flex items-center gap-2 hover:text-teal-600 dark:hover:text-teal-400 cursor-pointer"
+      className="px-4 py-2 rounded-[7px] bg-[var(--bg-canvas)] text-[13px] font-medium text-[var(--ink-secondary)] hover:text-[var(--brand)] transition-colors inline-flex items-center gap-2 cursor-pointer"
+      style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
     >
-      <span>浏览历史全部 936 篇博文（点击或按 / 快捷键检索）</span>
+      <Search className="w-3.5 h-3.5" />
+      <span>按 ⌘K 或 / 检索全站技术文档</span>
     </button>
   );
 }

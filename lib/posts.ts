@@ -23,6 +23,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeStringify from 'rehype-stringify';
 import { codeToHtml, bundledLanguages, isPlainLang, isSpecialLang } from 'shiki';
 import type { PostMeta, PostCardMeta, PostDetail } from '../types/post';
+import { GESP_LEVELS, type WorkbenchSidebarStats } from './workbench';
 
 export function toPostCardMeta(post: PostMeta): PostCardMeta {
   return {
@@ -44,9 +45,9 @@ export function toPostCardMeta(post: PostMeta): PostCardMeta {
 }
 
 const postsDirectory = path.join(process.cwd(), '_posts');
-const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v2');
+const postCacheDir = path.join(process.cwd(), '.next', 'cache', 'post-html-cache-v4');
 
-// Convert inline LaTeX and HTML fragments into clean plain text for SEO meta descriptions & GEO summaries
+// Convert inline LaTeX and HTML fragments into clean plain text for SEO meta descriptions, TOC labels & GEO summaries
 export function stripHtmlAndLatexForPlainText(input: string): string {
   let text = input
     // Decode common HTML entities first so escaped HTML tags in legacy posts get stripped too
@@ -57,15 +58,14 @@ export function stripHtmlAndLatexForPlainText(input: string): string {
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&');
 
-  // Remove HTML comments and HTML tags
+  // Remove HTML comments and actual HTML tags only (never eat C++ comparisons like `i <= n ... n > 1`)
   text = text.replace(/<!--[\s\S]*?-->/g, ' ');
-  text = text.replace(/<[^>]+>/g, ' ');
+  text = text.replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^<>]*)?\/?>/g, ' ');
 
-  // Convert display & inline math $...$ into readable plain symbols
-  text = text.replace(/\$\$([\s\S]*?)\$\$/g, ' $1 ');
-  text = text.replace(/\$([^$\n]+)\$/g, (_, expr: string) => {
-    return expr
+  const convertLatexExpr = (expr: string) =>
+    expr
       .replace(/\\times\b/g, '×')
+      .replace(/\\cdot\b/g, '·')
       .replace(/\\div\b/g, '÷')
       .replace(/\\le(?:q)?\b/g, '≤')
       .replace(/\\ge(?:q)?\b/g, '≥')
@@ -73,6 +73,14 @@ export function stripHtmlAndLatexForPlainText(input: string): string {
       .replace(/\\approx\b/g, '≈')
       .replace(/\\pm\b/g, '±')
       .replace(/\\infty\b/g, '∞')
+      .replace(/\\sigma\b/g, 'σ')
+      .replace(/\\Sigma\b/g, 'Σ')
+      .replace(/\\pi\b/g, 'π')
+      .replace(/\\phi\b|\\varphi\b/g, 'φ')
+      .replace(/\\alpha\b/g, 'α')
+      .replace(/\\beta\b/g, 'β')
+      .replace(/\\theta\b/g, 'θ')
+      .replace(/\\Omega\b/g, 'Ω')
       .replace(/\\(?:c|l|v)?dots\b/g, '...')
       .replace(/\\to\b|\\rightarrow\b/g, '→')
       .replace(/\\log\b/g, 'log')
@@ -82,11 +90,14 @@ export function stripHtmlAndLatexForPlainText(input: string): string {
       .replace(/\\lcm\b/g, 'lcm')
       .replace(/\\bmod\b|\\mod\b/g, ' mod ')
       .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1/$2)')
-      .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
+      .replace(/\\sqrt\{([^{}]+)\}/g, (_, inner: string) => (inner.length <= 2 ? `√${inner}` : `√(${inner})`))
       .replace(/\\(?:text|mathrm|mathbf|mathit|texttt)\{([^{}]+)\}/g, '$1')
       .replace(/\\[a-zA-Z]+/g, '')
       .replace(/[{}]/g, '');
-  });
+
+  // Convert display & inline math $...$ into readable plain symbols
+  text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_, expr: string) => ` ${convertLatexExpr(expr)} `);
+  text = text.replace(/\$([^$\n]+)\$/g, (_, expr: string) => convertLatexExpr(expr));
 
   return text;
 }
@@ -118,13 +129,17 @@ function cleanExcerpt(
   text = text.replace(/{{.*?}}/g, '');
   text = text.replace(/\{:.*?prompt-.*?\}|\{:\s*\..*?\}/g, '');
 
-  // Remove markdown code blocks, images, links, headers
+  // Remove markdown code blocks, images, links, headers (preserve * and > inside inline code/math!)
   text = text.replace(/```[\s\S]*?```/g, '');
   text = text.replace(/!\[.*?\]\(.*?\)/g, '');
   text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
   text = stripHtmlAndLatexForPlainText(text);
-  text = text.replace(/#{1,6}\s+/g, '');
-  text = text.replace(/[*_~`>|]/g, '');
+  text = text.replace(/^#{1,6}\s+/gm, '');
+  text = text.replace(/^\s*>\s*/gm, '');
+  text = text.replace(/\*\*([^*\n]+)\*\*/g, '$1');
+  text = text.replace(/__([^_\n]+)__/g, '$1');
+  text = text.replace(/~~([^~\n]+)~~/g, '$1');
+  text = text.replace(/`([^`\n]+)`/g, '$1');
   text = text.replace(/\s+/g, ' ').trim();
 
   if (text.length < 25 && fallbackTitle) {
@@ -517,6 +532,98 @@ export function getPostsByCategory(parentCategory: string, subCategory?: string)
   });
 }
 
+export function getWorkbenchStats(postsInput?: PostMeta[]): WorkbenchSidebarStats {
+  const posts = postsInput || getAllPosts();
+  const gespLevels: Record<string, number> = {};
+  for (const spec of GESP_LEVELS) {
+    gespLevels[spec.level] = 0;
+  }
+
+  let gespTotal = 0;
+  let gespOther = 0;
+  let cspCount = 0;
+  let noipCount = 0;
+  let algoCount = 0;
+  let javaCount = 0;
+  let pythonDataCount = 0;
+
+  for (const p of posts) {
+    if (p.topic === 'gesp') {
+      gespTotal++;
+      if (p.subtopic && p.subtopic in gespLevels) {
+        gespLevels[p.subtopic]++;
+      } else {
+        gespOther++;
+      }
+    } else if (p.topic === 'csp') {
+      if (p.subtopic === 'NOIP') noipCount++;
+      else cspCount++;
+    } else if (p.topic === 'algo') {
+      algoCount++;
+    } else if (p.topic === 'java') {
+      javaCount++;
+    } else {
+      pythonDataCount++;
+    }
+  }
+
+  return {
+    total: posts.length,
+    gespTotal,
+    gespLevels,
+    gespOther,
+    contestTotal: cspCount + noipCount + algoCount,
+    cspCount,
+    noipCount,
+    algoCount,
+    engTotal: javaCount + pythonDataCount,
+    javaCount,
+    pythonDataCount,
+  };
+}
+
+export interface SiblingPostItem {
+  slug: string;
+  title: string;
+  subtopic: string;
+  date: string;
+}
+
+export function getSiblingSeriesPosts(
+  current: PostMeta,
+  allPostsInput?: PostMeta[],
+  limit = 10
+): { heading: string; totalInSeries: number; items: SiblingPostItem[] } {
+  const allPosts = allPostsInput || getAllPosts();
+  let pool = allPosts.filter(p => p.topic === current.topic && p.subtopic === current.subtopic);
+  let heading = current.topic === 'gesp' && current.subtopic?.includes('级')
+    ? `GESP ${current.subtopic} · 同级连读`
+    : `${current.subtopic || current.topicName} · 同栏连读`;
+
+  if (pool.length < 3) {
+    pool = allPosts.filter(p => p.topic === current.topic);
+    heading = `${current.topicName} · 同栏连读`;
+  }
+
+  const idx = pool.findIndex(p => p.slug === current.slug);
+  let start = 0;
+  if (idx !== -1 && pool.length > limit) {
+    start = Math.max(0, Math.min(idx - Math.floor(limit / 2), pool.length - limit));
+  }
+  const sliced = pool.slice(start, start + limit).map(p => ({
+    slug: p.slug,
+    title: p.title,
+    subtopic: p.subtopic,
+    date: p.date,
+  }));
+
+  return {
+    heading,
+    totalInSeries: pool.length,
+    items: sliced,
+  };
+}
+
 export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null> {
   let decoded = rawSlug;
   try {
@@ -565,18 +672,24 @@ export async function getPostBySlug(rawSlug: string): Promise<PostDetail | null>
     content = content.replace(/{{.*?}}/g, '');
     content = content.replace(/^\s*(?:>\s*)?\{:\s*\.prompt-[^}]+\}\s*$/gm, '');
 
-    // Extract TOC headings (h2 and h3)
+    // Extract TOC headings (h2 and h3) with clean plain/Unicode math labels
     toc = [];
     const headingRegex = /^(#{2,3})\s+(.+)$/gm;
     let match;
     while ((match = headingRegex.exec(content)) !== null) {
       const depth = match[1].length;
-      const titleText = match[2].trim().replace(/[*_`]/g, '');
-      const id = titleText
+      const rawHeading = match[2].trim();
+      const id = rawHeading
+        .replace(/[*_`]/g, '')
         .toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w\u4e00-\u9fa5\-]/g, '');
-      toc.push({ id, title: titleText, depth });
+      const cleanTitle = stripHtmlAndLatexForPlainText(rawHeading)
+        .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+        .replace(/`([^`\n]+)`/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+      toc.push({ id, title: cleanTitle, depth });
     }
 
     // Process Markdown to HTML with Unified, KaTeX & Shiki
@@ -791,8 +904,8 @@ async function highlightCodeBlocks(html: string): Promise<string> {
         transformers: [lineNumbersTransformer],
       });
 
-      // Wrap with compact UI container (macOS dots, language, line count, line number toggle, copy button - no duplicate data-code bloat)
-      const enhanced = `<div class="code-block my-6 rounded-xl overflow-hidden border border-slate-700/60 dark:border-slate-800 shadow-lg shadow-black/10" style="--ln-gutter-width:${gutterWidth}"><div class="code-header flex items-center justify-between px-3.5 py-2.5 bg-[#21252b] border-b border-[#181a1f] text-xs font-mono select-none"><div class="flex items-center gap-2"><div class="flex items-center gap-1.5" aria-hidden="true"><span class="w-3 h-3 rounded-full bg-[#ff5f56] inline-block"></span><span class="w-3 h-3 rounded-full bg-[#ffbd2e] inline-block"></span><span class="w-3 h-3 rounded-full bg-[#27c93f] inline-block"></span></div><span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wider uppercase bg-teal-500/10 text-teal-400 border border-teal-500/25">${langDisplay}</span><span class="text-[11px] text-slate-400 font-mono">${lineCount} 行</span></div><div class="flex items-center gap-1.5"><button type="button" class="code-action-btn toggle-lines-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 transition flex items-center gap-1" title="显示/隐藏行号"><span class="btn-text"># 行号</span></button><button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-1.5 active:scale-95" title="复制代码"><span class="copy-label">📋 复制</span></button></div></div>${highlighted}</div>`;
+      // Wrap with Workbench Pro code container (clean status dot, crisp SVG buttons, zero emojis, ligatures off)
+      const enhanced = `<div class="code-block" style="--ln-gutter-width:${gutterWidth}"><div class="code-header flex items-center justify-between px-3.5 py-2 text-xs font-mono select-none"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#2DD4BF] inline-block" aria-hidden="true"></span><span class="text-[11.5px] font-medium text-slate-200">${langDisplay}</span><span class="text-[11px] text-slate-400 tnum">· ${lineCount} 行</span></div><div class="flex items-center gap-1.5"><button type="button" class="code-action-btn toggle-lines-btn px-2 py-1 rounded text-[11px] text-slate-400 hover:text-slate-100 hover:bg-white/10 transition flex items-center gap-1" title="显示/隐藏行号"><span class="btn-text"># 行号</span></button><button type="button" class="code-action-btn copy-code-btn px-2.5 py-1 rounded text-[11px] text-slate-200 hover:text-white bg-white/5 hover:bg-white/15 border border-white/15 transition flex items-center gap-1.5" title="复制代码"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-label">复制代码</span></button></div></div>${highlighted}</div>`;
 
       result = result.replace(fullMatch, enhanced);
     } catch {

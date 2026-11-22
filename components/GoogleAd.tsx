@@ -40,12 +40,12 @@ export default function GoogleAd({
 
   return (
     <div
-      className={`my-6 text-center overflow-hidden transition-colors ${
+      className={`my-4 text-center overflow-hidden transition-colors ${
         isDev
           ? 'border border-dashed border-slate-300 dark:border-slate-800 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30'
           : ''
       } ${className}`}
-      style={{ minHeight: `${minHeight}px` }}
+      style={isDev ? { minHeight: `${minHeight}px` } : undefined}
     >
       {isDev && (
         <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2 px-1">

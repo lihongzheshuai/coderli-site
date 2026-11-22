@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { FolderTree, ChevronRight, Circle } from 'lucide-react';
 import type { CategoryNode } from '@/lib/posts';
 import { getCategoryLink } from '@/lib/categories';
 
@@ -20,7 +21,6 @@ export default function CategoryNavTree({
   currentChild,
   className = '',
 }: CategoryNavTreeProps) {
-  // Tree is collapsed by default as requested; auto-expand current active parent if on that page
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     if (currentParent) {
@@ -43,24 +43,25 @@ export default function CategoryNavTree({
   }
 
   return (
-    <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm ${className}`}>
-      {/* Header */}
-      <div className="font-bold text-base text-slate-900 dark:text-slate-100 mb-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div className={`wb-card p-4 ${className}`}>
+      <div
+        className="text-[13px] font-semibold text-[var(--ink-primary)] mb-3 pb-2.5 border-b flex items-center justify-between"
+        style={{ borderColor: 'var(--border-hairline)' }}
+      >
         <span className="flex items-center gap-1.5">
-          <span>📚</span>
-          <span>专题分类快速导航</span>
+          <FolderTree className="w-3.5 h-3.5 text-[var(--brand)]" />
+          <span>专题分类目录</span>
         </span>
         <Link
           href="/categories/"
           prefetch={false}
-          className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium"
+          className="font-mono tnum text-[11.5px] text-[var(--brand)] hover:underline font-medium"
         >
           全集 ({totalCount}) →
         </Link>
       </div>
 
-      {/* Tree list */}
-      <div className="space-y-1 text-[15px]">
+      <div className="space-y-0.5 text-[13px]">
         {displayList.map(node => {
           const hasChildren = node.children && node.children.length > 0;
           const isExpanded = !!expanded[node.name.toLowerCase()];
@@ -71,54 +72,49 @@ export default function CategoryNavTree({
 
           return (
             <div key={node.name} className="select-none">
-              {/* Parent category row */}
               <div
-                className={`flex items-center justify-between p-2 rounded-xl transition font-medium group ${
-                  isParentActive
-                    ? 'bg-teal-50 dark:bg-teal-950/70 text-teal-700 dark:text-teal-300 font-bold'
-                    : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80'
-                }`}
+                className="wb-sb-item"
+                data-active={!!isParentActive}
               >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {/* Expand/Collapse Toggle arrow */}
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
                   {hasChildren ? (
                     <button
                       type="button"
                       onClick={e => toggleExpand(node.name, e)}
-                      className="w-5 h-5 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition text-[11px] flex-shrink-0 cursor-pointer"
+                      className="w-4 h-4 flex items-center justify-center rounded hover:bg-[var(--bg-hover)] text-[var(--ink-muted)] flex-shrink-0 cursor-pointer"
                       aria-label={isExpanded ? '折叠子分类' : '展开子分类'}
-                      title={isExpanded ? '点击折叠子分类' : '点击展开子分类'}
                     >
-                      <span className={`inline-block transition-transform duration-200 ${isExpanded ? 'rotate-90 text-teal-600' : ''}`}>
-                        ▶
-                      </span>
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                          isExpanded ? 'rotate-90 text-[var(--brand)]' : ''
+                        }`}
+                      />
                     </button>
                   ) : (
-                    <span className="w-5 h-5 flex items-center justify-center text-slate-300 dark:text-slate-600 text-xs flex-shrink-0">
-                      •
+                    <span className="w-4 h-4 flex items-center justify-center text-[var(--ink-faint)] flex-shrink-0">
+                      <Circle className="w-1.5 h-1.5 fill-current" />
                     </span>
                   )}
 
-                  {/* Category Name link */}
                   <Link
                     href={getCategoryLink(node.name)}
                     prefetch={false}
-                    className="truncate hover:text-teal-600 dark:hover:text-teal-400 transition"
-                    title={`查看「${node.name}」专栏下的全部博文`}
+                    className="truncate hover:text-[var(--brand)] transition-colors"
                   >
                     {node.name}
                   </Link>
                 </div>
 
-                {/* Article count badge */}
-                <span className="font-mono text-teal-600 dark:text-teal-400 font-bold text-xs bg-teal-50 dark:bg-teal-950/60 px-2 py-0.5 rounded-md border border-teal-500/20 ml-2 flex-shrink-0">
-                  {node.count} 篇
+                <span className="font-mono tnum text-[11.5px] text-[var(--ink-faint)] ml-2 flex-shrink-0">
+                  {node.count}
                 </span>
               </div>
 
-              {/* Subcategories (Children) - Collapsed by default, animated expand */}
               {hasChildren && isExpanded && (
-                <div className="ml-5 pl-3 border-l-2 border-slate-200 dark:border-slate-800 space-y-0.5 my-1 animate-fadeIn">
+                <div
+                  className="ml-4 pl-2.5 border-l space-y-0.5 my-1"
+                  style={{ borderColor: 'var(--border-hairline)' }}
+                >
                   {node.children.map(child => {
                     const isChildActive =
                       currentParent &&
@@ -131,18 +127,11 @@ export default function CategoryNavTree({
                         key={child.name}
                         href={getCategoryLink(node.name, child.name)}
                         prefetch={false}
-                        className={`flex items-center justify-between py-1.5 px-2 rounded-lg text-sm transition ${
-                          isChildActive
-                            ? 'bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-semibold'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                        }`}
-                        title={`查看「${node.name} / ${child.name}」下的博文`}
+                        className="wb-sb-item text-[12.5px]"
+                        data-active={!!isChildActive}
                       >
-                        <span className="truncate flex items-center gap-1.5">
-                          <span className="text-slate-300 dark:text-slate-600 text-xs">└</span>
-                          <span>{child.name}</span>
-                        </span>
-                        <span className="font-mono text-slate-400 text-xs ml-2 flex-shrink-0">
+                        <span className="truncate">{child.name}</span>
+                        <span className="font-mono tnum text-[11px] text-[var(--ink-faint)] ml-2 flex-shrink-0">
                           {child.count}
                         </span>
                       </Link>
@@ -155,16 +144,17 @@ export default function CategoryNavTree({
         })}
       </div>
 
-      {/* Footer: View more categories link */}
       {totalCount > limit && (
-        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-center">
+        <div
+          className="mt-3 pt-2.5 border-t text-center"
+          style={{ borderColor: 'var(--border-hairline)' }}
+        >
           <Link
             href="/categories/"
             prefetch={false}
-            className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 inline-flex items-center gap-1 transition"
+            className="text-[12px] font-medium text-[var(--brand)] hover:underline inline-flex items-center gap-1"
           >
-            <span>显示全部 {totalCount} 大专题与分类大厅</span>
-            <span>→</span>
+            <span>查看全部 {totalCount} 大分类 →</span>
           </Link>
         </div>
       )}

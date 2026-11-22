@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Tags } from 'lucide-react';
 import { getAllTags } from '@/lib/posts';
 import GoogleAd from '@/components/GoogleAd';
 
@@ -16,50 +17,58 @@ export default function AllTagsPage() {
   const tags = getAllTags();
 
   return (
-    <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
-      {/* Top Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
+    <div className="max-w-[1180px] mx-auto px-4 md:px-7 py-6">
+      <nav
+        aria-label="面包屑导航"
+        className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"
+      >
+        <Link href="/" prefetch={false} className="hover:text-[var(--brand)]">
+          首页
+        </Link>
         <span>/</span>
-        <span className="text-slate-600 dark:text-slate-300 font-medium">全站技术标签</span>
+        <span className="text-[var(--ink-primary)] font-medium">全站技术标签</span>
       </nav>
 
-      {/* Hero Header */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-10 mb-8 shadow-sm">
-        <div className="flex items-center gap-3.5 mb-2">
-          <span className="text-3xl md:text-4xl">🏷️</span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+      <div className="wb-card p-5 sm:p-6 mb-6">
+        <div className="flex flex-wrap items-center gap-2.5 mb-2">
+          <span
+            className="w-8 h-8 rounded-[7px] grid place-items-center text-[var(--brand)]"
+            style={{
+              backgroundColor: 'var(--brand-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+            }}
+          >
+            <Tags className="w-4 h-4" />
+          </span>
+          <h1 className="text-[20px] sm:text-[23px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
             全站技术标签索引
           </h1>
-          <span className="text-xs font-mono font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 px-3 py-1 rounded-full border border-teal-500/20">
+          <span className="wb-pill wb-pill-gesp font-mono tnum">
             共 {tags.length} 个标签
           </span>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
-          点击任意标签，即可筛选出该技术领域沉淀的所有博文与算法真题。
+        <p className="text-[13.5px] text-[var(--ink-muted)] max-w-2xl leading-relaxed">
+          点击任意标签，即可查看该技术领域或算法考点下的全部原创文章。
         </p>
       </div>
 
-      {/* Tags Cloud Grid */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-sm mb-8">
-        <div className="flex flex-wrap gap-2.5">
+      <div className="wb-card p-5 sm:p-6 mb-6">
+        <div className="flex flex-wrap gap-2">
           {tags.map(item => (
             <Link
               key={item.tag}
               href={`/tags/${encodeURIComponent(item.tag)}/`}
               prefetch={false}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/60 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 font-mono text-xs md:text-sm border border-transparent hover:border-teal-500/30 transition flex items-center gap-1.5 group cursor-pointer"
+              className="px-3 py-1.5 rounded-[6px] bg-[var(--bg-subtle)] text-[var(--ink-secondary)] hover:text-[var(--brand)] font-mono text-[12.5px] transition-colors inline-flex items-center gap-1.5"
+              style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
             >
               <span>#{item.tag}</span>
-              <span className="text-xs font-semibold text-slate-400 group-hover:text-teal-500 transition">
-                {item.count}
-              </span>
+              <span className="tnum text-[11px] text-[var(--ink-faint)]">{item.count}</span>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Bottom Recommendation Ad Banner */}
       <GoogleAd
         slot="6416549436"
         format="auto"

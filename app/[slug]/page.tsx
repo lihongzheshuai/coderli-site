@@ -2,7 +2,23 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getAllPosts, getPostBySlug, resolveSeoCoverImage } from '@/lib/posts';
+import {
+  ChevronLeft,
+  BookOpen,
+  Info,
+  Github,
+  MessageSquare,
+  FileText,
+  ArrowUpRight,
+  ShieldCheck,
+} from 'lucide-react';
+import {
+  getAllPosts,
+  getPostBySlug,
+  getSiblingSeriesPosts,
+  resolveSeoCoverImage,
+} from '@/lib/posts';
+import { extractProblemId, formatReadTimeCompact, formatCompactTitle } from '@/lib/workbench';
 import TOC from '@/components/TOC';
 import GoogleAd from '@/components/GoogleAd';
 import ViewCounter from '@/components/ViewCounter';
@@ -10,7 +26,6 @@ import Comments from '@/components/Comments';
 import LatexText from '@/components/LatexText';
 import PostNavigation from '@/components/PostNavigation';
 import RelatedPosts from '@/components/RelatedPosts';
-import PopularTagsCard from '@/components/PopularTagsCard';
 import OiGamePromo from '@/components/OiGamePromo';
 
 interface PageProps {
@@ -18,11 +33,10 @@ interface PageProps {
 }
 
 export const dynamicParams = true;
-export const revalidate = false; // Permanent edge cache until revalidatePath
+export const revalidate = false;
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
-  // Pre-generate all posts at build time (SSG) to eliminate runtime ISR writes and CPU usage
   return posts.map(p => ({ slug: p.slug }));
 }
 
@@ -70,6 +84,11 @@ export default async function PostPage({ params }: PageProps) {
   if (!post) {
     notFound();
   }
+
+  const allPosts = getAllPosts();
+  const series = getSiblingSeriesPosts(post, allPosts, 10);
+  const problemId = extractProblemId(post.title, post.slug);
+  const isOiTrack = post.topic === 'gesp' || post.topic === 'csp' || post.topic === 'algo';
 
   const canonicalUrl = `https://www.coderli.com/${post.slug}/`;
   const coverPath = resolveSeoCoverImage(post);
@@ -137,192 +156,403 @@ export default async function PostPage({ params }: PageProps) {
   };
 
   return (
-    <div className="pb-20">
+    <div className="max-w-[1680px] mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] xl:grid-cols-[248px_minmax(0,1fr)_240px] min-h-[calc(100vh-52px)]">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c'),
+        }}
       />
-      {/* Top Breadcrumb navigation */}
-      <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 mt-5 mb-4">
-        <Link
-          href="/"
-          prefetch={false}
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition"
+
+      {/* =========================================================
+          LEFT STICKY SERIES SIDEBAR (xl+)
+         ========================================================= */}
+      <aside
+        aria-label="同级章节连读"
+        className="hidden xl:flex flex-col gap-5 px-2.5 py-4 border-r sticky top-[52px] h-[calc(100vh-52px)] overflow-y-auto"
+        style={{
+          backgroundColor: 'var(--bg-subtle)',
+          borderColor: 'var(--border-hairline)',
+        }}
+      >
+        <div className="space-y-4">
+          {/* Same-level / same-series sibling list */}
+          <div>
+            <div className="flex items-center justify-between px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
+              <span className="truncate">{series.heading}</span>
+              <span className="font-mono tnum flex-shrink-0">{series.totalInSeries} 篇</span>
+            </div>
+            <div className="space-y-0.5">
+              {series.items.map((item, idx) => {
+                const isCurrent = item.slug === post.slug;
+                return (
+                  <Link
+                    key={item.slug}
+                    href={`/${item.slug}/`}
+                    prefetch={false}
+                    className="wb-sb-item"
+                    data-active={isCurrent}
+                    title={item.title}
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono tnum text-[11px] text-[var(--ink-faint)] flex-shrink-0">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span className="truncate">{formatCompactTitle(item.title)}</span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Navigation */}
+          <div>
+            <div className="px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-muted)]">
+              快速导航
+            </div>
+            <Link href="/" prefetch={false} className="wb-sb-item">
+              <span className="flex items-center gap-2 min-w-0">
+                <ChevronLeft className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="truncate">返回全站索引大厅</span>
+              </span>
+            </Link>
+            <Link href={`/topics/${post.topic}/`} prefetch={false} className="wb-sb-item">
+              <span className="flex items-center gap-2 min-w-0">
+                <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="truncate">查看「{post.topicName}」全集</span>
+              </span>
+            </Link>
+            {isOiTrack && (
+              <a
+                href="https://wiki.coderli.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="wb-sb-item"
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <ArrowUpRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">GESP 考纲 Wiki 字典</span>
+                </span>
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Exam Standard Notice */}
+        <div className="wb-card p-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--brand)] mb-1">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>{isOiTrack ? 'C++11 考场规范' : 'OneCoder 工程规范'}</span>
+          </div>
+          <p className="text-[11.5px] text-[var(--ink-muted)] leading-relaxed">
+            {isOiTrack
+              ? '所有题解遵循严格 C++11 标准，禁用流加速与输入判空，本地实测 AC。'
+              : '原创工程实践与源码级拆解，配套代码同步归档至 GitHub。'}
+          </p>
+        </div>
+      </aside>
+
+      {/* =========================================================
+          CENTER READING WORKBENCH CANVAS
+         ========================================================= */}
+      <article className="w-full max-w-[810px] mx-auto px-4 sm:px-7 lg:px-9 py-5 lg:py-6 min-w-0">
+        {/* Compact Breadcrumb */}
+        <nav
+          aria-label="面包屑导航"
+          className="flex items-center gap-1.5 font-mono tnum text-[12px] text-[var(--ink-muted)] mb-2.5 flex-wrap"
         >
-          <span>← 返回全站首页</span>
-        </Link>
-      </div>
+          <Link href="/" prefetch={false} className="hover:text-[var(--brand)] transition-colors">
+            首页
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/topics/${post.topic}/`}
+            prefetch={false}
+            className="hover:text-[var(--brand)] transition-colors"
+          >
+            {post.topicName}
+          </Link>
+          <span>/</span>
+          <span>
+            {post.subtopic} · 更新于 {post.date}
+          </span>
+        </nav>
 
-      {/* Main Three-Column Grid */}
-      <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8 items-start">
-        {/* Center: Main Article Container */}
-        <article className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-12 shadow-sm min-w-0">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-5 flex-wrap">
-            <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
-            <span>/</span>
-            <Link href={`/topics/${post.topic}/`} prefetch={false} className="hover:text-teal-500">{post.topicName}</Link>
-            <span>/</span>
-            <span className="text-slate-600 dark:text-slate-300 font-medium">{post.subtopic}</span>
-          </nav>
+        {/* Article Title */}
+        <h1 className="text-[22px] sm:text-[26px] font-semibold tracking-[-0.02em] leading-[1.32] text-[var(--ink-primary)] mb-3.5">
+          <LatexText text={post.title} />
+        </h1>
 
-          {/* Featured Header Banner (Image or Graphic Card) */}
-          {post.previewImg ? (
-            <div className="w-full h-56 md:h-72 rounded-xl overflow-hidden mb-8 border border-slate-200 dark:border-slate-800 relative bg-slate-100 dark:bg-slate-800/60">
-              <img
-                src={post.previewImg}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded text-xs font-mono border border-white/10">
-                📷 题解插图
-              </span>
-            </div>
-          ) : (
-            <div className="w-full py-12 px-6 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800/40 text-center mb-8 relative">
-              <span className="text-4xl font-mono font-extrabold text-teal-600 dark:text-teal-400 block mb-2">
-                {post.previewGraphic.symbol}
-              </span>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {post.previewGraphic.title}
-              </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                {post.previewGraphic.desc}
-              </p>
-              <span className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-sm text-slate-300 px-2 py-0.5 rounded text-[11px] font-mono">
-                🎨 视觉封面
-              </span>
-            </div>
-          )}
-
-          {/* Article Title */}
-          <h1 className="text-2xl md:text-3xl lg:text-[38px] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-snug mb-6">
-            <LatexText text={post.title} />
-          </h1>
-
-          {/* Metadata line */}
-          <div className="flex flex-wrap items-center gap-3.5 text-sm text-slate-500 dark:text-slate-400 pb-6 border-b border-slate-100 dark:border-slate-800 mb-8">
-            <span>📅 {post.date}</span>
-            <span>·</span>
-            <span>✍️ {post.author}</span>
-            <span>·</span>
-            <ViewCounter slug={post.slug} />
-            <span>·</span>
-            <span>⏱️ {post.readTime}</span>
-            <div className="flex items-center gap-1.5 ml-auto flex-wrap">
-              {post.tags.map(t => (
-                <Link
-                  key={t}
-                  href={`/tags/${encodeURIComponent(t)}/`}
-                  prefetch={false}
-                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-teal-50 dark:bg-slate-800 dark:hover:bg-teal-950/60 text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 font-mono text-[11px] transition"
-                >
-                  #{t}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Google Ad Slot 1: Top in-article flow (Slot 1669039692) */}
-          <GoogleAd
-            slot="1669039692"
-            format="fluid"
-            minHeight={100}
-            label="广告位 1 · 文首流式"
-          />
-
-          {/* Article HTML Body (compiled with KaTeX + Shiki) */}
+        {/* 4-Cell Structured Fact Strip */}
+        <div
+          className="grid grid-cols-2 sm:grid-cols-4 rounded-[8px] overflow-hidden mb-4"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            boxShadow: '0 0 0 1px var(--border-hairline)',
+          }}
+        >
           <div
-            className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-          />
+            className="px-3 py-2 border-b sm:border-b-0 border-r"
+            style={{ borderColor: 'var(--border-hairline)' }}
+          >
+            <span className="block text-[11px] text-[var(--ink-muted)] mb-0.5">所属专题</span>
+            <span className="block text-[12.5px] font-semibold text-[var(--ink-primary)] truncate">
+              {post.topic === 'gesp' && post.subtopic?.includes('级')
+                ? `GESP ${post.subtopic}`
+                : post.subtopic || post.topicName}
+            </span>
+          </div>
+          <div
+            className="px-3 py-2 border-b sm:border-b-0 sm:border-r"
+            style={{ borderColor: 'var(--border-hairline)' }}
+          >
+            <span className="block text-[11px] text-[var(--ink-muted)] mb-0.5">
+              {problemId ? '题号标识' : '核心标签'}
+            </span>
+            <span className="block text-[12.5px] font-semibold font-mono text-[var(--ink-primary)] truncate">
+              {problemId || post.tags[0] || post.topicName}
+            </span>
+          </div>
+          <div
+            className="px-3 py-2 border-r"
+            style={{ borderColor: 'var(--border-hairline)' }}
+          >
+            <span className="block text-[11px] text-[var(--ink-muted)] mb-0.5">代码 / 阅读</span>
+            <span className="block text-[12.5px] font-semibold font-mono tnum text-[var(--ink-primary)]">
+              {isOiTrack ? 'C++11 · ' : ''}
+              {formatReadTimeCompact(post.readTime)}
+            </span>
+          </div>
+          <div className="px-3 py-2">
+            <span className="block text-[11px] text-[var(--ink-muted)] mb-0.5">累计阅读</span>
+            <span className="block text-[12.5px] font-semibold text-[var(--ink-primary)]">
+              <ViewCounter slug={post.slug} plain />
+            </span>
+          </div>
+        </div>
 
-          {/* Google Ad Slot 2: In-content (Slot 2477304429) */}
-          <GoogleAd
-            slot="2477304429"
-            format="fluid"
-            minHeight={100}
-            label="广告位 2 · 文中穿插"
-          />
-
-          {/* OI-Game 信奥远征文末互动横幅 */}
-          <OiGamePromo variant="banner" />
-
-          {/* Community Callouts */}
-          <div className="my-8 space-y-3">
-            <div className="p-4 rounded-xl border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
-              <strong className="text-blue-600 dark:text-blue-400 block mb-1">💡 OneCoder 资源指引</strong>
-              <p>所有代码开源上传至 GitHub：<a href="https://github.com/lihongzheshuai/yummy-code" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 underline font-semibold">yummy-code 仓库</a> · GESP 专题站：<a href="https://wiki.coderli.com/" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 underline font-semibold">GESP WIKI</a></p>
+        {/* TL;DR Takeaway Box (GEO Direct Answer & Fast Exam Recap) */}
+        {post.excerpt && (
+          <div
+            className="rounded-[8px] px-3.5 py-2.5 mb-5"
+            style={{
+              backgroundColor: 'var(--brand-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+            }}
+          >
+            <div className="flex items-center gap-1.5 text-[11.5px] font-semibold text-[var(--brand)] mb-1">
+              <Info className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>TL;DR · 核心摘要</span>
             </div>
+            <p className="text-[13.5px] text-[var(--ink-primary)] leading-relaxed">
+              <LatexText text={post.excerpt} />
+            </p>
+          </div>
+        )}
 
-            <div className="p-4 rounded-xl border-l-4 border-teal-500 bg-teal-50/50 dark:bg-teal-950/20 text-xs md:text-sm text-slate-700 dark:text-slate-300">
-              <strong className="text-teal-600 dark:text-teal-400 block mb-1">🤝 技术交流与答疑</strong>
-              <p>欢迎加入：<a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 font-bold underline hover:text-teal-700">C++ GESP/CSP 考级答疑群（688906745）</a> 与 <a href="https://qm.qq.com/q/qwy4BSW9La" target="_blank" rel="noopener noreferrer" className="text-teal-600 dark:text-teal-400 font-bold underline hover:text-teal-700">Java/Python交流群（982860385）</a>，点击可直接加群。</p>
+        {/* Tags Inline Strip */}
+        {post.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 mb-5">
+            {post.tags.slice(0, 8).map(t => (
+              <Link
+                key={t}
+                href={`/tags/${encodeURIComponent(t)}/`}
+                prefetch={false}
+                className="px-2 py-0.5 rounded-[4px] font-mono text-[11px] bg-[var(--bg-subtle)] text-[var(--ink-muted)] hover:text-[var(--brand)] transition-colors"
+                style={{ boxShadow: 'inset 0 0 0 1px var(--border-hairline)' }}
+              >
+                #{t}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Google Ad Slot 1: Top in-article flow (Preserved) */}
+        <GoogleAd
+          slot="1669039692"
+          format="fluid"
+          minHeight={90}
+          label="广告位 1 · 文首流式"
+        />
+
+        {/* Article HTML Body (KaTeX + Shiki Ligatures Off) */}
+        <div
+          className="prose max-w-none"
+          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+        />
+
+        {/* Google Ad Slot 2: In-content (Preserved) */}
+        <GoogleAd
+          slot="2477304429"
+          format="fluid"
+          minHeight={90}
+          label="广告位 2 · 文中穿插"
+        />
+
+        {/* OI-Game Banner */}
+        <OiGamePromo variant="banner" />
+
+        {/* Resource & Community Callouts (Clean SVG Icons, Zero Emojis) */}
+        <div className="my-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="wb-card p-4">
+            <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[var(--ink-primary)] mb-1.5">
+              <Github className="w-4 h-4 text-[var(--brand)]" />
+              <span>开源代码与考纲字典</span>
             </div>
+            <p className="text-[12.5px] text-[var(--ink-muted)] leading-relaxed">
+              配套题解代码归档于{' '}
+              <a
+                href="https://github.com/lihongzheshuai/yummy-code"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--brand)] font-medium hover:underline"
+              >
+                yummy-code 仓库
+              </a>
+              ，完整知识点索引见{' '}
+              <a
+                href="https://wiki.coderli.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--brand)] font-medium hover:underline"
+              >
+                GESP Wiki
+              </a>
+              。
+            </p>
           </div>
 
-          {/* Google Ad Slot 3: Post footer recommendation banner (Slot 6416549436) */}
-          <GoogleAd
-            slot="6416549436"
-            format="auto"
-            minHeight={120}
-            label="广告位 3 · 文末推荐横幅"
+          <div className="wb-card p-4">
+            <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[var(--ink-primary)] mb-1.5">
+              <MessageSquare className="w-4 h-4 text-[var(--brand)]" />
+              <span>技术交流与考级答疑</span>
+            </div>
+            <p className="text-[12.5px] text-[var(--ink-muted)] leading-relaxed">
+              欢迎加入{' '}
+              <a
+                href="https://qm.qq.com/q/fykBPjH8ru"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--brand)] font-medium hover:underline"
+              >
+                C++ GESP/CSP 群（688906745）
+              </a>{' '}
+              或{' '}
+              <a
+                href="https://qm.qq.com/q/qwy4BSW9La"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--brand)] font-medium hover:underline"
+              >
+                Java/Python 群（982860385）
+              </a>
+              。
+            </p>
+          </div>
+        </div>
+
+        {/* Google Ad Slot 3: Post footer recommendation banner (Preserved) */}
+        <GoogleAd
+          slot="6416549436"
+          format="auto"
+          minHeight={100}
+          label="广告位 3 · 文末推荐横幅"
+        />
+
+        {/* Prev / Next Navigation */}
+        <PostNavigation prevPost={post.prevPost || null} nextPost={post.nextPost || null} />
+
+        {/* Related Posts */}
+        {post.relatedPosts && post.relatedPosts.length > 0 && (
+          <RelatedPosts posts={post.relatedPosts} />
+        )}
+
+        {/* Compact Author Card */}
+        <div
+          className="mt-8 p-4 sm:p-5 rounded-[8px] flex items-center gap-4"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            boxShadow: '0 0 0 1px var(--border-hairline)',
+          }}
+        >
+          <img
+            src="/images/onecoder/avatar.png"
+            alt="OneCoder"
+            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+            style={{ boxShadow: '0 0 0 2px var(--brand)' }}
           />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h4 className="font-semibold text-[14px] text-[var(--ink-primary)]">OneCoder</h4>
+              <span className="font-mono text-[11px] text-[var(--ink-faint)]">始于 2012</span>
+            </div>
+            <p className="text-[12.5px] text-[var(--ink-muted)] leading-relaxed">
+              持续记录 C++ GESP/CSP 信奥算法、Java 服务端架构与 Python 工程实战。官方唯一域名：coderli.com
+            </p>
+          </div>
+        </div>
 
-          {/* Previous & Next Post Navigation */}
-          <PostNavigation
-            prevPost={post.prevPost || null}
-            nextPost={post.nextPost || null}
+        {/* Comments Section (Phase 1 XSS-hardened) */}
+        <Comments slug={post.slug} postTitle={post.title} />
+      </article>
+
+      {/* =========================================================
+          RIGHT STICKY TOC & UTILITY RAIL (lg+)
+         ========================================================= */}
+      <aside
+        aria-label="本文目录与工具"
+        className="hidden lg:flex flex-col gap-4 px-4 py-5 border-l sticky top-[52px] h-[calc(100vh-52px)] overflow-y-auto"
+        style={{ borderColor: 'var(--border-hairline)' }}
+      >
+        <TOC toc={post.toc} />
+
+        <OiGamePromo
+          variant="sidebar"
+          contextLabel={post.topic === 'gesp' && post.subtopic ? `GESP ${post.subtopic}` : undefined}
+        />
+
+        <a
+          href="/llms.txt"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2.5 rounded-[6px] text-[12px] font-medium bg-[var(--bg-canvas)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] transition-colors"
+          style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>全站 AI / Markdown 索引</span>
+        </a>
+
+        {/* Compact WeChat QR */}
+        <div
+          className="rounded-[8px] p-3 flex items-center gap-2.5"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            boxShadow: '0 0 0 1px var(--border-hairline)',
+          }}
+        >
+          <img
+            src="/images/wechat_qrcode.jpg"
+            alt="OneCoder 公众号二维码"
+            loading="lazy"
+            className="w-11 h-11 rounded-[5px] flex-shrink-0 object-cover"
           />
-
-          {/* Related Recommended Posts */}
-          {post.relatedPosts && post.relatedPosts.length > 0 && (
-            <RelatedPosts posts={post.relatedPosts} />
-          )}
-
-          {/* Author Card Footer */}
-          <div className="mt-12 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center gap-5">
-            <img
-              src="/images/onecoder/avatar.png"
-              alt="OneCoder"
-              className="w-16 h-16 rounded-full border-2 border-teal-500 object-cover flex-shrink-0"
-            />
-            <div>
-              <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-1">OneCoder</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
-                一个中年人的自留地，记录学习 C++、GESP/NOI、Java、Python 与算法架构的心得体会。本站唯一网址：coderli.com
-              </p>
-              <div className="flex flex-wrap gap-3 text-xs text-teal-600 dark:text-teal-400">
-                <a href="mailto:wushikezuo@gmail.com">📫 wushikezuo@gmail.com</a>
-                <a href="https://github.com/lihongzheshuai" target="_blank" rel="noopener noreferrer">🐙 GitHub</a>
-                <a href="https://twitter.com/wushikezuohehe" target="_blank" rel="noopener noreferrer">🐦 Twitter/X</a>
-                <a href="https://qm.qq.com/q/fykBPjH8ru" target="_blank" rel="noopener noreferrer">👥 QQ群: 688906745</a>
-              </div>
+          <div className="min-w-0">
+            <div className="text-[12px] font-semibold text-[var(--ink-primary)]">学习公众号</div>
+            <div className="text-[11px] text-[var(--ink-muted)] leading-snug">
+              扫码订阅考纲精讲
             </div>
           </div>
+        </div>
 
-          {/* Comments Section */}
-          <Comments slug={post.slug} postTitle={post.title} />
-        </article>
-
-        {/* Right: Sticky TOC & Sticky Sidebar Ad & Popular Tags */}
-        <aside className="sticky top-20 space-y-6">
-          <TOC toc={post.toc} />
-
-          {/* OI-Game 信奥远征侧边栏宣传卡 */}
-          <OiGamePromo variant="sidebar" />
-
-          {/* Google Ad Slot 4: Sidebar sticky ad (Slot 6734143049) */}
-          <GoogleAd
-            slot="6734143049"
-            format="auto"
-            minHeight={250}
-            label="广告位 4 · 侧边栏吸顶"
-          />
-
-          <PopularTagsCard limit={12} />
-        </aside>
-      </div>
+        {/* Google Ad Slot 4: Sidebar sticky ad (Preserved) */}
+        <GoogleAd
+          slot="6734143049"
+          format="auto"
+          minHeight={220}
+          label="广告位 4 · 侧边栏吸顶"
+        />
+      </aside>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { Tag, X } from 'lucide-react';
 import { getAllTags, getPostsByTag, toPostCardMeta } from '@/lib/posts';
 import HomePostStream from '@/components/HomePostStream';
 import GoogleAd from '@/components/GoogleAd';
@@ -16,7 +17,6 @@ export const revalidate = false;
 
 export async function generateStaticParams() {
   const tags = getAllTags();
-  // Pre-generate all tags at build time (SSG)
   return tags.map(item => ({
     tag: item.tag,
   }));
@@ -62,32 +62,45 @@ export default function TagPage({ params }: TagPageProps) {
   }
 
   return (
-    <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
-      {/* Top Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
+    <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      <nav
+        aria-label="面包屑导航"
+        className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"
+      >
+        <Link href="/" prefetch={false} className="hover:text-[var(--brand)]">
+          首页
+        </Link>
         <span>/</span>
-        <Link href="/tags/" prefetch={false} className="hover:text-teal-500">全站标签</Link>
+        <Link href="/tags/" prefetch={false} className="hover:text-[var(--brand)]">
+          全站标签
+        </Link>
         <span>/</span>
-        <span className="text-slate-600 dark:text-slate-300 font-medium">#{tag}</span>
+        <span className="text-[var(--ink-primary)] font-medium">#{tag}</span>
       </nav>
 
-      {/* Hero Header Card */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
+      <div className="wb-card p-5 sm:p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <span className="text-3xl md:text-4xl">🏷️</span>
+          <div className="flex items-start gap-3">
+            <span
+              className="w-8 h-8 rounded-[7px] grid place-items-center text-[var(--brand)] flex-shrink-0 mt-0.5"
+              style={{
+                backgroundColor: 'var(--brand-surface)',
+                boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+              }}
+            >
+              <Tag className="w-4 h-4" />
+            </span>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-[20px] sm:text-[23px] font-semibold font-mono tracking-[-0.02em] text-[var(--ink-primary)]">
                   #{tag}
                 </h1>
-                <span className="text-xs font-mono font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 px-2.5 py-1 rounded-full border border-teal-500/20">
-                  共 {posts.length} 篇博文
+                <span className="wb-pill wb-pill-gesp font-mono tnum">
+                  共 {posts.length} 篇
                 </span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-                已为您筛选出所有包含「#{tag}」标签的技术文章与算法真题
+              <p className="text-[13px] text-[var(--ink-muted)] mt-1">
+                已筛选所有包含「#{tag}」标签的技术文章与算法真题
               </p>
             </div>
           </div>
@@ -95,25 +108,24 @@ export default function TagPage({ params }: TagPageProps) {
           <Link
             href="/"
             prefetch={false}
-            className="self-start sm:self-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-teal-500 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-teal-600 transition shadow-sm inline-flex items-center gap-1.5 cursor-pointer"
+            className="self-start sm:self-center px-3 py-1.5 rounded-[6px] text-[12px] font-medium bg-[var(--bg-subtle)] text-[var(--ink-secondary)] hover:text-[var(--brand)] inline-flex items-center gap-1 transition-colors"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
           >
-            <span>✕ 清除筛选，返回首页</span>
+            <X className="w-3.5 h-3.5" />
+            <span>返回全站索引</span>
           </Link>
         </div>
       </div>
 
-      {/* Main Grid: Stream + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
-        {/* Left: Filtered Post Stream (cap serialized client payload to latest 80 posts to prevent multi-MB tag pages) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
         <div>
           <HomePostStream posts={posts.slice(0, 80).map(toPostCardMeta)} initialCount={20} pageSize={20} />
         </div>
 
-        {/* Right: Sidebar */}
-        <aside className="sticky top-20 space-y-6">
+        <aside className="lg:sticky lg:top-[68px] space-y-4">
           <GoogleAd
             slot="6734143049"
-            minHeight={250}
+            minHeight={220}
             label="广告位 4 · 侧边栏吸顶"
           />
 

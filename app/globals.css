@@ -4,111 +4,312 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================================
+   OneCoder Design System v2.0 · Workbench Edition
+   Light Precision (Vercel/Mintlify) × Dark Craft (Linear)
+   ======================================================== */
 :root {
-  --bg-body: #F4F6F9;
+  color-scheme: light;
+  --bg-canvas: #FFFFFF;
+  --bg-body: #FFFFFF;
   --bg-surface: #FFFFFF;
   --bg-surface-elevated: #FFFFFF;
-  --bg-subtle: #F1F5F9;
-  --border-main: #E2E8F0;
-  --border-subtle: #F1F5F9;
+  --bg-subtle: #F8FAFC;
+  --bg-hover: #F1F5F9;
+  --bg-active: #F0FDFA;
+
+  --ink-primary: #0F172A;
+  --ink-secondary: #334155;
+  --ink-muted: #475569;
+  --ink-faint: #64748B;
   --text-main: #0F172A;
-  --text-muted: #64748B;
-  --primary: #0D9488;
-  --primary-light: rgba(13, 148, 136, 0.1);
-  --container-max-width: 1560px;
+  --text-muted: #475569;
+
+  --border-hairline: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.15);
+  --border-main: rgba(15, 23, 42, 0.10);
+  --border-subtle: rgba(15, 23, 42, 0.06);
+
+  --brand: #0F766E;
+  --brand-hover: #115E59;
+  --brand-cta-text: #FFFFFF;
+  --brand-surface: #F0FDFA;
+  --brand-border: #99F6E4;
+  --primary: #0F766E;
+  --primary-light: rgba(15, 118, 110, 0.10);
+
+  --contest-fg: #92400E;
+  --contest-bg: #FFFBEB;
+  --contest-bd: #FDE68A;
+  --arch-fg: #1D4ED8;
+  --arch-bg: #EFF6FF;
+  --arch-bd: #BFDBFE;
+
+  --code-surface: #0F172A;
+  --code-head: #182234;
+  --code-border: #243047;
+
+  --shadow-card: 0 0 0 1px var(--border-hairline), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-modal: 0 0 0 1px rgba(15, 23, 42, 0.10), 0 24px 64px -12px rgba(15, 23, 42, 0.34);
+  --container-max-width: 1480px;
 }
 
 html.dark {
-  --bg-body: #090D16;
-  --bg-surface: #101623;
-  --bg-surface-elevated: #161F33;
-  --bg-subtle: #192233;
-  --border-main: #1D263B;
-  --border-subtle: #192233;
-  --text-main: #F1F5F9;
-  --text-muted: #94A3B8;
-  --primary: #14B8A6;
-  --primary-light: rgba(20, 184, 166, 0.15);
+  color-scheme: dark;
+  --bg-canvas: #080A0F;
+  --bg-body: #080A0F;
+  --bg-surface: #0E121A;
+  --bg-surface-elevated: #151B27;
+  --bg-subtle: #0F141E;
+  --bg-hover: #1D2536;
+  --bg-active: rgba(45, 212, 191, 0.13);
+
+  --ink-primary: #F3F6FA;
+  --ink-secondary: #D4DCE8;
+  --ink-muted: #B0BCD0;
+  --ink-faint: #98A6BC;
+  --text-main: #F3F6FA;
+  --text-muted: #B0BCD0;
+
+  --border-hairline: rgba(255, 255, 255, 0.085);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-main: rgba(255, 255, 255, 0.11);
+  --border-subtle: rgba(255, 255, 255, 0.065);
+
+  --brand: #2DD4BF;
+  --brand-hover: #5EEAD4;
+  --brand-cta-text: #042F2E;
+  --brand-surface: rgba(45, 212, 191, 0.12);
+  --brand-border: rgba(45, 212, 191, 0.30);
+  --primary: #2DD4BF;
+  --primary-light: rgba(45, 212, 191, 0.14);
+
+  --contest-fg: #FCD34D;
+  --contest-bg: rgba(251, 191, 36, 0.12);
+  --contest-bd: rgba(251, 191, 36, 0.30);
+  --arch-fg: #93C5FD;
+  --arch-bg: rgba(96, 165, 250, 0.13);
+  --arch-bd: rgba(147, 197, 253, 0.30);
+
+  --code-surface: #05070B;
+  --code-head: #121826;
+  --code-border: rgba(255, 255, 255, 0.11);
+
+  --shadow-card: 0 0 0 1px var(--border-hairline), 0 2px 10px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 28px 72px rgba(0, 0, 0, 0.78);
 }
 
 html {
-  font-size: 17px;
-}
-
-body.ultra-wide {
-  --container-max-width: 98%;
+  font-size: 16px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
 }
 
 body {
-  background-color: var(--bg-body);
-  color: var(--text-main);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: var(--bg-canvas);
+  color: var(--ink-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  overflow-x: hidden;
 }
 
-/* Custom Scrollbars */
+/* Atomic theme switching (next-themes pattern): prevents Chromium/Safari transition stalls on CSS vars */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Strictly disable ligatures on all code elements so C++ != <= >= >> stay literal */
+code,
+pre,
+kbd,
+.font-mono {
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0, 'calt' 0;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible:not(input):not(textarea) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Slim Native Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: rgba(100, 116, 139, 0.32);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: rgba(100, 116, 139, 0.52);
 }
 
-/* Typography styles */
-.prose {
-  color: var(--text-main);
-  font-size: 1.15rem;
-  line-height: 1.95;
+/* ========================================================
+   Workbench Shared Primitive Classes
+   ======================================================== */
+.wb-card {
+  background: var(--bg-surface-elevated);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
 }
-.prose p {
-  margin-bottom: 1.6rem;
+
+.wb-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  white-space: nowrap;
+  line-height: 1.45;
 }
-.prose h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-top: 2.85rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-subtle);
+.wb-pill-gesp {
+  background: var(--brand-surface);
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--brand-border);
+}
+.wb-pill-contest {
+  background: var(--contest-bg);
+  color: var(--contest-fg);
+  box-shadow: inset 0 0 0 1px var(--contest-bd);
+}
+.wb-pill-arch {
+  background: var(--arch-bg);
+  color: var(--arch-fg);
+  box-shadow: inset 0 0 0 1px var(--arch-bd);
+}
+
+.wb-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  background: var(--bg-canvas);
+  box-shadow: 0 0 0 1px var(--border-strong);
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.wb-sb-item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  scroll-margin-top: 5.5rem;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 5.5px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 450;
+  color: var(--ink-secondary);
+  transition: background-color 0.12s ease, color 0.12s ease;
+  text-align: left;
+  cursor: pointer;
 }
-.prose h2::before {
-  content: "#";
-  color: var(--primary);
-  font-weight: 800;
-  font-family: monospace;
-  font-size: 1.4rem;
+.wb-sb-item:hover {
+  background: var(--bg-hover);
+  color: var(--ink-primary);
+}
+.wb-sb-item[data-active='true'] {
+  background: var(--bg-active);
+  color: var(--brand);
+  font-weight: 600;
+}
+.wb-sb-item[data-active='true']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 2.5px;
+  border-radius: 2px;
+  background: var(--brand);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================================
+   Prose Typography (Mintlify-inspired Reading Canvas)
+   ======================================================== */
+.prose {
+  color: var(--ink-secondary);
+  font-size: 15.5px;
+  line-height: 1.82;
+}
+.prose p {
+  margin-bottom: 1.25rem;
+}
+.prose h2 {
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-primary);
+  margin-top: 2.25rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--border-hairline);
+  scroll-margin-top: 5rem;
 }
 .prose h3 {
-  font-size: 1.4rem;
+  font-size: 1.06rem;
   font-weight: 600;
-  color: var(--text-main);
-  margin-top: 2.15rem;
-  margin-bottom: 0.95rem;
-  scroll-margin-top: 5.5rem;
+  color: var(--ink-primary);
+  margin-top: 1.75rem;
+  margin-bottom: 0.65rem;
+  scroll-margin-top: 5rem;
 }
 .prose h4 {
-  font-size: 1.2rem;
+  font-size: 0.96rem;
   font-weight: 600;
-  color: var(--text-muted);
-  margin-top: 1.5rem;
+  color: var(--ink-secondary);
+  margin-top: 1.35rem;
   margin-bottom: 0.5rem;
 }
-.prose ul, .prose ol {
-  margin-bottom: 1.5rem;
-  padding-left: 1.75rem;
+.prose ul,
+.prose ol {
+  margin-bottom: 1.2rem;
+  padding-left: 1.55rem;
 }
 .prose ul {
   list-style-type: disc;
@@ -117,15 +318,16 @@ body {
   list-style-type: decimal;
 }
 .prose li {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
 .prose blockquote {
-  border-left: 4px solid var(--primary);
+  border-left: 3px solid var(--brand);
   background: var(--bg-subtle);
-  padding: 1rem 1.25rem;
+  padding: 0.85rem 1.15rem;
   border-radius: 0 8px 8px 0;
-  margin: 1.5rem 0;
-  color: var(--text-muted);
+  margin: 1.25rem 0;
+  color: var(--ink-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
 .prose blockquote p:last-child {
   margin-bottom: 0;
@@ -133,230 +335,151 @@ body {
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.75rem 0;
-  font-size: 0.95rem;
+  margin: 1.4rem 0;
+  font-size: 0.9rem;
+  background: var(--bg-surface-elevated);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  display: block;
+  overflow-x: auto;
 }
-.prose th, .prose td {
-  border: 1px solid var(--border-main);
-  padding: 0.6rem 1rem;
+.prose table thead,
+.prose table tbody {
+  width: 100%;
+  display: table;
+  table-layout: auto;
+}
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--border-hairline);
+  border-right: 1px solid var(--border-hairline);
+  padding: 0.55rem 0.85rem;
   text-align: left;
+  vertical-align: top;
+}
+.prose th:last-child,
+.prose td:last-child {
+  border-right: none;
+}
+.prose tr:last-child td {
+  border-bottom: none;
 }
 .prose th {
   background: var(--bg-subtle);
   font-weight: 600;
+  color: var(--ink-primary);
+  font-size: 0.84rem;
 }
 
-/* ========================================================
-   Content Links Styling
-   ======================================================== */
+/* Content Links */
 .prose a {
-  color: var(--primary);
+  color: var(--brand);
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: rgba(13, 148, 136, 0.45);
+  text-decoration-color: color-mix(in srgb, var(--brand) 42%, transparent);
   text-underline-offset: 3px;
-  text-decoration-thickness: 1.5px;
-  transition: color 0.15s ease-in-out, text-decoration-color 0.15s ease-in-out;
+  text-decoration-thickness: 1.25px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
   cursor: pointer;
 }
-
 .prose a:hover {
-  color: #0f766e;
-  text-decoration-color: #0f766e;
-  text-decoration-thickness: 2px;
+  color: var(--brand-hover);
+  text-decoration-color: var(--brand-hover);
 }
-
-html.dark .prose a {
-  color: #2dd4bf;
-  text-decoration-color: rgba(45, 212, 191, 0.5);
-}
-
-html.dark .prose a:hover {
-  color: #5eead4;
-  text-decoration-color: #5eead4;
-  text-decoration-thickness: 2px;
-}
-
-/* Links inside tables - crisp, prominent, and wrapping correctly */
 .prose table a {
   font-weight: 500;
   word-break: break-word;
 }
-
-/* Links inside blockquotes */
-.prose blockquote a {
-  color: var(--primary);
-  text-decoration-color: rgba(13, 148, 136, 0.5);
-}
-
-html.dark .prose blockquote a {
-  color: #2dd4bf;
-  text-decoration-color: rgba(45, 212, 191, 0.55);
-}
-
-/* Exclude image links from text underline */
 .prose a:has(> img) {
   text-decoration: none;
   display: inline-block;
 }
-
-/* Code inside links */
 .prose a code {
   color: inherit;
-  border-color: rgba(13, 148, 136, 0.35);
   text-decoration: underline;
-  text-decoration-color: inherit;
   text-underline-offset: 2px;
-  transition: all 0.15s ease;
 }
 
-.prose a:hover code {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-}
-
-/* ========================================================
-   Bold Typography (strong, b)
-   ======================================================== */
+/* Bold & Italic */
 .prose strong,
 .prose b {
-  font-weight: 700;
-  color: #020617; /* High-contrast deep black in light mode */
+  font-weight: 650;
+  color: var(--ink-primary);
 }
-
-html.dark .prose strong,
-html.dark .prose b {
-  font-weight: 700;
-  color: #FFFFFF; /* High-contrast white in dark mode */
-}
-
-/* Inherit link color when bold is inside an anchor link */
 .prose a strong,
 .prose a b {
   color: inherit;
-  font-weight: 700;
 }
-
-/* Bold inside blockquotes */
-.prose blockquote strong,
-.prose blockquote b {
-  color: var(--text-main);
-  font-weight: 700;
-}
-
-html.dark .prose blockquote strong,
-html.dark .prose blockquote b {
-  color: #FFFFFF;
-}
-
-/* ========================================================
-   Italic Typography (em, i)
-   ======================================================== */
 .prose em,
 .prose i {
   font-style: italic;
-  /* Graceful typographic fallback for authentic Chinese & Latin italics */
-  font-family: Georgia, Cambria, 'Times New Roman', 'Noto Serif SC', 'Source Han Serif SC', 'KaiTi', 'STKaiti', 'SimSun', serif;
 }
-
-/* Keep sans/mono fonts for code or math inside italics */
-.prose em code,
-.prose i code,
-.prose code em,
-.prose code i {
-  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-  font-style: italic;
-}
-
-/* Combined Bold + Italic (***text*** or **_text_**) */
-.prose strong em,
-.prose em strong,
-.prose b i,
-.prose i b,
-.prose strong i,
-.prose b em {
-  font-weight: 700;
-  font-style: italic;
-  color: #020617;
-}
-
-html.dark .prose strong em,
-html.dark .prose em strong,
-html.dark .prose b i,
-html.dark .prose i b,
-html.dark .prose strong i,
-html.dark .prose b em {
-  color: #FFFFFF;
-}
-
-/* When combined in link, inherit link color */
-.prose a em,
-.prose a i,
-.prose a strong em,
-.prose a em strong {
-  color: inherit;
-}
-
-/* ========================================================
-   Strikethrough and Mark (del, s, mark)
-   ======================================================== */
 .prose del,
 .prose s {
   text-decoration: line-through;
-  color: var(--text-muted);
-  opacity: 0.85;
+  color: var(--ink-muted);
 }
-
 .prose mark {
-  background-color: #fef08a;
-  color: #854d0e;
+  background-color: #FEF08A;
+  color: #854D0E;
   padding: 0.1em 0.35em;
   border-radius: 4px;
 }
-
 html.dark .prose mark {
-  background-color: rgba(234, 179, 8, 0.25);
-  color: #fef08a;
+  background-color: rgba(234, 179, 8, 0.24);
+  color: #FEF08A;
 }
+
+/* Inline Code */
 .prose code:not(pre code) {
-  font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
-  font-size: 0.88em;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.86em;
   background: var(--bg-subtle);
-  color: var(--primary);
-  padding: 0.2em 0.45em;
+  color: var(--ink-primary);
+  padding: 0.14em 0.42em;
   border-radius: 4px;
-  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
 }
+
+/* Images inside prose */
 .prose img {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1.5rem auto;
+  margin: 1.35rem auto;
   display: block;
-  border: 1px solid var(--border-main);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
+}
+
+/* KaTeX Overflow Safety on Narrow Viewports */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35rem 0;
 }
 
 /* ========================================================
-   Enhanced Code Block & Shiki Syntax Highlighting
+   Enhanced Workbench Code Block (Ligatures Strictly Off)
    ======================================================== */
 .code-block {
-  --code-editor-bg: #282c34;
-  --code-header-bg: #21252b;
-  --line-num-color: #5c6370;
-  --line-num-hover: #98a3b7;
+  --code-editor-bg: var(--code-surface);
+  --code-header-bg: var(--code-head);
+  --line-num-color: #64748B;
+  --line-num-hover: #94A3B8;
   --line-num-border: rgba(148, 163, 184, 0.12);
   --line-hover-bg: rgba(255, 255, 255, 0.04);
   background-color: var(--code-editor-bg);
   position: relative;
-  margin: 1.75rem 0;
-  border-radius: 0.75rem;
+  margin: 1.35rem 0;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.25), 0 2px 6px -2px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 1px var(--code-border);
 }
 
 .code-header {
   background-color: var(--code-header-bg);
+  border-bottom: 1px solid var(--code-border);
 }
 
 .code-action-btn {
@@ -365,30 +488,30 @@ html.dark .prose mark {
   cursor: pointer;
 }
 
-/* Base Pre & Shiki styles */
 .code-block pre.shiki {
   margin: 0 !important;
-  padding: 0.75rem 0 !important;
+  padding: 0.8rem 0 !important;
   background-color: var(--code-editor-bg) !important;
   overflow-x: auto;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   line-height: 1.65;
   tab-size: 4;
   -moz-tab-size: 4;
-  font-feature-settings: 'calt' 1, 'liga' 1;
+  font-variant-ligatures: none !important;
+  font-feature-settings: 'liga' 0, 'calt' 0 !important;
 }
 
-/* Code element container inside pre */
 .code-block pre.shiki code {
   display: flex;
   flex-direction: column;
   min-width: 100%;
   width: max-content;
   box-sizing: border-box;
+  font-variant-ligatures: none !important;
+  font-feature-settings: 'liga' 0, 'calt' 0 !important;
 }
 
-/* Each Line container */
 .code-block .line {
   display: flex;
   align-items: stretch;
@@ -407,14 +530,13 @@ html.dark .prose mark {
   color: var(--line-num-hover);
 }
 
-/* Line Number Gutter */
 .code-block .line-number {
   position: sticky;
   left: 0;
   z-index: 2;
   width: var(--ln-gutter-width, 2.75rem);
   min-width: var(--ln-gutter-width, 2.75rem);
-  padding: 0 0.85rem 0 0.5rem;
+  padding: 0 0.8rem 0 0.5rem;
   text-align: right;
   color: var(--line-num-color);
   user-select: none;
@@ -423,7 +545,7 @@ html.dark .prose mark {
   background-color: var(--code-editor-bg);
   border-right: 1px solid var(--line-num-border);
   font-variant-numeric: tabular-nums;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   line-height: 1.65;
   display: inline-flex;
   align-items: center;
@@ -433,7 +555,6 @@ html.dark .prose mark {
   transition: color 0.12s ease;
 }
 
-/* Line Code Content */
 .code-block .line-content {
   padding-left: 1rem;
   padding-right: 1.25rem;
@@ -443,36 +564,32 @@ html.dark .prose mark {
   box-sizing: border-box;
 }
 
-/* Line Numbers Toggled Off */
 .code-block.hide-line-numbers .line-number {
   display: none !important;
 }
 
 .code-block.hide-line-numbers .line-content {
-  padding-left: 1.25rem !important;
+  padding-left: 1.15rem !important;
 }
 
-/* Custom Scrollbars for Code Blocks */
 .code-block pre.shiki::-webkit-scrollbar {
-  height: 8px;
+  height: 7px;
 }
 .code-block pre.shiki::-webkit-scrollbar-track {
   background: var(--code-header-bg);
 }
 .code-block pre.shiki::-webkit-scrollbar-thumb {
-  background: #3e4451;
+  background: #334155;
   border-radius: 4px;
 }
 .code-block pre.shiki::-webkit-scrollbar-thumb:hover {
-  background: #5c6370;
+  background: #475569;
 }
 
 /* ========================================================
    Google AdSense Anti-Occlusion & Clean Slot Rules
-   (Suppress floating Anchor / Side-rail / Auto-placed ads that cover content,
-    while keeping explicit manual data-ad-slot units neat in-flow)
    ======================================================== */
-ins.adsbygoogle[data-ad-status="unfilled"] {
+ins.adsbygoogle[data-ad-status='unfilled'] {
   display: none !important;
 }
 .google-auto-placed,

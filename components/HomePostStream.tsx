@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { ArrowDown, CheckCircle2, Archive } from 'lucide-react';
 import { PostCardMeta } from '@/types/post';
 import ArticleCard from '@/components/ArticleCard';
 import GoogleAd from '@/components/GoogleAd';
@@ -76,60 +77,58 @@ export default function HomePostStream({
 
   return (
     <div>
-      {/* Post feed */}
-      <div className="space-y-4">
+      <div className="space-y-2.5">
         {visiblePosts.map((post, idx) => (
           <React.Fragment key={post.slug}>
             <ArticleCard post={post} />
-            {/* Cap in-feed Google Ads to at most 3 slots for clean UX & AdSense policy compliance */}
             {(idx === 4 || idx === 19 || idx === 34) && (
               <GoogleAd
                 slot="9656071817"
                 format="fluid"
                 layoutKey="-eu-2+fi-5k-by"
                 minHeight={90}
-                label="广告位 5 · 首页信息流原生穿插"
+                label="信息流广告"
               />
             )}
           </React.Fragment>
         ))}
       </div>
 
-      {/* Lazy loading bottom controls */}
-      <div className="text-center mt-10">
+      <div className="text-center mt-8">
         {hasMore ? (
           <button
             type="button"
             onClick={handleLoadMore}
             disabled={isLoadingMore}
-            className="px-8 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 text-slate-700 dark:text-slate-200 transition shadow-sm inline-flex items-center gap-2.5 cursor-pointer group disabled:opacity-60"
+            className="px-6 py-2.5 rounded-[7px] bg-[var(--bg-canvas)] text-[13px] font-medium text-[var(--ink-primary)] hover:bg-[var(--bg-hover)] hover:text-[var(--brand)] transition-colors inline-flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            style={{ boxShadow: '0 0 0 1px var(--border-strong)' }}
           >
             {isLoadingMore ? (
-              <>
-                <span className="w-4 h-4 rounded-full border-2 border-teal-500 border-t-transparent animate-spin"></span>
-                <span>加载中...</span>
-              </>
+              <span>加载中…</span>
             ) : (
               <>
-                <span>加载后续文章</span>
-                <span className="text-xs text-slate-400 dark:text-slate-500 group-hover:text-teal-500 transition">
-                  (已显示 {visiblePosts.length} / 共 {effectiveTotal} 篇)
+                <span>加载更多文章</span>
+                <span className="font-mono tnum text-[12px] text-[var(--ink-muted)]">
+                  ({visiblePosts.length} / {effectiveTotal})
                 </span>
-                <span className="text-sm font-bold text-teal-600 dark:text-teal-400 group-hover:translate-y-0.5 transition">
-                  ↓
-                </span>
+                <ArrowDown className="w-3.5 h-3.5 text-[var(--brand)]" />
               </>
             )}
           </button>
         ) : (
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
-            <span>🎉</span>
-            <span>已全部呈现所有 {effectiveTotal} 篇博文（可使用页面右上角或快捷键 <strong>/</strong> 搜索精准定位）</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[7px] bg-[var(--bg-subtle)] text-[12px] text-[var(--ink-muted)] font-mono tnum">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[var(--brand)]" />
+            <span>已呈现全部 {effectiveTotal} 篇内容（按 ⌘K 或 / 快速检索全站）</span>
           </div>
         )}
-        <div className="mt-4 text-xs text-slate-400 dark:text-slate-500">
-          <Link href="/archives/" prefetch={false} className="hover:text-teal-600 dark:hover:text-teal-400 underline underline-offset-4 transition">
-            🗂️ 浏览全站博文归档总目录 →
+        <div className="mt-3.5 text-[12px] text-[var(--ink-muted)]">
+          <Link
+            href="/archives/"
+            prefetch={false}
+            className="inline-flex items-center gap-1.5 hover:text-[var(--brand)] transition-colors"
+          >
+            <Archive className="w-3.5 h-3.5" />
+            <span>浏览全站博文归档总目录 →</span>
           </Link>
         </div>
       </div>

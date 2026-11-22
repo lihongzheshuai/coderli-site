@@ -1,228 +1,332 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  Code2,
+  Search,
+  Moon,
+  Sun,
+  ArrowUpRight,
+  Menu,
+  X,
+  BookOpen,
+  Trophy,
+  Archive,
+  Tags,
+  Layers,
+  Zap,
+} from 'lucide-react';
 
 interface HeaderProps {
   postCount?: number;
 }
 
 export default function Header({ postCount }: HeaderProps) {
-  const pathname = usePathname();
-  // Default to Light Theme as requested
+  const pathname = usePathname() || '/';
   const [isDark, setIsDark] = useState(false);
-  const [isWide, setIsWide] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    // Initial theme setup: default to light unless explicitly saved as 'dark'
-    const storedTheme = localStorage.getItem('theme');
-    const isDarkStored = storedTheme === 'dark';
-    setIsDark(isDarkStored);
-    if (isDarkStored) {
-      document.documentElement.classList.add('dark');
+  const applyTheme = useCallback((dark: boolean) => {
+    setIsDark(dark);
+    const root = document.documentElement;
+    root.classList.add('theme-switching');
+    if (dark) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-
-    const isWideStored = localStorage.getItem('wide') === 'true';
-    setIsWide(isWideStored);
-    if (isWideStored) {
-      document.body.classList.add('ultra-wide');
-    }
+    // Force immediate atomic style recalculation across all CSS-variable consumers
+    void root.offsetHeight;
+    requestAnimationFrame(() => {
+      root.classList.remove('theme-switching');
+    });
   }, []);
 
-  // Close mobile menu on route change
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme');
+    const dark = storedTheme === 'dark';
+    setIsDark(dark);
+    document.documentElement.classList.toggle('dark', dark);
+  }, []);
+
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  function toggleTheme() {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+  useEffect(() => {
+    function onToggleEvent() {
+      const next = !document.documentElement.classList.contains('dark');
+      applyTheme(next);
     }
-  }
-
-  function toggleWide() {
-    const nextWide = !isWide;
-    setIsWide(nextWide);
-    if (nextWide) {
-      document.body.classList.add('ultra-wide');
-      localStorage.setItem('wide', 'true');
-    } else {
-      document.body.classList.remove('ultra-wide');
-      localStorage.setItem('wide', 'false');
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.altKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        onToggleEvent();
+      }
     }
-  }
+    window.addEventListener('onecoder:toggle-theme', onToggleEvent);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('onecoder:toggle-theme', onToggleEvent);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [applyTheme]);
 
   function openSearch() {
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
+    window.dispatchEvent(new CustomEvent('onecoder:open-search'));
   }
 
-  function handleHomeClick(e: React.MouseEvent) {
-    if (pathname === '/' || pathname === '') {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    setMobileMenuOpen(false);
-  }
-
-  const navs = [
-    { label: '首页', href: '/', onClick: handleHomeClick },
-    { label: '🏆 GESP 考级', href: '/topics/gesp/' },
-    { label: '☕ Java 架构', href: '/topics/java/' },
-    { label: '⌘ CSP / NOIP', href: '/topics/csp/' },
-    { label: '🧮 算法专题', href: '/topics/algo/' },
-  ];
+  const isHome = pathname === '/' || pathname === '';
+  const isTopics = pathname.startsWith('/topics') || pathname.startsWith('/categories');
+  const isArchives = pathname.startsWith('/archives');
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
-      <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-        {/* Brand */}
-        <Link
-          href="/"
-          prefetch={false}
-          onClick={handleHomeClick}
-          className="flex items-center gap-3 group"
-          title="点击返回首页或回到顶部"
+    <header
+      className="sticky top-0 z-30 h-[52px] backdrop-blur-md transition-colors"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--bg-canvas) 94%, transparent)',
+        boxShadow: 'inset 0 -1px 0 var(--border-hairline)',
+      }}
+    >
+      <div className="h-full max-w-[1680px] mx-auto grid grid-cols-[auto_1fr_auto] lg:grid-cols-[248px_minmax(0,1fr)_auto] items-center px-3 lg:px-0 lg:pr-7 gap-2 lg:gap-0">
+        {/* Left Brand Column (248px aligned with desktop sidebar) */}
+        <div
+          className="h-full flex items-center gap-2.5 lg:px-4 lg:border-r lg:bg-[var(--bg-subtle)]"
+          style={{ borderColor: 'var(--border-hairline)' }}
         >
-          <img
-            src="/images/onecoder/avatar.png"
-            alt="OneCoder Avatar"
-            className="w-10 h-10 rounded-xl object-cover border-2 border-teal-500 shadow-sm group-hover:scale-105 transition"
-            onError={e => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-          <div className="flex flex-col">
-            <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition leading-tight">
-              OneCoder
-            </span>
-            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 leading-tight">
-              coderli.com{postCount ? ` · ${postCount} 篇博文` : ''}
-            </span>
-          </div>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-2">
-          {navs.map(n => {
-            const isActive = pathname === n.href;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                prefetch={false}
-                onClick={n.onClick}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition ${
-                  isActive
-                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-          <a
-            href="https://oi.coderli.com/?utm_source=coderli_nav"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-1 px-3.5 py-1.5 rounded-lg text-sm font-bold bg-gradient-to-r from-cyan-500/15 to-blue-500/15 dark:from-cyan-500/20 dark:to-blue-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40 hover:border-cyan-400 hover:shadow-sm transition flex items-center gap-1.5"
-            title="前往 OneCoder C++ 信奥远征互动闯关平台"
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(v => !v)}
+            aria-label={mobileMenuOpen ? '关闭导航菜单' : '打开导航菜单'}
+            aria-expanded={mobileMenuOpen}
+            className="lg:hidden inline-flex items-center justify-center w-[34px] h-[34px] rounded-[7px] bg-[var(--bg-canvas)] text-[var(--ink-primary)]"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
           >
-            <span>🎮 信奥闯关</span>
-            <span className="px-1.5 py-0.2 text-[10px] font-mono font-extrabold bg-amber-500 text-slate-950 rounded-full leading-tight">
-              HOT
-            </span>
-          </a>
-        </nav>
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 md:gap-2.5">
+          <Link href="/" prefetch={false} className="inline-flex items-center gap-2.5 group">
+            <span
+              className="w-[26px] h-[26px] rounded-[6px] grid place-items-center flex-shrink-0 transition-transform group-hover:scale-[1.03] bg-[#0F172A] text-white dark:bg-[#172133] dark:text-[#2DD4BF] dark:ring-1 dark:ring-white/15"
+              aria-hidden="true"
+            >
+              <Code2 className="w-3.5 h-3.5 stroke-[2.4]" />
+            </span>
+            <span className="flex items-baseline gap-1.5">
+              <strong className="text-[15px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
+                OneCoder
+              </strong>
+              {postCount ? (
+                <span className="hidden sm:inline font-mono tnum text-[11px] text-[var(--ink-muted)]">
+                  {postCount.toLocaleString()} 篇
+                </span>
+              ) : null}
+            </span>
+          </Link>
+        </div>
+
+        {/* Center Command Search Trigger */}
+        <div className="flex items-center justify-end lg:justify-start lg:px-7 min-w-0">
           <button
             type="button"
             onClick={openSearch}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-xs text-slate-600 dark:text-slate-400 hover:border-teal-500 transition cursor-pointer"
-            title="快捷搜索 (按 / 或 Ctrl+K)"
+            aria-label="打开全站命令搜索面板 (⌘K)"
+            className="hidden sm:flex items-center justify-between gap-2.5 w-full max-w-[490px] h-[34px] px-3 pr-2.5 rounded-[7px] text-[13px] text-[var(--ink-muted)] hover:text-[var(--ink-primary)] bg-[var(--bg-subtle)] transition-all cursor-pointer"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
           >
-            <span>🔍 搜索博文...</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[10px] font-mono">
-              /
-            </kbd>
+            <span className="flex items-center gap-2 min-w-0">
+              <Search className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">
+                搜索题号（P17456 / B4576）、GESP 考点或 Java 技术笔记…
+              </span>
+            </span>
+            <kbd className="wb-kbd">⌘K</kbd>
           </button>
 
           <button
             type="button"
-            onClick={toggleWide}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm flex items-center gap-1 cursor-pointer"
-            title="切换超宽屏 / 标准宽度"
+            onClick={openSearch}
+            aria-label="搜索全站"
+            className="sm:hidden inline-flex items-center justify-center w-[34px] h-[34px] rounded-[7px] bg-[var(--bg-subtle)] text-[var(--ink-primary)]"
+            style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
           >
-            <span>{isWide ? '⤡' : '⤢'}</span>
-            <span className="text-xs hidden md:inline">{isWide ? '收缩' : '超宽屏'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 hover:border-teal-500 transition text-sm cursor-pointer"
-            title="切换浅色 / 深色模式"
-          >
-            {isDark ? '🌙' : '☀️'}
-          </button>
-
-          {/* Mobile Menu Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 hover:text-teal-600 text-base flex items-center justify-center cursor-pointer"
-            aria-label="打开网站导航菜单"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
+            <Search className="w-4 h-4" />
           </button>
         </div>
-      </div>
 
-      {/* Mobile Navigation Dropdown */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-3 shadow-lg space-y-1">
-          {navs.map(n => {
-            const isActive = pathname === n.href;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                prefetch={false}
-                onClick={e => {
-                  if (n.onClick) n.onClick(e);
-                  setMobileMenuOpen(false);
-                }}
-                className={`block px-4 py-2.5 rounded-xl text-base font-medium transition ${
-                  isActive
-                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 font-bold'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900'
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
+        {/* Right Primary Navigation & Single Brand CTA */}
+        <nav aria-label="主导航" className="flex items-center gap-1">
+          <Link
+            href="/"
+            prefetch={false}
+            className={`hidden md:inline-flex items-center px-2.5 py-1.5 rounded-[6px] text-[13px] transition-colors ${
+              isHome
+                ? 'font-semibold text-[var(--ink-primary)] bg-[var(--bg-hover)]'
+                : 'font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-hover)]'
+            }`}
+          >
+            索引大厅
+          </Link>
+          <Link
+            href="/topics/gesp/"
+            prefetch={false}
+            className={`hidden md:inline-flex items-center px-2.5 py-1.5 rounded-[6px] text-[13px] transition-colors ${
+              isTopics
+                ? 'font-semibold text-[var(--ink-primary)] bg-[var(--bg-hover)]'
+                : 'font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-hover)]'
+            }`}
+          >
+            专题
+          </Link>
+          <Link
+            href="/archives/"
+            prefetch={false}
+            className={`hidden md:inline-flex items-center px-2.5 py-1.5 rounded-[6px] text-[13px] transition-colors ${
+              isArchives
+                ? 'font-semibold text-[var(--ink-primary)] bg-[var(--bg-hover)]'
+                : 'font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-hover)]'
+            }`}
+          >
+            归档
+          </Link>
           <a
-            href="https://oi.coderli.com/?utm_source=coderli_nav_mobile"
+            href="https://wiki.coderli.com/"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-4 py-2.5 rounded-xl text-base font-bold text-cyan-600 dark:text-cyan-300 bg-cyan-50/70 dark:bg-cyan-950/50 border border-cyan-500/30 transition"
+            className="hidden xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-[6px] text-[13px] font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-hover)] transition-colors"
           >
-            🎮 信奥闯关 (oi.coderli.com) 🔥
+            <span>GESP Wiki</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
           </a>
+
+          <span
+            className="hidden md:block w-px h-[18px] mx-1.5"
+            style={{ backgroundColor: 'var(--border-hairline)' }}
+            aria-hidden="true"
+          />
+
+          <button
+            type="button"
+            onClick={() => applyTheme(!isDark)}
+            aria-label={isDark ? '切换至浅色模式' : '切换至深色模式'}
+            title={isDark ? '切换至浅色模式 (⌥T)' : '切换至深色模式 (⌥T)'}
+            className="hidden sm:grid place-items-center w-8 h-8 rounded-[6px] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
+          <a
+            href="https://oi.coderli.com/?utm_source=coderli_header"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 ml-0.5 sm:ml-1 px-2.5 sm:px-3 py-1.5 rounded-[6px] text-[12.5px] font-semibold whitespace-nowrap transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: 'var(--brand)',
+              color: 'var(--brand-cta-text)',
+            }}
+          >
+            <span className="hidden sm:inline">信奥闯关 240 关</span>
+            <span className="sm:hidden">信奥闯关</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </a>
+        </nav>
+      </div>
+
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden border-b px-4 py-3 space-y-2 shadow-lg"
+          style={{
+            backgroundColor: 'var(--bg-canvas)',
+            borderColor: 'var(--border-strong)',
+          }}
+        >
+          <div className="grid grid-cols-2 gap-1.5">
+            <Link href="/" prefetch={false} className="wb-sb-item" data-active={isHome}>
+              <span className="flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5" />
+                <span>全站索引</span>
+              </span>
+            </Link>
+            <Link
+              href="/topics/gesp/"
+              prefetch={false}
+              className="wb-sb-item"
+              data-active={pathname.startsWith('/topics/gesp')}
+            >
+              <span className="flex items-center gap-2">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>GESP 考级</span>
+              </span>
+            </Link>
+            <Link
+              href="/topics/csp/"
+              prefetch={false}
+              className="wb-sb-item"
+              data-active={pathname.startsWith('/topics/csp')}
+            >
+              <span className="flex items-center gap-2">
+                <Trophy className="w-3.5 h-3.5" />
+                <span>CSP / NOIP</span>
+              </span>
+            </Link>
+            <Link
+              href="/topics/java/"
+              prefetch={false}
+              className="wb-sb-item"
+              data-active={pathname.startsWith('/topics/java')}
+            >
+              <span className="flex items-center gap-2">
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Java 架构</span>
+              </span>
+            </Link>
+            <Link href="/archives/" prefetch={false} className="wb-sb-item" data-active={isArchives}>
+              <span className="flex items-center gap-2">
+                <Archive className="w-3.5 h-3.5" />
+                <span>全站归档</span>
+              </span>
+            </Link>
+            <Link
+              href="/tags/"
+              prefetch={false}
+              className="wb-sb-item"
+              data-active={pathname.startsWith('/tags')}
+            >
+              <span className="flex items-center gap-2">
+                <Tags className="w-3.5 h-3.5" />
+                <span>全部标签</span>
+              </span>
+            </Link>
+          </div>
+
+          <div
+            className="pt-2 border-t flex items-center justify-between gap-2"
+            style={{ borderColor: 'var(--border-hairline)' }}
+          >
+            <button
+              type="button"
+              onClick={() => applyTheme(!isDark)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-medium bg-[var(--bg-subtle)] text-[var(--ink-secondary)]"
+              style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
+            >
+              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              <span>{isDark ? '切换浅色模式' : '切换深色模式'}</span>
+            </button>
+            <a
+              href="https://wiki.coderli.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-[6px] text-xs font-medium text-[var(--brand)] bg-[var(--brand-surface)]"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>GESP Wiki ↗</span>
+            </a>
+          </div>
         </div>
       )}
     </header>

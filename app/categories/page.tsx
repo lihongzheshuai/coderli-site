@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { FolderTree, Folder, ArrowRight } from 'lucide-react';
 import { getCategoryTree, getAllPosts } from '@/lib/posts';
 import { getCategoryLink } from '@/lib/categories';
 import CategoryNavTree from '@/components/CategoryNavTree';
@@ -20,95 +21,99 @@ export default function AllCategoriesPage() {
   const totalPosts = getAllPosts().length;
 
   return (
-    <div className="max-w-[var(--container-max-width)] mx-auto px-4 md:px-8 py-8">
-      {/* Top Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-        <Link href="/" prefetch={false} className="hover:text-teal-500">首页</Link>
+    <div className="max-w-[1360px] mx-auto px-4 md:px-7 py-6">
+      <nav
+        aria-label="面包屑导航"
+        className="flex items-center gap-1.5 font-mono text-[12px] text-[var(--ink-muted)] mb-4"
+      >
+        <Link href="/" prefetch={false} className="hover:text-[var(--brand)]">
+          首页
+        </Link>
         <span>/</span>
-        <span className="text-slate-600 dark:text-slate-300 font-medium">全部专题分类全集</span>
+        <span className="text-[var(--ink-primary)] font-medium">全站专题分类</span>
       </nav>
 
-      {/* Hero Header */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-10 mb-8 shadow-sm">
-        <div className="flex items-center gap-3.5 mb-2">
-          <span className="text-3xl md:text-4xl">📚</span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+      <div className="wb-card p-5 sm:p-6 mb-6">
+        <div className="flex flex-wrap items-center gap-2.5 mb-2">
+          <span
+            className="w-8 h-8 rounded-[7px] grid place-items-center text-[var(--brand)]"
+            style={{
+              backgroundColor: 'var(--brand-surface)',
+              boxShadow: 'inset 0 0 0 1px var(--brand-border)',
+            }}
+          >
+            <FolderTree className="w-4 h-4" />
+          </span>
+          <h1 className="text-[20px] sm:text-[23px] font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
             全站专题分类大厅
           </h1>
-          <span className="text-xs font-mono font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 px-3 py-1 rounded-full border border-teal-500/20">
-            共 {tree.length} 大核心体系 · {totalPosts} 篇博文
+          <span className="wb-pill wb-pill-gesp font-mono tnum">
+            {tree.length} 大体系 · {totalPosts.toLocaleString()} 篇
           </span>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
-          涵盖 GESP 考级真题、Java 服务端架构、CSP/NOIP 信奥竞赛、算法专题等完整知识树体系。点击任意一级或二级分类即可直达文章清单。
+        <p className="text-[13.5px] text-[var(--ink-muted)] max-w-2xl leading-relaxed">
+          涵盖 GESP 考级真题、Java 服务端架构、CSP/NOIP 信奥竞赛与算法专题等完整知识树，点击任意一级或二级目录直达清单。
         </p>
       </div>
 
-      {/* Main Grid: Categories Tree Cards + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-8 items-start">
-        {/* Categories Full Roster */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
+        <div className="space-y-3.5">
           {tree.map(parent => (
-            <div
-              key={parent.name}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-teal-500/40 transition-all duration-200"
-            >
-              {/* Parent Category Header */}
-              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 dark:border-slate-800">
+            <div key={parent.name} className="wb-card p-4 sm:p-5">
+              <div
+                className="flex items-center justify-between gap-2 pb-3 mb-3 border-b"
+                style={{ borderColor: 'var(--border-hairline)' }}
+              >
                 <Link
                   href={getCategoryLink(parent.name)}
                   prefetch={false}
-                  className="flex items-center gap-2.5 text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 hover:text-teal-600 dark:hover:text-teal-400 transition"
+                  className="flex items-center gap-2 text-[16px] font-semibold text-[var(--ink-primary)] hover:text-[var(--brand)] transition-colors"
                 >
-                  <span className="text-teal-600 dark:text-teal-400 font-mono text-base">📁</span>
+                  <Folder className="w-4 h-4 text-[var(--brand)] flex-shrink-0" />
                   <span>{parent.name}</span>
                 </Link>
                 <Link
                   href={getCategoryLink(parent.name)}
                   prefetch={false}
-                  className="font-mono text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-full border border-teal-500/20 hover:bg-teal-100 transition"
+                  className="inline-flex items-center gap-1 font-mono tnum text-[12px] font-medium text-[var(--brand)] hover:underline"
                 >
-                  查看全部 {parent.count} 篇 →
+                  <span>全部 {parent.count} 篇</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
-              {/* Subcategories Pills */}
               {parent.children && parent.children.length > 0 ? (
-                <div>
-                  <div className="text-xs text-slate-400 mb-2 font-medium">包含细分子分支：</div>
-                  <div className="flex flex-wrap gap-2">
-                    {parent.children.map(child => (
-                      <Link
-                        key={child.name}
-                        href={getCategoryLink(parent.name, child.name)}
-                        prefetch={false}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-50 dark:bg-slate-800/80 dark:hover:bg-teal-950/60 text-slate-700 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 text-xs md:text-sm border border-transparent hover:border-teal-500/30 transition flex items-center gap-1.5 group cursor-pointer"
-                      >
-                        <span className="text-slate-400 text-xs">└</span>
-                        <span className="font-medium">{child.name}</span>
-                        <span className="text-xs font-semibold text-slate-400 group-hover:text-teal-500 transition font-mono">
-                          {child.count}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {parent.children.map(child => (
+                    <Link
+                      key={child.name}
+                      href={getCategoryLink(parent.name, child.name)}
+                      prefetch={false}
+                      className="px-2.5 py-1 rounded-[6px] bg-[var(--bg-subtle)] text-[var(--ink-secondary)] hover:text-[var(--brand)] text-[12.5px] transition-colors inline-flex items-center gap-1.5"
+                      style={{ boxShadow: '0 0 0 1px var(--border-hairline)' }}
+                    >
+                      <span>{child.name}</span>
+                      <span className="font-mono tnum text-[11px] text-[var(--ink-faint)]">
+                        {child.count}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 flex items-center gap-2">
-                  <span>✨ 独立专项知识沉淀，共收录 {parent.count} 篇专业文章。</span>
-                </div>
+                <p className="text-[12.5px] text-[var(--ink-muted)]">
+                  独立专项沉淀，共收录 {parent.count} 篇技术文章。
+                </p>
               )}
             </div>
           ))}
         </div>
 
-        {/* Right: Sidebar */}
-        <aside className="sticky top-20 space-y-6">
+        <aside className="lg:sticky lg:top-[68px] space-y-4">
           <CategoryNavTree categories={tree} limit={10} />
 
           <GoogleAd
             slot="6734143049"
-            minHeight={250}
+            minHeight={220}
             label="广告位 4 · 侧边栏吸顶"
           />
 
